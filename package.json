@@ -9,7 +9,8 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
-    "format": "biome format --write ."
+    "format": "biome format --write .",
+    "test": "turbo test"
   },
   "dependencies": {
     "@types/bun": "^1.1.6",
