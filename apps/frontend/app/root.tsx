@@ -1,5 +1,6 @@
 import type { LinksFunction } from "@remix-run/node";
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react";
+import { UIProvider } from "@yamada-ui/react";
 import type { ReactNode } from "react";
 
 import styles from "./index.css?url";
@@ -16,7 +17,7 @@ export function Layout({ children }: { children: ReactNode }) {
         <Links />
       </head>
       <body>
-        {children}
+        <UIProvider>{children}</UIProvider>
         <ScrollRestoration />
         <Scripts />
       </body>
