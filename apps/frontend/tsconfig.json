@@ -1,0 +1,21 @@
+{
+  "extends": ["@data-maki/typescript-config/base.json"],
+  "compilerOptions": {
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
+    "types": ["@remix-run/cloudflare", "vite/client"],
+    "jsx": "react-jsx",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@style/*": ["./styled-system/*"]
+    },
+    "noEmit": true,
+    "plugins": [
+      {
+        "transform": "typia/lib/transform"
+      }
+    ],
+    "strictNullChecks": true,
+    "strict": true
+  },
+  "include": ["app/**/*.{ts,tsx}", "styled-system"]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@data-maki/schemas",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "biome lint --write ."
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "typia": "^6.5.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "@data-maki/biome-config": "workspace:*",
+    "@data-maki/typescript-config": "workspace:*"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@data-maki/backend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "bun run build.ts",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "lint": "biome check --write ."
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@data-maki/schemas": "workspace:*",
+    "@hono/typia-validator": "^0.0.5",
+    "hono": "^4.4.13"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "@cloudflare/workers-types": "^4.20240712.0",
+    "@data-maki/biome-config": "workspace:*",
+    "@data-maki/typescript-config": "workspace:*",
+    "@ryoppippi/unplugin-typia": "npm:@jsr/ryoppippi__unplugin-typia",
+    "wrangler": "^3.64.0"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "exclude": ["@data-maki/typescript-config/base.json"],
+  "compilerOptions": {
+    "plugins": [
+      {
+        "transform": "typia/lib/transform"
+      }
+    ],
+    "strictNullChecks": true,
+    "strict": true
+  },
+  "include": ["src/**/*.ts"]
+}

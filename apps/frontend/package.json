@@ -1,0 +1,46 @@
+{
+  "name": "@data-maki/frontend",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "prepare": "run-p prepare:*",
+    "prepare:panda": "panda codegen",
+    "prepare:wrangler": "wrangler types",
+    "build": "remix vite:build",
+    "deploy": "wrangler pages deploy ./build/client",
+    "dev": "remix vite:dev",
+    "lint": "biome check --write .",
+    "start": "wrangler pages dev ./build/client"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@data-maki/schemas": "workspace:*",
+    "@remix-run/cloudflare": "^2.10.2",
+    "@remix-run/cloudflare-pages": "^2.10.2",
+    "@remix-run/react": "^2.10.2",
+    "isbot": "4",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "@cloudflare/workers-types": "^4.20240712.0",
+    "@data-maki/biome-config": "workspace:*",
+    "@data-maki/typescript-config": "workspace:*",
+    "@ryoppippi/unplugin-typia": "npm:@jsr/ryoppippi__unplugin-typia",
+    "@pandacss/dev": "^0.42.0",
+    "@remix-run/dev": "^2.10.2",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "browserslist": "^4.23.2",
+    "lightningcss": "^1.25.1",
+    "postcss": "^8.4.39",
+    "postcss-lightningcss": "^1.0.0",
+    "vite": "^5.3.3",
+    "vite-tsconfig-paths": "^4.3.2",
+    "wrangler": "^3.64.0"
+  }
+}
