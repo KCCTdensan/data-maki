@@ -25,5 +25,6 @@
     "node": ">=18"
   },
   "packageManager": "bun@1.1.20",
-  "workspaces": ["apps/*", "packages/*"]
+  "workspaces": ["apps/*", "packages/*"],
+  "trustedDependencies": ["@biomejs/biome", "@data-maki/frontend"]
 }
