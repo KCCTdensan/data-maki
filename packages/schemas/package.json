@@ -17,7 +17,6 @@
     "typia": "^6.5.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.8.3",
     "@data-maki/biome-config": "workspace:*",
     "@data-maki/typescript-config": "workspace:*",
     "@ryoppippi/unplugin-typia": "npm:@jsr/ryoppippi__unplugin-typia"

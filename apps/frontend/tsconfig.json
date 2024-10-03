@@ -8,14 +8,14 @@
       "@/*": ["./src/*"],
       "@style/*": ["./styled-system/*"]
     },
-    "noEmit": true,
     "plugins": [
       {
         "transform": "typia/lib/transform"
+      },
+      {
+        "name": "typescript-remix-routes-plugin"
       }
-    ],
-    "strictNullChecks": true,
-    "strict": true
+    ]
   },
-  "include": ["app/**/*.{ts,tsx}", "styled-system"]
+  "include": ["src/app/**/*.{ts,tsx}", "styled-system"]
 }

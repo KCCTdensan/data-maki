@@ -1,13 +1,12 @@
 {
-  "name": "@data-maki/backend",
+  "name": "@data-maki/solver",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "build": "bun run build.ts",
-    "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
+    "build": "bun run scripts/build.ts",
+    "dev": "cross-env NODE_ENV=development bun -b --hot run src/index.ts",
     "lint": "biome check --write ."
   },
   "publishConfig": {
@@ -16,14 +15,12 @@
   "dependencies": {
     "@data-maki/schemas": "workspace:*",
     "@hono/typia-validator": "^0.0.5",
-    "hono": "^4.4.13"
+    "hono": "^4.6.3"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.8.3",
-    "@cloudflare/workers-types": "^4.20240712.0",
     "@data-maki/biome-config": "workspace:*",
     "@data-maki/typescript-config": "workspace:*",
     "@ryoppippi/unplugin-typia": "npm:@jsr/ryoppippi__unplugin-typia",
-    "wrangler": "^3.64.0"
+    "wrangler": "^3.79.0"
   }
 }

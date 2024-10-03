@@ -4,28 +4,40 @@
  * For more information, see https://remix.run/file-conventions/entry.server
  */
 
-import type { EntryContext } from "@remix-run/cloudflare";
+import type { AppLoadContext, EntryContext } from "@remix-run/cloudflare";
 import { RemixServer } from "@remix-run/react";
 import { isbot } from "isbot";
 import { renderToReadableStream } from "react-dom/server";
+import { ServerProvider } from "remix-provider";
 
 export default async function handleRequest(
   request: Request,
   _responseStatusCode: number,
   responseHeaders: Headers,
   remixContext: EntryContext,
+  loadContext: AppLoadContext,
 ) {
   let responseStatusCode = _responseStatusCode;
 
-  const body = await renderToReadableStream(<RemixServer context={remixContext} url={request.url} />, {
-    signal: request.signal,
-    onError(error: unknown) {
-      // Log streaming rendering errors from inside the shell
-      console.error(error);
+  const body = await renderToReadableStream(
+    <ServerProvider
+      value={{
+        env: loadContext.cloudflare.env,
+        host: request.headers.get("host"),
+      }}
+    >
+      <RemixServer context={remixContext} url={request.url} />
+    </ServerProvider>,
+    {
+      signal: request.signal,
+      onError(error: unknown) {
+        // Log streaming rendering errors from inside the shell
+        console.error(error);
 
-      responseStatusCode = 500;
+        responseStatusCode = 500;
+      },
     },
-  });
+  );
 
   if (isbot(request.headers.get("user-agent") || "")) {
     await body.allReady;
