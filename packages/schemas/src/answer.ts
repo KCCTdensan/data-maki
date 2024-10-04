@@ -1,4 +1,4 @@
-import typia, { type tags } from "typia";
+import type { tags } from "typia";
 
 // Example schema
 

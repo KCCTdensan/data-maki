@@ -1,12 +1,8 @@
-import { type LinksFunction, json } from "@remix-run/cloudflare";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration, useLoaderData, useRouteLoaderData } from "@remix-run/react";
+import { type LinksFunction, type LoaderFunctionArgs, json } from "@remix-run/cloudflare";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration, useRouteLoaderData } from "@remix-run/react";
 import {
   ColorModeScript,
   Container,
-  Flex,
-  Heading,
-  Spacer,
-  Text,
   ThemeSchemeScript,
   UIProvider,
   createColorModeManager,
@@ -17,6 +13,8 @@ import type { ReactNode } from "react";
 import { RootProvider, RootValue } from "remix-provider";
 
 import "./index.css";
+import { Footer } from "./components/layout/Footer";
+import { Header } from "./components/layout/Header";
 
 export const links: LinksFunction = () => [
   {
@@ -31,16 +29,32 @@ export const links: LinksFunction = () => [
     rel: "stylesheet",
     href: "https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/mauve.css",
   },
+  {
+    rel: "stylesheet",
+    href: "https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/red.css",
+  },
+  {
+    rel: "stylesheet",
+    href: "https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/blue.css",
+  },
+  {
+    rel: "stylesheet",
+    href: "https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/green.css",
+  },
+  {
+    rel: "stylesheet",
+    href: "https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/yellow.css",
+  },
 ];
 
-export const loader = async ({ request }) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
   const cookies = request.headers.get("Cookie");
 
   return json({ cookies });
 };
 
 export function Layout({ children }: { children: ReactNode }) {
-  const data = useLoaderData<typeof loader>();
+  const data = useRouteLoaderData<typeof loader>("root");
 
   const colorModeManager = createColorModeManager("ssr", data?.cookies);
   const themeSchemeManager = createThemeSchemeManager("ssr", data?.cookies);
@@ -73,16 +87,11 @@ export function Layout({ children }: { children: ReactNode }) {
 export default function App() {
   return (
     <>
-      <Container as="header" bg="var(--mauve-4)">
-        <Flex align="center">
-          <Heading fontWeight="semilight">Data Maki UI</Heading>
-          <Spacer />
-          <Text>Procon 2024</Text>
-        </Flex>
-      </Container>
-      <Container>
+      <Header />
+      <Container as="main">
         <Outlet />
       </Container>
+      <Footer />
     </>
   );
 }

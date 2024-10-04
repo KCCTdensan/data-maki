@@ -1,13 +1,17 @@
 {
-  "exclude": ["@data-maki/typescript-config/base.json"],
+  "extends": ["@data-maki/typescript-config/base.json"],
   "compilerOptions": {
     "plugins": [
       {
         "transform": "typia/lib/transform"
       }
     ],
-    "strictNullChecks": true,
-    "strict": true
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "outDir": "dist",
+    "incremental": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
   },
-  "include": ["src/**/*.ts"]
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts"]
 }

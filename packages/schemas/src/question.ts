@@ -1,4 +1,4 @@
-import typia, { type tags } from "typia";
+import type { tags } from "typia";
 
 // Example schema
 
@@ -17,10 +17,10 @@ export interface Board {
 
 export interface General {
   readonly n: number & tags.Type<"uint32"> & tags.Maximum<256>;
-  readonly patterns: Array<Patterns> & tags.MaxItems<256>;
+  readonly patterns: Array<Pattern> & tags.MaxItems<256>;
 }
 
-export interface Patterns {
+export interface Pattern {
   readonly p: number & tags.Type<"uint32"> & tags.Maximum<281>;
   readonly width: number & tags.Type<"uint32"> & tags.Maximum<256>;
   readonly height: number & tags.Type<"uint32"> & tags.Maximum<256>;

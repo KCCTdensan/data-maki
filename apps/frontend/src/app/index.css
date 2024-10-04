@@ -15,4 +15,13 @@ html,
 body {
   line-height: 2.0;
   background-color: var(--mauve-2);
+
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+body > footer {
+  position: sticky;
+  top: 100vh;
+  top: 100svh;
 }

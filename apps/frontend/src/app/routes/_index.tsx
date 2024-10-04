@@ -1,13 +1,14 @@
 import type { MetaFunction } from "@remix-run/node";
+import { MainBoardView } from "../components/board/MainBoardView";
 
 export const meta: MetaFunction = () => {
-  return [{ title: "New Remix App" }, { name: "description", content: "Welcome to Remix!" }];
+  return [{ title: "Data Maki UI" }];
 };
 
 export default function Index() {
   return (
     <>
-      <p>Hello, world!</p>
+      <MainBoardView />
     </>
   );
 }
