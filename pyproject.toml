@@ -1,9 +1,10 @@
 [project]
 name = "data-maki"
 version = "0.1.0"
-description = "Add your description here"
+description = "Data Maki temporal solver impl"
 authors = [
-    { name = "GIGAHERTZ00", email = "gigahertz00@gmail.com" }
+    { name = "GIGAHERTZ00", email = "gigahertz00@gmail.com" },
+    { name = "KtaK721" }
 ]
 dependencies = []
 readme = "README.md"
@@ -34,4 +35,3 @@ line-length = 119
 [tool.isort]
 profile = "black"
 line_length = 119
-
