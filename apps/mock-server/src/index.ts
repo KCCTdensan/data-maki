@@ -1,7 +1,7 @@
 import type { Answer } from "@data-maki/schemas";
 import { Hono } from "hono";
 import typia from "typia";
-import config from "./input.json";
+import config from "../resources/input.json";
 
 const app = new Hono();
 

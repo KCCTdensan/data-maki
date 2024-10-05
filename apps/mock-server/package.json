@@ -1,0 +1,23 @@
+{
+  "name": "@data-maki/mock-server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "bun run scripts/build.ts",
+    "dev": "cross-env NODE_ENV=development bun -b --hot run src/index.ts",
+    "lint": "biome check --write .",
+    "start": "bun -b run dist/index.js"
+  },
+  "dependencies": {
+    "@data-maki/schemas": "workspace:*",
+    "@hono/typia-validator": "^0.0.5",
+    "hono": "^4.6.3"
+  },
+  "devDependencies": {
+    "@data-maki/biome-config": "workspace:*",
+    "@data-maki/typescript-config": "workspace:*",
+    "@ryoppippi/unplugin-typia": "npm:@jsr/ryoppippi__unplugin-typia"
+  }
+}
