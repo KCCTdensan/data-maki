@@ -1,6 +1,5 @@
 import typia from "@ryoppippi/unplugin-typia/bun";
 
-console.info("Building solver...");
 console.time("Finished building solver");
 
 await Bun.build({

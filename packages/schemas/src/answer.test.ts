@@ -6,7 +6,7 @@ import type { Answer } from "./answer";
 const exampleJson = `
 {
   "n":3,
-  "ops":[
+  "ops": [
     {
       "p":4,
       "x":5,

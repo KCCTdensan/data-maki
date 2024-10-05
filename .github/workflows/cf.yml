@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+    paths:
+      - "apps/frontend/**"
+      - "bun.lockb"
   pull_request:
     branches:
       - main
