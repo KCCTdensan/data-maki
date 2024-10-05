@@ -5,7 +5,7 @@ on:
     branches:
       - main
     paths:
-      - "apps/backend/**"
+      - "apps/solver/**"
       - "bun.lockb"
   pull_request:
     branches:
@@ -44,22 +44,22 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        working-directory: apps/backend
+        working-directory: apps/solver
         run: bun install --frozen-lockfile
 
       - name: Build
-        working-directory: apps/backend
+        working-directory: apps/solver
         run: bun run build
 
       - name: Build (standalone)
-        working-directory: apps/backend
+        working-directory: apps/solver
         run: bun build --sourcemap=inline --compile --target=${{ matrix.target }} --outfile=dist/${{ matrix.outfile }} src/index.ts
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: solver-${{ matrix.target }}
-          path: apps/backend/dist/${{ matrix.outfile }}
+          path: apps/solver/dist/${{ matrix.outfile }}
 
   test:
     name: Test schemas
