@@ -13,45 +13,50 @@ function getRandomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min) + min); // [min,max)
 }
 
-function problemGenerator(): JSON {
+function problemGenerator(): { width: number; height: number; start: string[]; goal: string[] } {
   const width = getRandomInt(32, 257);
   const height = getRandomInt(32, 257);
 
-  let numbers: number[] = Array.from({ length: width * height });
-  let flg: bool = true;
+  let numbers: number[] = Array(width * height).fill(0);
+  let flg: boolean = true;
   while (flg) {
-    var counts: number[] = Array(4).fill(0);
+    const counts: number[] = [0, 0, 0, 0];
     for (let i = 0; i < height * width; ++i) {
-      numbers[i] = getRandomInt(0, 5);
-      ++counts[numbers[i] - 1];
+      const num: number = getRandomInt(0, 5);
+      numbers[i] = num;
+      if (counts[num] !== undefined) {
+        ++counts[num];
+      }
     }
     flg = false;
     counts.forEach((count) => {
       flg = count / (width * height) < 0.1;
     });
   }
-  let startTable: string[] = Array.from({ length: height });
-  for (let i = 0; i < height; ++i) {
-    startTable[i] = numbers.slice(i * width, (i + 1) * width).toString();
-  }
-  let goalTable: string[] = Array.from({ length: height });
+
+  // 初期盤面の生成
+  const startTable: string[] = Array.from({ length: height }).map(
+    (e, i) => (e = numbers.slice(i * width, (i + 1) * width).toString()),
+  );
+  // 目標盤面の生成
   numbers.sort();
-  for (let i = 0; i < height; ++i) {
-    goalTable[i] = numbers.slice(i * width, (i + 1) * width).toString();
-  }
-  let problem = JSON.stringify({ width: width, height: height, start: startTable, goal: goalTable });
+  const goalTable: string[] = Array.from({ length: height }).map(
+    (e, i) => (e = numbers.slice(i * width, (i + 1) * width).toString()),
+  );
+
+  const problem = { width: width, height: height, start: startTable, goal: goalTable };
   console.log("Generate successful!!");
   return problem;
 }
 
 const problem = problemGenerator();
 
-app.use("*", (c, next) => {
+app.use(async (c, next) => {
   const token = c.req.header("Procon-Token");
   if (!token || !validTokens.has(token)) {
     return c.json({ error: "Invalid or missing token" }, 401);
   }
-  return next();
+  await next();
 });
 
 app.get("/problem", (c) => {
