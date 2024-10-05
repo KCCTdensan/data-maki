@@ -1,5 +1,7 @@
-def main():
-    print("Hello, world!")
+from ..solver import solve
 
-if __name__ == "__main__":
-    main()
+
+def main():
+    answer = solve()
+
+    print(answer)
