@@ -1,3 +1,4 @@
+<!--
 # Require:
 1. `flake8`
 2. `black`
@@ -17,3 +18,6 @@ yay -S flake8 python-black python-isort pre-commit
 pre-commit .pre-commit-config.yaml 
 ```
 を実行してください
+--->
+
+# WIP
