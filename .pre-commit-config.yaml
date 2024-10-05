@@ -3,6 +3,6 @@ repos:
     hooks:
       - id: lint
         name: lint
-        entry: bash -c 'flake8 . && isort -c --diff . && black --check .'
+        entry: bash -c 'flake8 src/data_maki/ && isort -c --diff src/data_maki/ && black --check src/data_maki/'
         language: system
         types: [python]
