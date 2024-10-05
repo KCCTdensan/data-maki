@@ -1,5 +1,6 @@
 import type { Serve, Server } from "bun";
 import { Hono } from "hono";
+import { cors } from "hono/cors";
 import { showRoutes } from "hono/dev";
 import { logger } from "hono/logger";
 import { HOST, PORT, isDevelopment } from "../../constants/env.ts";
@@ -17,6 +18,17 @@ export type Env = {
 const app = new Hono<Env>();
 
 app.use(logger());
+app.use(
+  cors({
+    origin: (origin) => {
+      if (isDevelopment) {
+        return origin;
+      }
+
+      return origin.endsWith("data-maki.pages.dev") ? origin : "";
+    },
+  }),
+);
 
 export class UICommunicatorFeature extends FeatureBase {
   #server!: Server;
