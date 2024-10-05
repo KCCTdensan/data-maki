@@ -7,6 +7,10 @@ import { denyImports, envOnlyMacros } from "vite-env-only";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
+  build: {
+    minify: true,
+    sourcemap: true,
+  },
   plugins: [
     cloudflareDevProxyVitePlugin(),
     remix({
@@ -46,8 +50,5 @@ export default defineConfig({
   },
   resolve: {
     mainFields: ["browser", "module", "main"],
-  },
-  build: {
-    minify: true,
   },
 });

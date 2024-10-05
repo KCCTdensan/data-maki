@@ -4,11 +4,14 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "typecheck": "tsc",
+    "preview": "bun run build && wrangler pages dev",
+    "cf-typegen": "wrangler types",
     "prepare": "run-p \"prepare:*\"",
     "prepare:panda": "panda codegen",
     "prepare:wrangler": "wrangler types",
     "build": "remix vite:build",
-    "deploy": "wrangler pages deploy ./dist/client",
+    "deploy": "bun run build && wrangler pages deploy",
     "dev": "remix vite:dev",
     "lint": "biome check --write .",
     "start": "wrangler pages dev ./dist/client"
