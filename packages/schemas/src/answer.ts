@@ -1,7 +1,5 @@
 import typia, { type tags } from "typia";
 
-// Example schema
-
 export interface Answer {
   n: number & tags.Type<"uint32"> & tags.Maximum<320000>;
   ops: Array<Ops> & tags.MaxItems<320000>;

@@ -1,0 +1,27 @@
+@layer reset, base, tokens, recipes, utilities;
+
+:root {
+  font-family: "Inter", sans-serif;
+  font-feature-settings: "palt", "ss04", "cv10";
+}
+
+@supports (font-variation-settings: normal) {
+  :root {
+    font-family: "Inter var", sans-serif;
+  }
+}
+
+html,
+body {
+  line-height: 2.0;
+  background-color: var(--mauve-2);
+
+  min-height: 100vh;
+  min-height: 100svh;
+}
+
+body > footer {
+  position: sticky;
+  top: 100vh;
+  top: 100svh;
+}

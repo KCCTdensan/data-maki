@@ -3,6 +3,7 @@ import { plugin } from "bun";
 
 plugin(
   typia({
+    cache: false,
     log: false,
   }),
 );

@@ -1,20 +1,45 @@
 import { cloudflareDevProxyVitePlugin, vitePlugin as remix } from "@remix-run/dev";
 import typia from "@ryoppippi/unplugin-typia/vite";
+import { flatRoutes } from "remix-flat-routes";
+import { remixRoutes } from "remix-routes/vite";
 import { defineConfig } from "vite";
+import { denyImports, envOnlyMacros } from "vite-env-only";
 import tsconfigPaths from "vite-tsconfig-paths";
-import { getLoadContext } from "./load-context";
 
 export default defineConfig({
+  build: {
+    minify: true,
+    sourcemap: true,
+  },
   plugins: [
-    cloudflareDevProxyVitePlugin({ getLoadContext }),
+    cloudflareDevProxyVitePlugin(),
     remix({
+      appDirectory: "src/app",
+      buildDirectory: "dist",
+      ignoredRouteFiles: ["**/*"],
+      ssr: false,
+      routes: async (defineRoutes) =>
+        flatRoutes("routes", defineRoutes, {
+          appDir: "src/app",
+        }),
       future: {
         v3_fetcherPersist: true,
         v3_relativeSplatPath: true,
         v3_throwAbortReason: true,
       },
     }),
+    remixRoutes(),
     tsconfigPaths(),
+    denyImports({
+      client: {
+        specifiers: [/^node:/],
+        files: ["**/.server/*", "**/*.server.*"],
+      },
+      server: {
+        files: ["**/.client/*", "**/*.client.*"],
+      },
+    }),
+    envOnlyMacros(),
     typia({
       log: false,
     }),
@@ -26,8 +51,5 @@ export default defineConfig({
   },
   resolve: {
     mainFields: ["browser", "module", "main"],
-  },
-  build: {
-    minify: true,
   },
 });
