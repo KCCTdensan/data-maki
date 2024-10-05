@@ -16,12 +16,12 @@
     "@data-maki/schemas": "workspace:*",
     "@hono/typia-validator": "^0.0.5",
     "hono": "^4.6.3",
+    "reactive-channel": "^3.1.2",
     "universal-stores": "^2.4.3"
   },
   "devDependencies": {
     "@data-maki/biome-config": "workspace:*",
     "@data-maki/typescript-config": "workspace:*",
-    "@ryoppippi/unplugin-typia": "npm:@jsr/ryoppippi__unplugin-typia",
-    "wrangler": "^3.79.0"
+    "@ryoppippi/unplugin-typia": "npm:@jsr/ryoppippi__unplugin-typia"
   }
 }
