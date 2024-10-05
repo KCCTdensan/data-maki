@@ -52,7 +52,7 @@ export class UICommunicatorFeature extends FeatureBase {
     }
   }
 
-  async onReady() {
+  async start() {
     console.info(`UI Communicator is ready at http://${HOST}:${PORT}`);
   }
 }

@@ -21,5 +21,5 @@ export class AlgorithmFeature extends FeatureBase {
 
   init() {}
 
-  async onReady() {}
+  async start() {}
 }

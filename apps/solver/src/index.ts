@@ -3,6 +3,8 @@ import { AlgorithmFeature } from "./features/algorithm";
 import type { FeatureBase } from "./features/base";
 import { ServerCommunicatorFeature } from "./features/server-comm";
 import { UICommunicatorFeature } from "./features/ui-comm";
+import { IdleState } from "./state/idle.ts";
+import { StateManager } from "./state/manager.ts";
 import { spmc } from "./util/channel";
 import type { Falsy } from "./util/types";
 
@@ -22,6 +24,8 @@ const features = createFeatures();
 
 console.time("All features ready");
 
+StateManager.init(spmc<UIMessageEvent>().tx);
+
 console.group(
   "Registered features:\n",
   ...features.map((feature) => `- ${feature.getName()}\n`),
@@ -40,9 +44,11 @@ for (const feature of features) {
   console.timeEnd(`Initialized feature: ${name}`);
 }
 
-const allFeaturesPromise = Promise.all(features.map((feature) => feature.onReady()));
+const allFeaturesPromise = Promise.all(features.map((feature) => feature.start()));
 
 console.timeEnd("All features ready");
+
+StateManager.instance.setState(IdleState.instance);
 
 await allFeaturesPromise;
 

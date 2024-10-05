@@ -7,5 +7,5 @@ export class ServerCommunicatorFeature extends FeatureBase {
 
   init() {}
 
-  async onReady() {}
+  async start() {}
 }
