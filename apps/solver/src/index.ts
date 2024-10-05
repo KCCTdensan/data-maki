@@ -1,3 +1,4 @@
+import { SERVER_TOKEN, SERVER_URL } from "./constants/env.ts";
 import type { UIMessageEvent } from "./events/base.ts";
 import { AlgorithmFeature } from "./features/algorithm";
 import type { FeatureBase } from "./features/base";
@@ -10,11 +11,12 @@ import type { Falsy } from "./util/types";
 
 const createFeatures = () => {
   const { tx, subscriberCount$, tee } = spmc<UIMessageEvent>();
+  const serverComm = new ServerCommunicatorFeature(SERVER_URL, SERVER_TOKEN);
 
   return (
     [
-      new AlgorithmFeature(tx, subscriberCount$),
-      new ServerCommunicatorFeature(),
+      new AlgorithmFeature(tx, subscriberCount$, serverComm),
+      serverComm,
       new UICommunicatorFeature(tee),
     ] as const satisfies (FeatureBase | Falsy)[]
   ).filter((feature) => !!feature);

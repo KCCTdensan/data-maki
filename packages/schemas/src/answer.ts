@@ -11,3 +11,7 @@ export interface Ops {
   y: number & tags.Type<"int32"> & tags.Minimum<-255> & tags.Maximum<255>;
   s: number & tags.Type<"uint32"> & tags.Maximum<3>;
 }
+
+export interface AnswerResponse {
+  revision: number & tags.Type<"uint32">;
+}
