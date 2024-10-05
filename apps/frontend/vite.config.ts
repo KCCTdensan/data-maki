@@ -3,6 +3,7 @@ import typia from "@ryoppippi/unplugin-typia/vite";
 import { flatRoutes } from "remix-flat-routes";
 import { remixRoutes } from "remix-routes/vite";
 import { defineConfig } from "vite";
+import { denyImports, envOnlyMacros } from "vite-env-only";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
@@ -24,6 +25,16 @@ export default defineConfig({
     }),
     remixRoutes(),
     tsconfigPaths(),
+    denyImports({
+      client: {
+        specifiers: [/^node:/],
+        files: ["**/.server/*", "**/*.server.*"],
+      },
+      server: {
+        files: ["**/.client/*", "**/*.client.*"],
+      },
+    }),
+    envOnlyMacros(),
     typia({
       log: false,
     }),

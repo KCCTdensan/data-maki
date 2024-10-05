@@ -7,7 +7,7 @@ type Props = {
 
 export const ZoomLevelSlider = ({ value, onChange }: Props) => {
   return (
-    <Flex align="center" gap={10} minW="40vw">
+    <Flex align="center" gap={10} w="40vw" minW={300}>
       <FormControl label="Zoom level" flex={1}>
         <Slider value={value} min={0.1} max={2.0} step={0.1} onChange={onChange}>
           <SliderMark value={0.1} ml={-4}>

@@ -1,16 +1,22 @@
+import type { UIMessageEvent } from "./events/base.ts";
 import { AlgorithmFeature } from "./features/algorithm";
 import type { FeatureBase } from "./features/base";
 import { ServerCommunicatorFeature } from "./features/server-comm";
 import { UICommunicatorFeature } from "./features/ui-comm";
-import type { Falsy } from "./util/types.ts";
+import { spmc } from "./util/channel";
+import type { Falsy } from "./util/types";
 
-const createFeatures = () =>
-  (
-    [new AlgorithmFeature(), new ServerCommunicatorFeature(), new UICommunicatorFeature()] as const satisfies (
-      | FeatureBase
-      | Falsy
-    )[]
+const createFeatures = () => {
+  const { tx, subscriberCount$, tee } = spmc<UIMessageEvent>();
+
+  return (
+    [
+      new AlgorithmFeature(tx, subscriberCount$),
+      new ServerCommunicatorFeature(),
+      new UICommunicatorFeature(tee),
+    ] as const satisfies (FeatureBase | Falsy)[]
   ).filter((feature) => !!feature);
+};
 
 const features = createFeatures();
 

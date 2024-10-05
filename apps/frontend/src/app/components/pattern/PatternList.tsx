@@ -23,7 +23,7 @@ export const PatternList = ({ patterns }: Props) => {
       <Card variant="outline" w="75vw">
         <ScrollArea innerProps={{ as: CardBody }}>
           <HStack gap="md">
-            {(patternType === "general" ? patterns : fixedPatterns.filter((_, i) => i < 7)).map((pattern, i, arr) => (
+            {(patternType === "general" ? patterns : fixedPatterns.slice(0, 7)).map((pattern, i, arr) => (
               <Fragment key={pattern.p}>
                 <Pattern pattern={pattern} />
                 {patternType === "fixed" && i === arr.length - 1 && <p>...</p>}

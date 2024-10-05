@@ -1,4 +1,4 @@
-import { Grid, HStack, Heading, Spacer, VStack } from "@yamada-ui/react";
+import { Grid, Heading, Spacer, Text, VStack } from "@yamada-ui/react";
 import { useState } from "react";
 import { ScrollSync } from "scroll-sync-react";
 import { PatternList } from "../pattern/PatternList";
@@ -38,38 +38,49 @@ export const MainBoardView = () => {
 
   return (
     <>
-      <HStack>
+      <Grid templateColumns="1fr 1fr" autoRows="1fr" gap="md">
         <ConnectionManagerCard />
         <StatsCard board={testBoard.board} />
-      </HStack>
+      </Grid>
       <VStack as="section" h="100vh">
         <Heading as="h2" size="lg" fontWeight="medium" lineHeight={1.2}>
           Board
         </Heading>
-        <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
-          <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
-            Start
-          </Heading>
-          <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
-            Goal
-          </Heading>
-        </Grid>
-        <ScrollSync>
-          <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
-            <Board board={testBoard.board.start} width={testBoard.board.width} zoomLevel={zoomLevel} />
-            <Board board={testBoard.board.goal} width={testBoard.board.width} zoomLevel={zoomLevel} />
-          </Grid>
-        </ScrollSync>
-        <Grid as="section" templateColumns="1fr auto" w="100%" mb={4}>
-          <Spacer />
-          <ZoomLevelSlider value={zoomLevel} onChange={setZoomLevel} />
-        </Grid>
-        <section>
-          <Heading as="h2" size="lg" fontWeight="medium">
-            Patterns
-          </Heading>
-          <PatternList patterns={testBoard.general.patterns} />
-        </section>
+        {false ? (
+          <>
+            <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
+              <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
+                Start
+              </Heading>
+              <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
+                Goal
+              </Heading>
+            </Grid>
+            <ScrollSync>
+              <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
+                <Board board={testBoard.board.start} width={testBoard.board.width} zoomLevel={zoomLevel} />
+                <Board board={testBoard.board.goal} width={testBoard.board.width} zoomLevel={zoomLevel} />
+              </Grid>
+            </ScrollSync>
+            <Grid as="section" templateColumns="1fr auto" w="100%" mb={4}>
+              <Spacer />
+              <ZoomLevelSlider value={zoomLevel} onChange={setZoomLevel} />
+            </Grid>
+            <section>
+              <Heading as="h2" size="lg" fontWeight="medium">
+                Patterns
+              </Heading>
+              <PatternList patterns={testBoard.general.patterns} />
+            </section>
+            ) : (
+            <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
+              <Board board={testBoard.board.start} width={testBoard.board.width} zoomLevel={zoomLevel} />
+              <Board board={testBoard.board.goal} width={testBoard.board.width} zoomLevel={zoomLevel} />
+            </Grid>
+          </>
+        ) : (
+          <Text>Waiting solver to start solving...</Text>
+        )}
       </VStack>
     </>
   );

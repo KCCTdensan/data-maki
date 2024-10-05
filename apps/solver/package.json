@@ -15,7 +15,8 @@
   "dependencies": {
     "@data-maki/schemas": "workspace:*",
     "@hono/typia-validator": "^0.0.5",
-    "hono": "^4.6.3"
+    "hono": "^4.6.3",
+    "universal-stores": "^2.4.3"
   },
   "devDependencies": {
     "@data-maki/biome-config": "workspace:*",
