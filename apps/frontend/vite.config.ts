@@ -17,6 +17,7 @@ export default defineConfig({
       appDirectory: "src/app",
       buildDirectory: "dist",
       ignoredRouteFiles: ["**/*"],
+      ssr: false,
       routes: async (defineRoutes) =>
         flatRoutes("routes", defineRoutes, {
           appDir: "src/app",

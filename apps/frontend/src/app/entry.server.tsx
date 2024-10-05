@@ -7,45 +7,40 @@
 import type { AppLoadContext, EntryContext } from "@remix-run/cloudflare";
 import { RemixServer } from "@remix-run/react";
 import { isbot } from "isbot";
-import { renderToReadableStream } from "react-dom/server";
-import { ServerProvider } from "remix-provider";
+import { renderToReadableStream, renderToString } from "react-dom/server";
+
+const indexHtml = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Data Maki UI</title>
+  <link rel="preconnect" href="https://rsms.me/">
+  <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/mauve.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/red.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/blue.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/green.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/yellow.css">
+</head>
+<body>
+  <div id="app"><!-- Remix SPA --></body>
+</html>
+`.trim();
 
 export default async function handleRequest(
   request: Request,
-  _responseStatusCode: number,
+  responseStatusCode: number,
   responseHeaders: Headers,
   remixContext: EntryContext,
   loadContext: AppLoadContext,
 ) {
-  let responseStatusCode = _responseStatusCode;
+  const appHtml = renderToString(<RemixServer context={remixContext} url={request.url} />);
 
-  const body = await renderToReadableStream(
-    <ServerProvider
-      value={{
-        env: loadContext.cloudflare.env,
-        host: request.headers.get("host"),
-      }}
-    >
-      <RemixServer context={remixContext} url={request.url} />
-    </ServerProvider>,
-    {
-      signal: request.signal,
-      onError(error: unknown) {
-        // Log streaming rendering errors from inside the shell
-        console.error(error);
-
-        responseStatusCode = 500;
-      },
-    },
-  );
-
-  if (isbot(request.headers.get("user-agent") || "")) {
-    await body.allReady;
-  }
+  const html = indexHtml.replace("<!-- Remix SPA -->", appHtml);
 
   responseHeaders.set("Content-Type", "text/html");
 
-  return new Response(body, {
+  return new Response(html, {
     headers: responseHeaders,
     status: responseStatusCode,
   });
