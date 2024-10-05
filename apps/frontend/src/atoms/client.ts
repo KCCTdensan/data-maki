@@ -71,28 +71,29 @@ export const eventStreamAtom = atom(
       onClose();
     }
 
-    onRequest();
-
     const newController = new AbortController();
-    const response = await fetch(url, {
-      headers: {
-        Accept: "text/event-stream",
-      },
-      signal: newController.signal,
-    });
 
-    if (!response.ok) {
-      onResponseError(response);
+    const fetchStream = async () => {
+      onRequest();
 
-      return;
-    }
+      const response = await fetch(url, {
+        headers: {
+          Accept: "text/event-stream",
+        },
+        signal: newController.signal,
+      });
 
-    onOpen();
+      if (!response.ok) {
+        onResponseError(response);
 
-    set(controllerAtom, [newController, onClose]);
+        return;
+      }
 
-    const fetchStream = async () =>
-      response.body
+      onOpen();
+
+      set(controllerAtom, [newController, onClose]);
+
+      return response.body
         .pipeThrough(new TextDecoderStream())
         .pipeThrough(new EventSourceParserStream())
         .pipeTo(
@@ -110,6 +111,7 @@ export const eventStreamAtom = atom(
             },
           }),
         );
+    };
 
     fetchStream().catch((e) => {
       if ((e instanceof Error && e.name === "AbortError") || reloading) return;
