@@ -1,18 +1,22 @@
+import { SERVER_TOKEN, SERVER_URL } from "./constants/env.ts";
 import type { UIMessageEvent } from "./events/base.ts";
 import { AlgorithmFeature } from "./features/algorithm";
 import type { FeatureBase } from "./features/base";
 import { ServerCommunicatorFeature } from "./features/server-comm";
 import { UICommunicatorFeature } from "./features/ui-comm";
+import { IdleState } from "./state/idle.ts";
+import { StateManager } from "./state/manager.ts";
 import { spmc } from "./util/channel";
 import type { Falsy } from "./util/types";
 
 const createFeatures = () => {
   const { tx, subscriberCount$, tee } = spmc<UIMessageEvent>();
+  const serverComm = new ServerCommunicatorFeature(SERVER_URL, SERVER_TOKEN);
 
   return (
     [
-      new AlgorithmFeature(tx, subscriberCount$),
-      new ServerCommunicatorFeature(),
+      new AlgorithmFeature(tx, subscriberCount$, serverComm),
+      serverComm,
       new UICommunicatorFeature(tee),
     ] as const satisfies (FeatureBase | Falsy)[]
   ).filter((feature) => !!feature);
@@ -21,6 +25,8 @@ const createFeatures = () => {
 const features = createFeatures();
 
 console.time("All features ready");
+
+StateManager.init(spmc<UIMessageEvent>().tx);
 
 console.group(
   "Registered features:\n",
@@ -40,9 +46,11 @@ for (const feature of features) {
   console.timeEnd(`Initialized feature: ${name}`);
 }
 
-const allFeaturesPromise = Promise.all(features.map((feature) => feature.onReady()));
+const allFeaturesPromise = Promise.all(features.map((feature) => feature.start()));
 
 console.timeEnd("All features ready");
+
+StateManager.instance.setState(IdleState.instance);
 
 await allFeaturesPromise;
 

@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "prepare": "tsup",
-    "lint": "biome lint --write .",
-    "test": "bun test"
+    "lint": "biome lint --write ."
   },
   "exports": {
     ".": {

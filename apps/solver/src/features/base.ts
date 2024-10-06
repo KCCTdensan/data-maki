@@ -11,7 +11,7 @@ export abstract class FeatureBase {
 
   abstract init(): void;
 
-  abstract onReady(): Promise<void>;
+  abstract start(): Promise<void>;
 
   onDispose() {}
 }

@@ -4,12 +4,14 @@ on:
   push:
     branches:
       - main
+      - staging
     paths:
       - "apps/frontend/**"
       - "bun.lockb"
   pull_request:
     branches:
       - main
+      - staging
     types:
       - opened
       - synchronize
