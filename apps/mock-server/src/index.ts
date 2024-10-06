@@ -2,6 +2,7 @@ import type { Answer } from "@data-maki/schemas";
 import type { Serve } from "bun";
 import { Hono } from "hono";
 import { logger } from "hono/logger";
+import { prettyJSON } from "hono/pretty-json";
 import microtime from "microtime";
 import type { FixedLengthArray, IntRange } from "type-fest";
 import typia from "typia";
@@ -72,6 +73,7 @@ const problem = problemGenerator();
 const app = new Hono();
 
 app.use(logger());
+app.use(prettyJSON());
 
 app.use(async (c, next) => {
   const token = c.req.header("Procon-Token");
