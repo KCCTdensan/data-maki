@@ -6,6 +6,7 @@ import { prettyJSON } from "hono/pretty-json";
 import microtime from "microtime";
 import type { FixedLengthArray, IntRange } from "type-fest";
 import typia from "typia";
+import { generateProblem } from "./gen";
 import type { Config } from "./models/config";
 
 const PORT = 8080;
@@ -22,53 +23,7 @@ function getRandomInt<TMin extends number, TMax extends number>(min: TMin, max: 
   return Math.floor(Math.random() * (max - min) + min) as unknown as IntRange<TMin, TMax>; // [min,max]
 }
 
-function problemGenerator(): { width: number; height: number; start: string[]; goal: string[] } {
-  console.time("Problem generation successful");
-
-  const width = getRandomInt(32, 257);
-  const height = getRandomInt(32, 257);
-
-  const numbers: number[] = Array(width * height).fill(0);
-
-  let flg = true;
-
-  while (flg) {
-    const counts: FixedLengthArray<number, 4> = [0, 0, 0, 0];
-
-    for (let i = 0; i < width * height; i++) {
-      const num = getRandomInt(0, 5);
-
-      numbers[i] = num;
-      counts[num]++;
-    }
-
-    flg = false;
-
-    for (const count of counts) {
-      flg = count / (width * height) < 0.1;
-    }
-  }
-
-  // 初期盤面の生成
-  const startTable: string[] = [...Array(height).keys()].map((i) =>
-    numbers.slice(i * width, (i + 1) * width).toString(),
-  );
-
-  // 目標盤面の生成
-  numbers.sort();
-
-  const goalTable: string[] = [...Array(height).keys()].map((i) =>
-    numbers.slice(i * width, (i + 1) * width).toString(),
-  );
-
-  const problem = { width: width, height: height, start: startTable, goal: goalTable };
-
-  console.timeEnd("Problem generation successful");
-
-  return problem;
-}
-
-const problem = problemGenerator();
+const problem = generateProblem();
 
 const app = new Hono();
 
