@@ -1,3 +1,4 @@
+import type { Question } from "@data-maki/schemas";
 import { Grid, Heading, Spacer, Text, VStack } from "@yamada-ui/react";
 import { useState } from "react";
 import { ScrollSync } from "scroll-sync-react";
@@ -7,7 +8,7 @@ import { StatsCard } from "../stats/StatsCard";
 import { Board } from "./Board";
 import { ZoomLevelSlider } from "./ZoomLevelSlider";
 
-const testBoard = {
+const testBoard: Question = {
   board: {
     width: 18,
     height: 4,
@@ -72,11 +73,6 @@ export const MainBoardView = () => {
               </Heading>
               <PatternList patterns={testBoard.general.patterns} />
             </section>
-            ) : (
-            <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
-              <Board board={testBoard.board.start} width={testBoard.board.width} zoomLevel={zoomLevel} />
-              <Board board={testBoard.board.goal} width={testBoard.board.width} zoomLevel={zoomLevel} />
-            </Grid>
           </>
         ) : (
           <Text>Waiting solver to start solving...</Text>

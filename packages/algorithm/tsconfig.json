@@ -1,0 +1,18 @@
+{
+  "extends": ["@data-maki/typescript-config/base.json"],
+  "compilerOptions": {
+    "noUncheckedIndexedAccess": false,
+    "plugins": [
+      {
+        "transform": "typia/lib/transform"
+      }
+    ],
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
+    "outDir": "dist",
+    "incremental": true,
+    "tsBuildInfoFile": "dist/.tsbuildinfo"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["src/**/*.test.ts"]
+}
