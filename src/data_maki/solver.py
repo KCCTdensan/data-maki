@@ -54,7 +54,7 @@ def solve():
             isFilled = False
 
             print(f"fill row {j}")
-            for k in range(1, max(j, g.board["width"] - j - 1)):
+            for k in range(1, max(j, g.board["width"] - j - 1) + 1):
                 # right side
                 x = j + k
                 print(f"check row {x}")
@@ -73,10 +73,9 @@ def solve():
                             if m % 2 == 1:
                                 print("protect confusing")
                                 # move cell_lk the place confused and move deepest cell the place not confused
-                                katanuki(g.patterns[0], x, y - 1, cn.UP)
-                                katanuki(g.patterns[0], x, y, cn.UP)
+                                katanuki(g.patterns[3], x, y, cn.UP)
                                 irregular = True
-                                y -= 1
+                                y = g.board["height"] - 2
 
                             cnt = 0
                             while ln > 0:
@@ -94,14 +93,14 @@ def solve():
                                 cnt += 1
 
                             katanuki(g.patterns[0], x, y, cn.UP)
-                            utils.get_delta(
-                                g.elems_now[g.board["height"] - 1], elems_goal[i]
-                            )
-
                             if irregular:
                                 katanuki(
                                     g.patterns[0], j + k, g.board["height"] - 3, cn.UP
                                 )
+
+                            utils.get_delta(
+                                g.elems_now[g.board["height"] - 1], elems_goal[i]
+                            )
 
                             isFilled = True
                             break
@@ -127,10 +126,9 @@ def solve():
                             if m % 2 == 1:
                                 print("protect confusing")
                                 # move cell_lk the place confused and move deepest cell the place not confused
-                                katanuki(g.patterns[0], x, y - 1, cn.UP)
-                                katanuki(g.patterns[0], x, y, cn.UP)
+                                katanuki(g.patterns[3], x, y, cn.UP)
                                 irregular = True
-                                y -= 1
+                                y = g.board["height"] - 2
 
                             cnt = 0
                             while ln > 0:
@@ -148,14 +146,14 @@ def solve():
                                 cnt += 1
 
                             katanuki(g.patterns[0], x, y, cn.UP)
-                            utils.get_delta(
-                                g.elems_now[g.board["height"] - 1], elems_goal[i]
-                            )
-
                             if irregular:
                                 katanuki(
                                     g.patterns[0], j - k, g.board["height"] - 3, cn.UP
                                 )
+
+                            utils.get_delta(
+                                g.elems_now[g.board["height"] - 1], elems_goal[i]
+                            )
 
                             isFilled = True
                             break
