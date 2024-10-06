@@ -1,11 +1,9 @@
 import { StateBase } from "./base.ts";
 
 export class InitState extends StateBase {
-  static #instance: InitState;
+  static readonly stateName = "Initializing";
 
-  constructor() {
-    super("Initializing");
-  }
+  static #instance: InitState;
 
   static get instance() {
     if (!InitState.#instance) {

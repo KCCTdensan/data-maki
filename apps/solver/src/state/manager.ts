@@ -33,7 +33,7 @@ export class StateManager {
 
     log
       .withMetadata({
-        initialState: INITIAL_STATE.getName(),
+        initialState: INITIAL_STATE.stateName,
       })
       .info("Initialized");
   }
@@ -53,8 +53,8 @@ export class StateManager {
 
     this.log
       .withMetadata({
-        oldState: this.#oldState.getName(),
-        newState: state.getName(),
+        oldState: this.#oldState.stateName,
+        newState: state.stateName,
       })
       .info("Changing state");
 

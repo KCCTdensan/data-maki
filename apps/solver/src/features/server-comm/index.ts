@@ -1,10 +1,12 @@
 import type { Answer, AnswerResponse, Question } from "@data-maki/schemas";
-import * as cuid2 from "@paralleldrive/cuid2";
+import cuid2 from "@paralleldrive/cuid2";
 import axios, { type AxiosInstance, isAxiosError } from "axios";
 import type { LogLayer } from "loglayer";
 import typia from "typia";
 import { span } from "../../logging";
 import { axiosLoggingInterceptor } from "../../logging/third-party/axios.ts";
+import { DoneState } from "../../state/done.ts";
+import { IdleState } from "../../state/idle.ts";
 import { StateManager } from "../../state/manager.ts";
 import { SolvingState } from "../../state/solving.ts";
 import { FeatureBase } from "../base";
@@ -75,8 +77,7 @@ export class ServerCommunicatorFeature extends FeatureBase {
     }
   }
 
-  async submitAnswer(answer: Answer): Promise<number> {
-    const id = ""; //TODO
+  async submitAnswer(id: string, answer: Answer): Promise<number> {
     const scope = span(
       this.log.withMetadata({
         answerId: id,
@@ -115,8 +116,24 @@ export class ServerCommunicatorFeature extends FeatureBase {
   }
 
   async start() {
-    const [id, question] = await this.pollProblem();
+    StateManager.instance.state$.subscribe(async (state) => {
+      if (state.stateName === IdleState.stateName) {
+        const [id, question] = await this.pollProblem();
 
-    StateManager.instance.setState(new SolvingState(id, question));
+        StateManager.instance.setState(new SolvingState(id, question));
+
+        return;
+      }
+
+      if (state.stateName === DoneState.stateName) {
+        const doneState = state as DoneState;
+
+        const revision = await this.submitAnswer(doneState.id, doneState.answer);
+
+        setTimeout(() => {
+          StateManager.instance.setState(IdleState.instance);
+        }, 1000);
+      }
+    });
   }
 }

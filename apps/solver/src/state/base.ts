@@ -1,11 +1,9 @@
-export abstract class StateBase {
-  readonly #name: string;
+export abstract class StateBase<T extends typeof StateBase = typeof StateBase> {
+  static readonly stateName: string;
 
-  protected constructor(name: string) {
-    this.#name = name;
-  }
+  protected constructor() {}
 
-  getName() {
-    return this.#name;
+  get stateName() {
+    return (this.constructor as T).stateName;
   }
 }

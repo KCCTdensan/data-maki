@@ -13,5 +13,5 @@ export interface Ops {
 }
 
 export interface AnswerResponse {
-  revision: number & tags.Type<"uint32">;
+  revision: number & tags.Type<"uint64">;
 }

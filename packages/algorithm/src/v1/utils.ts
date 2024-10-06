@@ -1,10 +1,18 @@
-import type { FixedLengthArray } from "type-fest";
-import type { CellCounts } from "./types";
+import { dbg } from "../log";
+import type { CellCounts, Context } from "./types";
 
 export const zip = <T, U>(a: T[], b: U[]): Array<[T, U]> => a.map((e, i) => [e, b[i]]);
 
 export const removeStringRange = (str: string, start: number, end: number): string =>
   str.slice(0, start) + str.slice(end);
+
+export const dbgBoard = (c: Context) => {
+  for (const column of c.board) {
+    dbg(column);
+  }
+
+  dbg();
+};
 
 export type ReverseOperation = "reverse-90" | "reverse-up-down" | "reverse-left-right";
 
@@ -32,7 +40,7 @@ export const reverseCells = (cells: string[], op: ReverseOperation): string[] =>
 };
 
 export const countElementsColumnWise = (board: string[], h: number): Array<CellCounts> =>
-  Array(h).map((_, i) => {
+  [...Array(h).keys()].map((i) => {
     const counts: CellCounts = [0, 0, 0, 0];
 
     for (const cell of board[i]) {

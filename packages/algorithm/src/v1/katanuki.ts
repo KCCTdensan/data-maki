@@ -1,8 +1,9 @@
-import type { Pattern } from "@data-maki/schemas";
+import type { Ops, Pattern } from "@data-maki/schemas";
 import { shallowEqual } from "fast-equals";
+import { dbg } from "../log";
 import { addOps } from "./answer";
 import { type Context, DOWN, type Direction, LEFT, type Point, UP } from "./types";
-import { countElementsColumnWise, removeStringRange, reverseCells } from "./utils";
+import { countElementsColumnWise, dbgBoard, removeStringRange, reverseCells } from "./utils";
 
 const generatePatternData = (
   dir: Direction,
@@ -44,7 +45,7 @@ const generatePatternData = (
       };
 
 export const katanuki = (c: Context, p: Pattern, x: number, y: number, dir: Direction) => {
-  console.log(p.cells, x, y, dir);
+  dbg("katanuki", { p: p.p, x, y, dir });
 
   if (x + p.width <= 0 || x >= c.width || y + p.height <= 0 || y >= c.height) {
     throw new Error("Cannot pick any cells: out of range");
@@ -81,6 +82,8 @@ export const katanuki = (c: Context, p: Pattern, x: number, y: number, dir: Dire
   }
 
   for (const i of Array(ph).keys()) {
+    // Up / Left: Add at the end, Down / Right: Add at the beginning
+
     l.y = pp.y + i;
 
     if (l.y < 0 || l.y >= bp.y) continue;
@@ -93,17 +96,17 @@ export const katanuki = (c: Context, p: Pattern, x: number, y: number, dir: Dire
   }
 
   if (!shallowEqual(b, c.board)) {
-    c.board = structuredClone(b);
+    c.board = b;
+    c.currentElementCounts = countElementsColumnWise(c.board, c.height);
 
-    addOps(c, {
+    const op: Ops = {
       p: p.p,
       x,
       y,
       s: dir,
-    });
+    };
 
-    c.currentElementCounts = countElementsColumnWise(c.board, c.height);
-
-    // TODO: progress
+    addOps(c, op);
+    dbgBoard(c);
   }
 };

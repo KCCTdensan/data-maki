@@ -1,27 +1,13 @@
-# Data maki schemas
+# Data maki algorithm
 
-Lightweight schema definitions using Typia.
+Main algorithm implementation.
 
 ## Setup
 
 Follow the root monorepo README.md for setup instructions.
 
-## Test
+## Changelog
 
-To test the schemas, run the following command:
+## v1 (2024-10-06)
 
-```
-bun test
-```
-
-## Refreshing definitions
-
-You need to run `prepare` script when editing the schemas. This will update the generated TypeScript definitions:
-
-```
-bun prepare
-```
-
-## Utilities
-
-- TSUp for generating TypeScript definitions
+- Initial version

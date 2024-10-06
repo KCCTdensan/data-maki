@@ -2,11 +2,6 @@
   "extends": ["@data-maki/typescript-config/base.json"],
   "compilerOptions": {
     "noUncheckedIndexedAccess": false,
-    "plugins": [
-      {
-        "transform": "typia/lib/transform"
-      }
-    ],
     "noEmit": false,
     "allowImportingTsExtensions": false,
     "outDir": "dist",

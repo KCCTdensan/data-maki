@@ -11,7 +11,9 @@ export const getBoardArrayFromNumbers = (numbers: number[], width: number): stri
   );
 };
 
-export const generateProblem = (): Question => {
+let id = 0;
+
+export const generateProblem = (): [id: number, question: Question] => {
   console.time("Problem generation successful");
 
   const width = getRandomInt(32, 257);
@@ -57,5 +59,5 @@ export const generateProblem = (): Question => {
 
   console.timeEnd("Problem generation successful");
 
-  return problem;
+  return [id++, problem];
 };

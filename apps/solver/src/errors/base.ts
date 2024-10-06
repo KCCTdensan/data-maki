@@ -2,7 +2,7 @@ export class BaseError extends Error {
   constructor(
     readonly _tag: string,
     message: string,
-    cause: Error,
+    cause?: Error,
   ) {
     super(message, { cause });
 

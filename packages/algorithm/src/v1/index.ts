@@ -1,26 +1,32 @@
 import { fixedPatterns } from "@data-maki/schemas";
 import { shallowEqual } from "fast-equals";
 import type { SolveFunc } from "../index";
+import { dbg } from "../log";
 import { katanuki } from "./katanuki";
 import { type CellCounts, type Context, DOWN, LEFT, RIGHT, UP } from "./types";
-import { countElementsColumnWise, getDelta, reverseCells } from "./utils";
+import { countElementsColumnWise, dbgBoard, getDelta } from "./utils";
 
-export const solve: SolveFunc = (question, onProgress) => {
+export const solve: SolveFunc = (question, onProgress, onFinish) => {
   const { board } = question;
 
   const c: Context = {
+    onProgress,
+
     board: board.start,
     goalBoard: board.goal,
+
     currentElementCounts: countElementsColumnWise(board.start, board.height),
+
     width: board.width,
     height: board.height,
     n: 0,
     ops: [],
   };
 
-  const goalElementCounts = countElementsColumnWise(board.goal, board.height);
+  onProgress(c.board, c.n, null);
+  dbgBoard(c);
 
-  // TODO: progress
+  const goalElementCounts = countElementsColumnWise(board.goal, board.height);
 
   let delta: CellCounts;
 
@@ -61,15 +67,21 @@ export const solve: SolveFunc = (question, onProgress) => {
       if (!isFilled) unfilled.push(j);
     }
 
+    dbg("unfilled", unfilled);
+
     // Clear cell unfilled
     for (const j of unfilled) {
       let isFilled = false;
+
+      dbg("fill row", j);
 
       for (let k = 1; k <= Math.max(j, c.width - j - 1); k++) {
         // TODO: compare and combine right side and left side
 
         // right side
         let rx = j + k;
+
+        dbg("check row", rx);
 
         if (rx < c.width) {
           for (let m = c.height - 2; m >= completedColumns; m--) {
@@ -80,7 +92,11 @@ export const solve: SolveFunc = (question, onProgress) => {
               let ln = k; // How long have to move
               let irregular = false;
 
+              dbg(`bring ${lookingCell} from ${rx} ${y}`);
+
               if (m % 2 === 1) {
+                dbg("protect confusion");
+
                 katanuki(c, fixedPatterns[3], rx, y, UP);
 
                 irregular = true;
@@ -92,7 +108,7 @@ export const solve: SolveFunc = (question, onProgress) => {
               while (ln > 0) {
                 if (ln % 2 === 1) {
                   // border nukigata (else: 1 * 1)
-                  katanuki(c, fixedPatterns[cnt !== 0 ? 3 * cnt - 1 : 0], (rx - 2) << (cnt - 1), y, LEFT);
+                  katanuki(c, fixedPatterns[cnt !== 0 ? 3 * cnt - 1 : 0], rx - (2 << (cnt - 1)), y, LEFT);
 
                   rx -= 2 << (cnt - 1);
                 }
@@ -119,19 +135,25 @@ export const solve: SolveFunc = (question, onProgress) => {
         if (isFilled) break;
 
         // left side
-        const lx = j - k;
+        let lx = j - k;
+
+        dbg("check row", lx);
 
         if (lx >= 0) {
           for (let m = c.height - 2; m >= completedColumns; m--) {
-            const lookingCell = Number(c.board[m][rx]);
+            const lookingCell = Number(c.board[m][lx]);
 
             if (delta[lookingCell] < 0) {
               let y = m;
               let ln = k; // How long have to move
               let irregular = false;
 
+              dbg(`bring ${lookingCell} from ${lx} ${y}`);
+
               if (m % 2 === 1) {
-                katanuki(c, fixedPatterns[3], rx, y, UP);
+                dbg("protect confusion");
+
+                katanuki(c, fixedPatterns[3], lx, y, UP);
 
                 irregular = true;
                 y = c.height - 2;
@@ -142,16 +164,16 @@ export const solve: SolveFunc = (question, onProgress) => {
               while (ln > 0) {
                 if (ln % 2 === 1) {
                   // border nukigata (else: 1 * 1)
-                  katanuki(c, fixedPatterns[cnt !== 0 ? 3 * cnt - 1 : 0], rx + 1, y, RIGHT);
+                  katanuki(c, fixedPatterns[cnt !== 0 ? 3 * cnt - 1 : 0], lx + 1, y, RIGHT);
 
-                  rx += 2 << (cnt - 1);
+                  lx += 2 << (cnt - 1);
                 }
 
                 ln = ln >> 1;
                 cnt++;
               }
 
-              katanuki(c, fixedPatterns[0], rx, y, UP);
+              katanuki(c, fixedPatterns[0], lx, y, UP);
 
               if (irregular) {
                 katanuki(c, fixedPatterns[0], j - k, c.height - 3, UP);
@@ -201,6 +223,10 @@ export const solve: SolveFunc = (question, onProgress) => {
   }
 
   // c.board = reverseCells(c.board, )
+
+  onFinish(c.board);
+
+  dbg("turns", c.n);
 
   return {
     n: c.n,

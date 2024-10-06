@@ -42,7 +42,5 @@ export const bootstrap = async (log_: LogLayer) => {
 
   scope.end();
 
-  StateManager.instance.setState(IdleState.instance);
-
   return features;
 };

@@ -23,7 +23,7 @@ function getRandomInt<TMin extends number, TMax extends number>(min: TMin, max: 
   return Math.floor(Math.random() * (max - min) + min) as unknown as IntRange<TMin, TMax>; // [min,max]
 }
 
-const problem = generateProblem();
+const [id, problem] = generateProblem();
 
 const app = new Hono();
 
@@ -41,6 +41,8 @@ app.use(async (c, next) => {
 });
 
 app.get("/problem", (c) => {
+  c.header("X-Data-Maki-Problem-ID", id.toString());
+
   return c.json(problem);
 });
 
