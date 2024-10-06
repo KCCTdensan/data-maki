@@ -1,10 +1,11 @@
 import type { Answer, AnswerResponse, Question } from "@data-maki/schemas";
-import axios, { type AxiosInstance } from "axios";
+import axios, { type AxiosInstance, isAxiosError } from "axios";
 import type { LogLayer } from "loglayer";
 import typia from "typia";
 import { span } from "../../logging";
 import { axiosLoggingInterceptor } from "../../logging/third-party/axios.ts";
 import { FeatureBase } from "../base";
+import { ServerUnavailableError } from "./errors/server-unavailable.ts";
 
 export const SERVER_COMMUNICATOR_POLL_INTERVAL = 1000;
 
@@ -20,14 +21,6 @@ export class ServerCommunicatorFeature extends FeatureBase {
     this.#token = token;
   }
 
-  async ping() {
-    const correctStatus = [200, 403];
-
-    await this.#client.get("/problem", {
-      validateStatus: (status) => correctStatus.includes(status),
-    });
-  }
-
   async pollProblem(): Promise<Question> {
     const correctStatus = [200, 403];
 
@@ -40,19 +33,30 @@ export class ServerCommunicatorFeature extends FeatureBase {
         })
         .info("Polling problem...");
 
-      const { data } = await this.#client.get("/problem", {
-        validateStatus: (status) => correctStatus.includes(status),
-      });
+      const question = await this.#client
+        .get<unknown>("/problem", {
+          validateStatus: (status) => correctStatus.includes(status),
+        })
+        .then(({ data }) => (data ? typia.assert<Question>(data) : undefined))
+        .catch((e) => {
+          if (isAxiosError(e)) throw new ServerUnavailableError(e);
 
-      if (data) {
+          throw e;
+        });
+
+      if (question) {
         this.log
           .withMetadata({
             tries,
-            data,
+            data: {
+              width: question.board.width,
+              height: question.board.height,
+              generalCount: question.general.n,
+            },
           })
           .info("Received problem");
 
-        return typia.assert<Question>(data);
+        return question;
       }
 
       tries++;
@@ -70,7 +74,12 @@ export class ServerCommunicatorFeature extends FeatureBase {
       "Answer submitted",
     );
 
-    const { data } = await this.#client.post("/answer", typia.misc.assertPrune(answer));
+    const { data } = await this.#client.post("/answer", typia.misc.assertPrune(answer)).catch((e) => {
+      if (isAxiosError(e)) throw new ServerUnavailableError(e);
+
+      throw e;
+    });
+
     const { revision } = typia.assert<AnswerResponse>(data);
 
     scope.end();
@@ -93,11 +102,9 @@ export class ServerCommunicatorFeature extends FeatureBase {
     client.interceptors.response.use(response);
 
     this.#client = client;
-
-    await this.ping();
-
-    this.log.info("Server connection is healthy");
   }
 
-  async start() {}
+  async start() {
+    await this.pollProblem();
+  }
 }
