@@ -9,13 +9,7 @@ Data maki mock server using Hono.
 
 ## Setup
 
-This app has `.env` file for setting some information.
-Copy `.env.example` to `.env.local` and edit the file.
-
-```
-SERVER_URL=http://localhost:4000
-SERVER_TOKEN=token1
-```
+Follow the root monorepo README.md for setup instructions.
 
 ## Develop
 
