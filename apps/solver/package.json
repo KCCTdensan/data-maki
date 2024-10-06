@@ -15,6 +15,7 @@
   "dependencies": {
     "@data-maki/schemas": "workspace:*",
     "@hono/typia-validator": "^0.0.5",
+    "@paralleldrive/cuid2": "^2.2.2",
     "axios": "^1.7.7",
     "hono": "^4.6.3",
     "hono-pino": "^0.3.0",

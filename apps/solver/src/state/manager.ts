@@ -46,9 +46,9 @@ export class StateManager {
     return StateManager.#instance;
   }
 
-  setState(state: StateBase) {
+  setState<T extends StateBase>(state: T) {
     if (state === this.#state$.content()) {
-      return;
+      return state;
     }
 
     this.log
@@ -60,6 +60,8 @@ export class StateManager {
 
     this.#oldState = this.#state$.content();
     this.#state$.set(state);
+
+    return state;
   }
 
   get state$(): ReadonlyStore<StateBase> {

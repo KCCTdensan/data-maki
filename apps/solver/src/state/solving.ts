@@ -1,9 +1,11 @@
+import type { Question } from "@data-maki/schemas";
 import { StateBase } from "./base.ts";
 
 export class SolvingState extends StateBase {
-  readonly id = crypto.randomUUID();
-
-  constructor() {
+  constructor(
+    readonly id: string,
+    readonly question: Question,
+  ) {
     super("Solving");
   }
 }
