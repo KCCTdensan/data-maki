@@ -1,6 +1,7 @@
 import type { Answer } from "@data-maki/schemas";
 import type { Serve } from "bun";
 import { Hono } from "hono";
+import { logger } from "hono/logger";
 import microtime from "microtime";
 import type { FixedLengthArray, IntRange } from "type-fest";
 import typia from "typia";
@@ -12,8 +13,6 @@ const HOST = "localhost";
 const filename = process.argv.at(2) ?? "resources/input.json";
 const config = typia.assert<Config>(await Bun.file(filename).json());
 
-const app = new Hono();
-
 const validateAnswer = typia.createValidate<Answer>();
 
 const validTokens = new Set(config.teams);
@@ -23,6 +22,8 @@ function getRandomInt<TMin extends number, TMax extends number>(min: TMin, max: 
 }
 
 function problemGenerator(): { width: number; height: number; start: string[]; goal: string[] } {
+  console.time("Problem generation successful");
+
   const width = getRandomInt(32, 257);
   const height = getRandomInt(32, 257);
 
@@ -61,12 +62,16 @@ function problemGenerator(): { width: number; height: number; start: string[]; g
 
   const problem = { width: width, height: height, start: startTable, goal: goalTable };
 
-  console.log("Generate successful!!");
+  console.timeEnd("Problem generation successful");
 
   return problem;
 }
 
 const problem = problemGenerator();
+
+const app = new Hono();
+
+app.use(logger());
 
 app.use(async (c, next) => {
   const token = c.req.header("Procon-Token");
