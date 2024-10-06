@@ -25,7 +25,7 @@ export const generateProblem = (): Question => {
     const counts: FixedLengthArray<number, 4> = [0, 0, 0, 0];
 
     for (let i = 0; i < width * height; i++) {
-      const num = getRandomInt(0, 5);
+      const num = getRandomInt(0, 4);
 
       numbers[i] = num;
       counts[num]++;
