@@ -1,9 +1,16 @@
 import type { Answer } from "@data-maki/schemas";
+import type { Serve } from "bun";
 import { Hono } from "hono";
 import microtime from "microtime";
 import type { FixedLengthArray, IntRange } from "type-fest";
 import typia from "typia";
-import config from "../resources/input.json";
+import type { Config } from "./models/config";
+
+const PORT = 8080;
+const HOST = "localhost";
+
+const filename = process.argv.at(2) ?? "resources/input.json";
+const config = typia.assert<Config>(await Bun.file(filename).json());
 
 const app = new Hono();
 
@@ -88,4 +95,8 @@ app.post("/answer", async (c) => {
   return c.json({ revision });
 });
 
-export default app;
+export default {
+  port: PORT,
+  hostname: HOST,
+  fetch: app.fetch,
+} satisfies Serve;
