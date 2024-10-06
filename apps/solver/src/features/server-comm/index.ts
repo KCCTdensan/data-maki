@@ -1,6 +1,9 @@
 import type { Answer, AnswerResponse, Question } from "@data-maki/schemas";
 import axios, { type AxiosInstance } from "axios";
+import type { LogLayer } from "loglayer";
 import typia from "typia";
+import { span } from "../../logging";
+import { axiosLoggingInterceptor } from "../../logging/third-party/axios.ts";
 import { FeatureBase } from "../base";
 
 export const SERVER_COMMUNICATOR_POLL_INTERVAL = 1000;
@@ -10,8 +13,8 @@ export class ServerCommunicatorFeature extends FeatureBase {
   readonly #token: string;
   #client!: AxiosInstance;
 
-  constructor(baseURL: string, token: string) {
-    super("Server Communicator");
+  constructor(log: LogLayer, baseURL: string, token: string) {
+    super("Server Communicator", log);
 
     this.#baseURL = baseURL;
     this.#token = token;
@@ -20,15 +23,9 @@ export class ServerCommunicatorFeature extends FeatureBase {
   async ping() {
     const correctStatus = [200, 403];
 
-    try {
-      await this.#client.get("/problem", {
-        validateStatus: (status) => correctStatus.includes(status),
-      });
-    } catch (error) {
-      console.error("Server connection is unhealthy:", error);
-
-      throw error;
-    }
+    await this.#client.get("/problem", {
+      validateStatus: (status) => correctStatus.includes(status),
+    });
   }
 
   async pollProblem(): Promise<Question> {
@@ -37,14 +34,23 @@ export class ServerCommunicatorFeature extends FeatureBase {
     let tries = 1;
 
     while (true) {
-      console.info(`Polling problem (try ${tries})...`);
+      this.log
+        .withMetadata({
+          tries,
+        })
+        .info("Polling problem...");
 
       const { data } = await this.#client.get("/problem", {
         validateStatus: (status) => correctStatus.includes(status),
       });
 
       if (data) {
-        console.info("Received problem:", data);
+        this.log
+          .withMetadata({
+            tries,
+            data,
+          })
+          .info("Received problem");
 
         return typia.assert<Question>(data);
       }
@@ -57,29 +63,41 @@ export class ServerCommunicatorFeature extends FeatureBase {
 
   async submitAnswer(answer: Answer): Promise<number> {
     const id = ""; //TODO
-    console.info("Submitting answer:", id);
+    const scope = span(
+      this.log.withMetadata({
+        answerId: id,
+      }),
+      "Answer submitted",
+    );
 
     const { data } = await this.#client.post("/answer", typia.misc.assertPrune(answer));
     const { revision } = typia.assert<AnswerResponse>(data);
 
-    console.info(`Answer submitted, revision: ${revision}`);
+    scope.end();
 
     return revision;
   }
 
-  init() {
-    this.#client = axios.create({
+  async init() {
+    const client = axios.create({
       baseURL: this.#baseURL,
       headers: {
         "Procon-Token": this.#token,
       },
       adapter: "fetch",
     });
-  }
 
-  async start() {
+    const { request, response } = axiosLoggingInterceptor(this.log);
+
+    client.interceptors.request.use(request);
+    client.interceptors.response.use(response);
+
+    this.#client = client;
+
     await this.ping();
 
-    console.info("Server connection is healthy");
+    this.log.info("Server connection is healthy");
   }
+
+  async start() {}
 }

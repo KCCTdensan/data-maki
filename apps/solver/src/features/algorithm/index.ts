@@ -1,3 +1,4 @@
+import type { LogLayer } from "loglayer";
 import type { ChannelTx, ReadonlyStore } from "reactive-channel";
 import type { UIMessageEvent } from "../../events/base.ts";
 import { FeatureBase } from "../base";
@@ -8,11 +9,12 @@ export class AlgorithmFeature extends FeatureBase {
   #subscriberCount$: ReadonlyStore<number>;
 
   constructor(
+    log: LogLayer,
     tx: ChannelTx<UIMessageEvent>,
     subscriberCount$: ReadonlyStore<number>,
     private serverComm: ServerCommunicatorFeature,
   ) {
-    super("Algorithm");
+    super("Algorithm", log);
 
     this.#tx = tx;
     this.#subscriberCount$ = subscriberCount$;

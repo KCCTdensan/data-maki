@@ -1,57 +1,48 @@
-import { SERVER_TOKEN, SERVER_URL } from "./constants/env.ts";
+import type { LogLayer } from "loglayer";
 import type { UIMessageEvent } from "./events/base.ts";
-import { AlgorithmFeature } from "./features/algorithm";
-import type { FeatureBase } from "./features/base";
-import { ServerCommunicatorFeature } from "./features/server-comm";
-import { UICommunicatorFeature } from "./features/ui-comm";
+import { createFeatures } from "./features";
+import { _defaultLog, span, spanScoped } from "./logging";
 import { IdleState } from "./state/idle.ts";
 import { StateManager } from "./state/manager.ts";
 import { spmc } from "./util/channel";
-import type { Falsy } from "./util/types";
 
-const createFeatures = () => {
-  const { tx, subscriberCount$, tee } = spmc<UIMessageEvent>();
-  const serverComm = new ServerCommunicatorFeature(SERVER_URL, SERVER_TOKEN);
+const bootstrap = async (log: LogLayer) => {
+  const features = createFeatures(log);
 
-  return (
-    [
-      new AlgorithmFeature(tx, subscriberCount$, serverComm),
-      serverComm,
-      new UICommunicatorFeature(tee),
-    ] as const satisfies (FeatureBase | Falsy)[]
-  ).filter((feature) => !!feature);
+  StateManager.init(log, spmc<UIMessageEvent>().tx);
+
+  log
+    .withMetadata({ features: features.map((feature) => feature.getName()) })
+    .info(`Initialized ${features.length} features`);
+
+  await Promise.all(
+    features.map(async (feature) => {
+      if (!feature) return;
+
+      const name = feature.getName();
+      const scope = span(log, `Initialized feature: ${name}`);
+
+      await feature.init();
+
+      scope.end();
+    }),
+  );
+
+  StateManager.instance.setState(IdleState.instance);
+
+  return features;
 };
 
-const features = createFeatures();
+const bootstrapLog = _defaultLog.child().withContext({ feature: "Bootstrap" });
 
-console.time("All features ready");
+bootstrapLog.info("Starting up...");
 
-StateManager.init(spmc<UIMessageEvent>().tx);
+const features = await spanScoped(bootstrapLog, "Initialization took", bootstrap)(bootstrapLog);
 
-console.group(
-  "Registered features:\n",
-  ...features.map((feature) => `- ${feature.getName()}\n`),
-  `Total: ${features.length}`,
-);
+Promise.all(features.map((feature) => feature.start())).catch((error) => {
+  _defaultLog.withError(error).fatal("Some feature throw an error");
 
-for (const feature of features) {
-  if (!feature) continue;
-
-  const name = feature.getName();
-
-  console.time(`Initialized feature: ${name}`);
-
-  feature.init();
-
-  console.timeEnd(`Initialized feature: ${name}`);
-}
-
-const allFeaturesPromise = Promise.all(features.map((feature) => feature.start()));
-
-console.timeEnd("All features ready");
-
-StateManager.instance.setState(IdleState.instance);
-
-await allFeaturesPromise;
+  process.exit(1);
+});
 
 export type { SolverApp } from "./features/ui-comm";

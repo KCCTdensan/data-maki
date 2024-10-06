@@ -1,4 +1,5 @@
 import typia from "@ryoppippi/unplugin-typia/bun";
+import { bunPluginPino } from "bun-plugin-pino";
 
 console.time("Finished building solver");
 
@@ -9,6 +10,9 @@ await Bun.build({
   plugins: [
     typia({
       log: false,
+    }),
+    bunPluginPino({
+      transports: ["pino-pretty", "pino-roll"],
     }),
   ],
   minify: true,

@@ -1,3 +1,4 @@
+import type { LogLayer } from "loglayer";
 import type { ChannelTx, ReadonlyStore } from "reactive-channel";
 import { type Store, makeStore } from "universal-stores";
 import type { UIMessageEvent } from "../events/base.ts";
@@ -12,20 +13,29 @@ export class StateManager {
   #oldState: StateBase;
   #tx: ChannelTx<UIMessageEvent>;
 
-  private constructor(tx: ChannelTx<UIMessageEvent>) {
+  private constructor(
+    private log: LogLayer,
+    tx: ChannelTx<UIMessageEvent>,
+  ) {
     this.#state$ = makeStore(INITIAL_STATE);
     this.#oldState = INITIAL_STATE;
     this.#tx = tx;
   }
 
-  static init(tx: ChannelTx<UIMessageEvent>) {
+  static init(log_: LogLayer, tx: ChannelTx<UIMessageEvent>) {
     if (StateManager.#instance) {
       throw new Error("State manager already initialized");
     }
 
-    StateManager.#instance = new StateManager(tx);
+    const log = log_.child().withContext({ feature: "State Manager" });
 
-    console.info("State manager initialized with:", INITIAL_STATE.getName());
+    StateManager.#instance = new StateManager(log, tx);
+
+    log
+      .withMetadata({
+        initialState: INITIAL_STATE.getName(),
+      })
+      .info("Initialized");
   }
 
   static get instance() {
@@ -41,7 +51,12 @@ export class StateManager {
       return;
     }
 
-    console.info("[State change]", this.#oldState.getName(), "-->", state.getName());
+    this.log
+      .withMetadata({
+        oldState: this.#oldState.getName(),
+        newState: state.getName(),
+      })
+      .info("Changing state");
 
     this.#oldState = this.#state$.content();
     this.#state$.set(state);

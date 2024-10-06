@@ -15,8 +15,9 @@ export const { SERVER_URL, SERVER_TOKEN, PORT, HOST } = parseEnv(process.env, {
   HOST: {
     schema: z.string().min(1),
     defaults: {
-      production: "0.0.0.0",
       development: "localhost",
+
+      _: "0.0.0.0",
     },
   },
 });
