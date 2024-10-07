@@ -35,7 +35,7 @@ export const solve: SolveFunc = (question, onProgress, onFinish) => {
 
     delta = getDelta(c.currentElementCounts[c.height - 1], goalElementCounts[i]);
 
-    console.debug("delta", delta);
+    dbg("delta", delta);
 
     const unfilled = [];
 
