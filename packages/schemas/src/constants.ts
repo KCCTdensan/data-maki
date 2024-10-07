@@ -31,7 +31,7 @@ const generateTypeII = (p: number, size: number): Pattern => {
 };
 
 const generateTypeIII = (p: number, size: number): Pattern => {
-  const cells = Array.from({ length: size }, () => "01".repeat(Math.ceil(size / 2)).substring(0, size));
+  const cells = Array.from({ length: size }, () => "10".repeat(Math.ceil(size / 2)).substring(0, size));
 
   return {
     p,

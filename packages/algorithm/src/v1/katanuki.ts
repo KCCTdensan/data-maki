@@ -17,10 +17,8 @@ const generatePatternData = (
   dir === UP || dir === DOWN
     ? {
         b: reverseCells(b, "reverse-90"),
-        bp: {
-          x: h,
-          y: w,
-        },
+        bw: h,
+        bh: w,
         pw: pattern.height,
         ph: pattern.width,
         pp: {
@@ -31,10 +29,8 @@ const generatePatternData = (
       }
     : /* dir === LEFT || dir === RIGHT */ {
         b,
-        bp: {
-          x: w,
-          y: h,
-        },
+        bw: w,
+        bh: h,
         pw: pattern.width,
         ph: pattern.height,
         pp: {
@@ -55,23 +51,31 @@ export const katanuki = (c: Context, p: Pattern, x: number, y: number, dir: Dire
   const l: Point = { x: 0, y: 0 };
 
   // Stripe -> Reverse / Border -> Normal
-  let { b, bp, pw, ph, pp, pattern } = generatePatternData(dir, c.board, p, c.width, c.height, x, y);
+  let { b, bw, bh, pw, ph, pp, pattern } = generatePatternData(
+    dir,
+    [...c.board] /* NOTE: Must be cloned */,
+    p,
+    c.width,
+    c.height,
+    x,
+    y,
+  );
 
   const picked: string[] = Array(ph).fill("");
 
-  for (let i = pw; i > -1; i--) {
+  for (let i = pw - 1; i > -1; i--) {
     l.x = pp.x + i;
 
     // Out of range
     if (l.x < 0) break;
-    if (l.x >= bp.x) continue;
+    if (l.x >= bw) continue;
 
     for (const j of Array(ph).keys()) {
       l.y = pp.y + j;
 
       // Out of range
       if (l.y < 0) continue;
-      if (l.y >= bp.y) break;
+      if (l.y >= bh) break;
 
       if (pattern[j][i] === "0") continue;
 
@@ -86,7 +90,7 @@ export const katanuki = (c: Context, p: Pattern, x: number, y: number, dir: Dire
 
     l.y = pp.y + i;
 
-    if (l.y < 0 || l.y >= bp.y) continue;
+    if (l.y < 0 || l.y >= bh) continue;
 
     b[l.y] = dir === UP || dir === LEFT ? b[l.y] + picked[i] : /* dir === DOWN || dir === RIGHT */ picked[i] + b[l.y];
   }
@@ -96,7 +100,7 @@ export const katanuki = (c: Context, p: Pattern, x: number, y: number, dir: Dire
   }
 
   if (!shallowEqual(b, c.board)) {
-    c.board = b;
+    c.board = [...b];
     c.currentElementCounts = countElementsColumnWise(c.board, c.height);
 
     const op: Ops = {
@@ -108,5 +112,7 @@ export const katanuki = (c: Context, p: Pattern, x: number, y: number, dir: Dire
 
     addOps(c, op);
     dbgBoard(c);
+  } else {
+    dbg(c.board, b);
   }
 };

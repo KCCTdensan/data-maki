@@ -94,7 +94,7 @@ export const solve: SolveFunc = (question, onProgress, onFinish) => {
 
               dbg(`bring ${lookingCell} from ${rx} ${y}`);
 
-              if (m % 2 === 1) {
+              if (m % 2 === (c.height - 1) % 2) {
                 dbg("protect confusion");
 
                 katanuki(c, fixedPatterns[3], rx, y, UP);
@@ -108,12 +108,12 @@ export const solve: SolveFunc = (question, onProgress, onFinish) => {
               while (ln > 0) {
                 if (ln % 2 === 1) {
                   // border nukigata (else: 1 * 1)
-                  katanuki(c, fixedPatterns[cnt !== 0 ? 3 * cnt - 1 : 0], rx - (2 << (cnt - 1)), y, LEFT);
+                  katanuki(c, fixedPatterns[cnt !== 0 ? 3 * cnt - 1 : 0], rx - (1 << cnt), y, LEFT);
 
-                  rx -= 2 << (cnt - 1);
+                  rx -= 1 << cnt;
                 }
 
-                ln = ln >> 1;
+                ln >>= 1;
                 cnt++;
               }
 
@@ -150,7 +150,7 @@ export const solve: SolveFunc = (question, onProgress, onFinish) => {
 
               dbg(`bring ${lookingCell} from ${lx} ${y}`);
 
-              if (m % 2 === 1) {
+              if (m % 2 === (c.height - 1) % 2) {
                 dbg("protect confusion");
 
                 katanuki(c, fixedPatterns[3], lx, y, UP);
@@ -166,10 +166,10 @@ export const solve: SolveFunc = (question, onProgress, onFinish) => {
                   // border nukigata (else: 1 * 1)
                   katanuki(c, fixedPatterns[cnt !== 0 ? 3 * cnt - 1 : 0], lx + 1, y, RIGHT);
 
-                  lx += 2 << (cnt - 1);
+                  lx += 1 << cnt;
                 }
 
-                ln = ln >> 1;
+                ln >>= 1;
                 cnt++;
               }
 
@@ -202,7 +202,7 @@ export const solve: SolveFunc = (question, onProgress, onFinish) => {
 
     // Only stripe
     for (const j of Array(c.height).keys()) {
-      const correctCell = Number(c.board[j][i]);
+      const correctCell = Number(c.goalBoard[j][i]);
 
       if (Number(c.board[j][c.width - 1]) === correctCell) continue;
 
