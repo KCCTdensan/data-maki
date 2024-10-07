@@ -5,12 +5,13 @@
 
 ## Apps and Packages
 
-- `frontend`: a Remix frontend
-- `solver`: a Hono solver
-- `mock-server`: a Hono mock server
-- `@data-maki/schemas`: Typia schemas used throughout the monorepo
-- `@data-maki/biome-config`: `biome` configurations
-- `@data-maki/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- [`frontend`](apps/frontend): a Remix frontend
+- [`solver`](apps/solver): a Hono solver
+- [`mock-server`](apps/mock-server): a Hono mock server
+- [`@data-maki/algorithm`](packages/algorithm): Main algorithm implementation
+- [`@data-maki/schemas`](packages/schemas): Typia schemas used throughout the monorepo
+- [`@data-maki/biome-config`](packages/biome-config): `biome` configurations
+- [`@data-maki/typescript-config`](packages/typescript-config): `tsconfig.json`s used throughout the monorepo
 
 Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
 
