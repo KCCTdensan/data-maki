@@ -6,7 +6,9 @@ authors = [
     { name = "GIGAHERTZ00", email = "gigahertz00@gmail.com" },
     { name = "KtaK721" }
 ]
-dependencies = []
+dependencies = [
+    "dataclasses-json>=0.6.7",
+]
 readme = "README.md"
 requires-python = ">= 3.8"
 

@@ -1,37 +1,36 @@
-from data_maki.global_value import g
-import data_maki.constant_numbers as cn
+from .global_value import g
+
+from .models.answer import Direction, Op
 
 
-def add_ops(p, x, y, s):
+def add_ops(p: int, x: int, y: int, s: Direction):
     # this function can't correct x&y confused by ud or lr
     p = p
     if g.rv_lr:
-        if s == cn.LEFT:
-            s == cn.RIGHT
-        elif s == cn.RIGHT:
-            s == cn.LEFT
+        if s == Direction.LEFT:
+            s = Direction.RIGHT
+        elif s == Direction.RIGHT:
+            s = Direction.LEFT
 
     if g.rv_uldr:
-        if s == cn.UP:
-            s == cn.LEFT
-        elif s == cn.DOWN:
-            s == cn.RIGHT
-        elif s == cn.LEFT:
-            s == cn.UP
-        elif s == cn.RIGHT:
-            s == cn.DOWN
+        if s == Direction.UP:
+            s = Direction.LEFT
+        elif s == Direction.DOWN:
+            s = Direction.RIGHT
+        elif s == Direction.LEFT:
+            s = Direction.UP
+        elif s == Direction.RIGHT:
+            s = Direction.DOWN
 
         val = x
         x = y
         y = val
 
     if g.rv_ud:
-        if s == cn.UP:
-            s == cn.DOWN
-        elif s == cn.DOWN:
-            s == cn.UP
+        if s == Direction.UP:
+            s = Direction.DOWN
+        elif s == Direction.DOWN:
+            s = Direction.UP
 
     g.n += 1
-    g.ops.append([p, x, y, s])
-
-    return
+    g.ops.append(Op(p, x, y, s))

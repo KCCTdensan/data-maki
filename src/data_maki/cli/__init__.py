@@ -1,7 +1,11 @@
+import dataclasses
+import json
+
+from .data import example_data
+from .encoder import EnhancedJSONEncoder
 from ..solver import solve
 
-
 def main():
-    answer = solve()
+    answer = solve(example_data)
 
-    print(answer)
+    print(json.dumps(answer, indent=2, cls=EnhancedJSONEncoder))

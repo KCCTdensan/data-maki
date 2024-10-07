@@ -1,42 +1,39 @@
-from data_maki.global_value import g
-import data_maki.constant_numbers as cn
-import data_maki.utils as utils
-from data_maki.create_answer import add_ops
+from .global_value import g
+from . import utils
+from .create_answer import add_ops
+from .models.answer import Direction
+from .models.problem import Pattern
 
 
-def katanuki(p, x, y, s):
-    print([p[cn.P_N], x, y, s])
+def katanuki(p: Pattern, x: int, y: int, s: Direction):
+    print([p["cells"], x, y, s])
     if (
-        x + p[cn.P_W] <= 0
-        or x >= g.board["width"]
-        or y + p[cn.P_H] <= 0
-        or y >= g.board["height"]
+        x + p["width"] <= 0
+        or x >= g.height
+        or y + p["height"] <= 0
+        or y >= g.height
     ):
         exit(print("Nukigata can't pick any cells :("))
 
-    # looking point on board
-    lx = 0
-    ly = 0
-
     # stripe -> reverse / border -> normal
-    if s == cn.UP or s == cn.DOWN:
-        b = utils.list_rv(g.board_now, True, False, False)
-        bx = g.board["height"]
-        by = g.board["width"]
-        pw = p[cn.P_H]
-        ph = p[cn.P_W]
+    if s == Direction.UP or s == Direction.DOWN:
+        b = utils.list_rv(g.board, True, False, False)
+        bx = g.height
+        by = g.width
+        pw = p["height"]
+        ph = p["width"]
         px = y
         py = x
-        pattern = utils.list_rv(p[cn.P_P], True, False, False)
-    elif s == cn.LEFT or s == cn.RIGHT:
-        b = g.board_now[:]
-        bx = g.board["width"]
-        by = g.board["height"]
-        pw = p[cn.P_W]
-        ph = p[cn.P_H]
+        pattern = utils.list_rv(p["cells"], True, False, False)
+    elif s == Direction.LEFT or s == Direction.RIGHT:
+        b = g.board[:]
+        bx = g.width
+        by = g.height
+        pw = p["width"]
+        ph = p["height"]
         px = x
         py = y
-        pattern = p[cn.P_P]
+        pattern = p["cells"]
     else:
         exit(print("the direction is not exist! :("))
 
@@ -79,19 +76,19 @@ def katanuki(p, x, y, s):
         ly = py + i
         if ly < 0 or ly >= by:
             continue
-        if s == cn.UP or s == cn.LEFT:
+        if s == Direction.UP or s == Direction.LEFT:
             b[ly] = b[ly] + picked[i]
         else:
             b[ly] = picked[i] + b[ly]
 
-    if s == cn.UP or s == cn.DOWN:
+    if s == Direction.UP or s == Direction.DOWN:
         b = utils.list_rv(b, True, False, False)
 
-    if g.board_now != b:
-        g.board_now = b[:]
-        add_ops(p[cn.P_N], x, y, s)
+    if g.board != b:
+        g.board = b[:]
+        add_ops(p["p"], x, y, s)
 
-        g.elems_now = utils.count_elements(g.board_now[:])
+        g.elems_now = utils.count_elements(g.board[:])
         utils.print_board()
 
     return
