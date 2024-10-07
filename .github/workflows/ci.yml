@@ -44,7 +44,6 @@ jobs:
         uses: oven-sh/setup-bun@v2
 
       - name: Install dependencies
-        working-directory: apps/solver
         run: bun install --frozen-lockfile
 
       - name: Build
