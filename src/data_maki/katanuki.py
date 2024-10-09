@@ -3,6 +3,7 @@ from . import utils
 from .create_answer import add_ops
 from .models.answer import Direction
 from .models.problem import Pattern
+from .utils import ListReverseStrategy
 
 
 def katanuki(p: Pattern, x: int, y: int, s: Direction):
@@ -17,14 +18,14 @@ def katanuki(p: Pattern, x: int, y: int, s: Direction):
 
     # stripe -> reverse / border -> normal
     if s == Direction.UP or s == Direction.DOWN:
-        b = utils.list_rv(g.board, True, False, False)
+        b = utils.list_rv(g.board, ListReverseStrategy.Reverse90)
         bx = g.height
         by = g.width
         pw = p["height"]
         ph = p["width"]
         px = y
         py = x
-        pattern = utils.list_rv(p["cells"], True, False, False)
+        pattern = utils.list_rv(p["cells"], ListReverseStrategy.Reverse90)
     elif s == Direction.LEFT or s == Direction.RIGHT:
         b = g.board[:]
         bx = g.width
@@ -37,7 +38,9 @@ def katanuki(p: Pattern, x: int, y: int, s: Direction):
     else:
         exit(print("the direction is not exist! :("))
 
+    """
     pattern = utils.list_rv(pattern, g.rv_uldr, g.rv_ud, g.rv_lr)
+    """
 
     # nukigata de nuita cell
     picked = ["" for _ in range(ph)]
@@ -82,7 +85,7 @@ def katanuki(p: Pattern, x: int, y: int, s: Direction):
             b[ly] = picked[i] + b[ly]
 
     if s == Direction.UP or s == Direction.DOWN:
-        b = utils.list_rv(b, True, False, False)
+        b = utils.list_rv(b, ListReverseStrategy.Reverse90)
 
     if g.board != b:
         g.board = b[:]

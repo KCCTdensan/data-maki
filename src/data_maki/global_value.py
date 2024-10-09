@@ -10,6 +10,7 @@ class GlobalValue:
     n = 0
     ops: list[Op] = []
     elems_now: list[list[int]] = []
+    # TODO: change to ReverseListStrategy
     rv_ud = False
     rv_lr = False
     rv_uldr = False

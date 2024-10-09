@@ -200,7 +200,9 @@ def solve(problem: Problem):
         # next column
         katanuki(g.patterns[22], g.width - 1, 0, Direction.RIGHT)
 
+    """
     g.board = utils.list_rv(g.board, g.rv_uldr, g.rv_ud, g.rv_lr)
+    """
 
     answer = Answer(g.n, g.ops)
 

@@ -1,4 +1,5 @@
 from .global_value import g
+from enum import StrEnum
 
 
 # delete string from begin to end (not include end)
@@ -14,20 +15,26 @@ def print_board():
 
     return
 
+class ListReverseStrategy(StrEnum):
+    Reverse90 = "reverse-90"
+    ReverseUpDown = "reverse-up-down"
+    ReverseLeftRight = "reverse-left-right"
 
-def list_rv(lst: list[str], is_uldr: bool, is_ud: bool, is_lr: bool):
-    if is_uldr:
-        lst = ["".join(x) for x in zip(*lst)]
-    if is_ud:
-        lst = list(reversed(lst))
-    if is_lr:
-        lst = ["".join(x) for x in reversed(lst)]
+def list_rv(lst: list[str], strategy: ListReverseStrategy) -> list[str]:
+    match strategy:
+        case ListReverseStrategy.Reverse90:
+            lst = ["".join(x) for x in zip(*lst)]
+        case ListReverseStrategy.ReverseUpDown:
+            lst = list(reversed(lst))
+        case ListReverseStrategy.ReverseLeftRight:
+            lst = ["".join(x) for x in reversed(lst)]
 
     return lst
 
 
 def count_elements(b: list[str]):
     elems = [[0, 0, 0, 0] for _ in range(g.height)]
+
     for i in range(g.height):
         for j in b[i]:
             elem = int(j)
