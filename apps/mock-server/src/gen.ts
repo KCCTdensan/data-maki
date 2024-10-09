@@ -13,11 +13,16 @@ export const getBoardArrayFromNumbers = (numbers: number[], width: number): stri
 
 let id = 0;
 
-export const generateProblem = (): [id: number, question: Question] => {
+export const generateProblem = (generateSettings: {
+  widthRandom: boolean;
+  heightRandom: boolean;
+  width: number;
+  height: number;
+}): [id: number, question: Question] => {
   console.time("Problem generation successful");
 
-  const width = getRandomInt(32, 257);
-  const height = getRandomInt(32, 257);
+  const width: number = generateSettings.widthRandom ? getRandomInt(32, 257) : generateSettings.width;
+  const height: number = generateSettings.widthRandom ? getRandomInt(32, 257) : generateSettings.height;
 
   const numbers: number[] = Array(width * height).fill(0);
 
