@@ -9,7 +9,7 @@ from .utils import ListReverseStrategy
 def katanuki(p: Pattern, x: int, y: int, s: Direction):
     print([p["cells"], x, y, s])
 
-    if x + p["width"] <= 0 or x >= g.height or y + p["height"] <= 0 or y >= g.height:
+    if x + p["width"] <= 0 or x >= g.width or y + p["height"] <= 0 or y >= g.height:
         raise Exception("Nukigata can't pick any cells :(")
 
     # stripe -> reverse / border -> normal
