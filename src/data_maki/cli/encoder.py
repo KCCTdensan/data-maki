@@ -1,5 +1,6 @@
-import json
 import dataclasses
+import json
+
 
 # This file contains the encoder for the dataclasses
 class EnhancedJSONEncoder(json.JSONEncoder):

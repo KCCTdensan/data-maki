@@ -1,6 +1,6 @@
-from .global_value import g
 from . import utils
 from .create_answer import add_ops
+from .global_value import g
 from .models.answer import Direction
 from .models.problem import Pattern
 from .utils import ListReverseStrategy
@@ -8,13 +8,9 @@ from .utils import ListReverseStrategy
 
 def katanuki(p: Pattern, x: int, y: int, s: Direction):
     print([p["cells"], x, y, s])
-    if (
-        x + p["width"] <= 0
-        or x >= g.height
-        or y + p["height"] <= 0
-        or y >= g.height
-    ):
-        exit(print("Nukigata can't pick any cells :("))
+
+    if x + p["width"] <= 0 or x >= g.height or y + p["height"] <= 0 or y >= g.height:
+        raise Exception("Nukigata can't pick any cells :(")
 
     # stripe -> reverse / border -> normal
     if s == Direction.UP or s == Direction.DOWN:
@@ -36,7 +32,7 @@ def katanuki(p: Pattern, x: int, y: int, s: Direction):
         py = y
         pattern = p["cells"]
     else:
-        exit(print("the direction is not exist! :("))
+        raise Exception("the direction is not exist! :(")
 
     """
     pattern = utils.list_rv(pattern, g.rv_uldr, g.rv_ud, g.rv_lr)

@@ -45,6 +45,6 @@ board_json = """
         ]
     }
 }
-""" # Currently there is no generals
+"""  # Currently there is no generals
 
 example_data: Problem = json.loads(board_json)

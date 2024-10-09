@@ -1,7 +1,7 @@
 from . import utils
 from .global_value import g
 from .katanuki import katanuki
-from .models.answer import Direction, Answer
+from .models.answer import Answer, Direction
 from .models.problem import Problem
 
 delta = [0, 0, 0, 0]
@@ -26,17 +26,20 @@ def solve(problem: Problem):
 
         print(f"delta = {delta}")
 
-        un_filled = []
+        unfilled = []
+
         # only stripe
         for j in range(g.width):
             if delta == [0, 0, 0, 0]:
                 break
 
             cell_lk = int(g.board[g.height - 1][j])
+
             if delta[cell_lk] <= 0:
                 continue
 
             is_filled = False
+
             for k in range(g.height - 2, cmped - 1, -1):
                 cell_lk = int(g.board[k][j])
 
@@ -50,18 +53,21 @@ def solve(problem: Problem):
                     break
 
             if not is_filled:
-                un_filled.append(j)
+                unfilled.append(j)
 
-        print(f"unFilled = {un_filled}")
+        print(f"unFilled = {unfilled}")
+
         # unFilled
-        for j in un_filled:
+        for j in unfilled:
             is_filled = False
 
             print(f"fill row {j}")
+
             for k in range(1, max(j, g.width - j - 1) + 1):
                 # right side
                 x = j + k
                 print(f"check row {x}")
+
                 if x < g.width:
                     for m in range(g.height - 2, cmped - 1, -1):
                         cell_lk = int(g.board[m][x])
@@ -82,6 +88,7 @@ def solve(problem: Problem):
                                 y = g.height - 2
 
                             cnt = 0
+
                             while ln > 0:
                                 if ln % 2 == 1:
                                     # border nukigata (else...1*1)
@@ -97,16 +104,14 @@ def solve(problem: Problem):
                                 cnt += 1
 
                             katanuki(g.patterns[0], x, y, Direction.UP)
-                            if irregular:
-                                katanuki(
-                                    g.patterns[0], j + k, g.height - 3, Direction.UP
-                                )
 
-                            delta = utils.get_delta(
-                                g.elems_now[g.height - 1], elems_goal[i]
-                            )
+                            if irregular:
+                                katanuki(g.patterns[0], j + k, g.height - 3, Direction.UP)
+
+                            delta = utils.get_delta(g.elems_now[g.height - 1], elems_goal[i])
 
                             is_filled = True
+
                             break
 
                 if is_filled:
@@ -114,7 +119,9 @@ def solve(problem: Problem):
 
                 # left side
                 x = j - k
+
                 print(f"check row {x}")
+
                 if x >= 0:
                     for m in range(g.height - 2, cmped - 1, -1):
                         cell_lk = int(g.board[m][x])
@@ -129,12 +136,14 @@ def solve(problem: Problem):
                             # if border nukigata confuse
                             if m % 2 == (g.height - 1) % 2:
                                 print("protect confusing")
+
                                 # move cell_lk the place confused and move the deepest cell the place not confused
                                 katanuki(g.patterns[3], x, y, Direction.UP)
                                 irregular = True
                                 y = g.height - 2
 
                             cnt = 0
+
                             while ln > 0:
                                 if ln % 2 == 1:
                                     # border nukigata (else...1*1)
@@ -144,22 +153,21 @@ def solve(problem: Problem):
                                         y,
                                         Direction.RIGHT,
                                     )
+
                                     x += 1 << cnt
 
                                 ln >>= 1
                                 cnt += 1
 
                             katanuki(g.patterns[0], x, y, Direction.UP)
-                            if irregular:
-                                katanuki(
-                                    g.patterns[0], j - k, g.height - 3, Direction.UP
-                                )
 
-                            delta = utils.get_delta(
-                                g.elems_now[g.height - 1], elems_goal[i]
-                            )
+                            if irregular:
+                                katanuki(g.patterns[0], j - k, g.height - 3, Direction.UP)
+
+                            delta = utils.get_delta(g.elems_now[g.height - 1], elems_goal[i])
 
                             is_filled = True
+
                             break
 
                 if is_filled:
@@ -189,6 +197,7 @@ def solve(problem: Problem):
 
             if int(g.board[j][g.width - 1]) == cell_cr:
                 continue
+
             for k in range(g.width - 2, cmped - 1, -1):
                 cell_lk = int(g.board[j][k])
 

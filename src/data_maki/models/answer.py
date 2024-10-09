@@ -10,6 +10,7 @@ class Direction(IntEnum):
     LEFT = 2
     RIGHT = 3
 
+
 @dataclass_json
 @dataclass(frozen=True)
 class Op:
@@ -17,6 +18,7 @@ class Op:
     x: int
     y: int
     s: Direction
+
 
 @dataclass_json
 @dataclass(frozen=True)

@@ -1,5 +1,6 @@
-from .global_value import g
 from enum import StrEnum
+
+from .global_value import g
 
 
 # delete string from begin to end (not include end)
@@ -15,10 +16,12 @@ def print_board():
 
     return
 
+
 class ListReverseStrategy(StrEnum):
     Reverse90 = "reverse-90"
     ReverseUpDown = "reverse-up-down"
     ReverseLeftRight = "reverse-left-right"
+
 
 def list_rv(lst: list[str], strategy: ListReverseStrategy) -> list[str]:
     match strategy:

@@ -1,9 +1,10 @@
 import dataclasses
 import json
 
+from ..solver import solve
 from .data import example_data
 from .encoder import EnhancedJSONEncoder
-from ..solver import solve
+
 
 def main():
     answer = solve(example_data)

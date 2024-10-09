@@ -1,5 +1,4 @@
 from .global_value import g
-
 from .models.answer import Direction, Op
 
 
