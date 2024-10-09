@@ -74,7 +74,7 @@ def solve(problem: Problem):
                             print(f"bring {cell_lk} from {x} {y}")
 
                             # if border nukigata confuse
-                            if m % 2 == 1:
+                            if m % 2 == (g.height - 1) % 2:
                                 print("protect confusing")
                                 # move cell_lk the place confused and move the deepest cell the place not confused
                                 katanuki(g.patterns[3], x, y, Direction.UP)
@@ -127,7 +127,7 @@ def solve(problem: Problem):
                             print(f"bring {cell_lk} from {x} {y}")
 
                             # if border nukigata confuse
-                            if m % 2 == 1:
+                            if m % 2 == (g.height - 1) % 2:
                                 print("protect confusing")
                                 # move cell_lk the place confused and move the deepest cell the place not confused
                                 katanuki(g.patterns[3], x, y, Direction.UP)
