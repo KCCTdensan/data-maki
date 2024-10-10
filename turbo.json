@@ -2,7 +2,6 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "prepare": {
-      "dependsOn": ["^@data-maki/schemas#build"],
       "cache": false
     },
     "build": {
