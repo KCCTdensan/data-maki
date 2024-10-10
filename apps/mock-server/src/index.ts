@@ -19,7 +19,7 @@ const validateAnswer = typia.createValidate<Answer>();
 
 const validTokens = new Set(config.teams);
 
-let generateSettings: { widthRandom: boolean; heightRandom: boolean; width: number; height: number } = {
+const generationSettings: { widthRandom: boolean; heightRandom: boolean; width: number; height: number } = {
   widthRandom: true,
   heightRandom: true,
   width: 0,
@@ -30,7 +30,7 @@ function getRandomInt<TMin extends number, TMax extends number>(min: TMin, max: 
   return Math.floor(Math.random() * (max - min) + min) as unknown as IntRange<TMin, TMax>; // [min,max]
 }
 
-const [id, problem] = generateProblem(generateSettings);
+const [id, problem] = generateProblem(generationSettings);
 
 const app = new Hono();
 
@@ -69,10 +69,10 @@ app.post("/answer", async (c) => {
 app.post("/settings", async (c) => {
   const settings = await c.req.json();
 
-  generateSettings.widthRandom = settings.widthRandom;
-  generateSettings.heightRandom = settings.heightRandom;
-  generateSettings.width = settings.width;
-  generateSettings.height = settings.height;
+  generationSettings.widthRandom = settings.widthRandom;
+  generationSettings.heightRandom = settings.heightRandom;
+  generationSettings.width = settings.width;
+  generationSettings.height = settings.height;
 
   return c.json({ success: true });
 });

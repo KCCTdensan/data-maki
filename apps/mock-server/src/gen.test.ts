@@ -6,7 +6,12 @@ import { generateProblem } from "./gen";
 
 describe("generated question parsing", () => {
   test("generated question correctly parses", () => {
-    const [, question] = generateProblem();
+    const [, question] = generateProblem({
+      widthRandom: true,
+      heightRandom: true,
+      width: 0,
+      height: 0,
+    });
 
     typia.assert<Question>(question);
   });
