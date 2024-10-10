@@ -2,10 +2,11 @@
   "$schema": "https://turbo.build/schema.json",
   "tasks": {
     "prepare": {
+      "dependsOn": ["^@data-maki/schemas#build", "^@data-maki/algorithm#build"],
       "cache": false
     },
     "build": {
-      "dependsOn": ["^prepare", "^build"],
+      "dependsOn": ["^build"],
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", "build/**"]
     },

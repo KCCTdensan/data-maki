@@ -7,8 +7,7 @@
   },
   "workspaces": ["apps/*", "packages/*"],
   "scripts": {
-    "prepare": "run-s \"prepare-before:*\" && run-p \"prepare:*\"",
-    "prepare-before:schemas": "cd packages/schemas && bun run build",
+    "prepare": "run-p \"prepare:*\"",
     "prepare:git": "lefthook install",
     "prepare:typia": "ts-patch install && typia patch",
     "prepare:children": "turbo prepare",

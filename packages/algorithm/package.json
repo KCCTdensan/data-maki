@@ -5,7 +5,7 @@
   "type": "module",
   "main": "src/index.ts",
   "scripts": {
-    "prepare": "tsup && bun -b run tsup --config tsup.worker.ts",
+    "build": "tsup && bun -b run tsup --config tsup.worker.ts",
     "bench": "vitest bench",
     "lint": "biome lint --write ."
   },

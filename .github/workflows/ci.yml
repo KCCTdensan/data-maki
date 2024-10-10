@@ -78,6 +78,10 @@ jobs:
         working-directory: packages/schemas
         run: bun test
 
+      - name: Test (algorithm)
+        working-directory: packages/algorithm
+        run: bun test
+
       - name: Test (mock server)
         working-directory: apps/mock-server
         run: bun test
