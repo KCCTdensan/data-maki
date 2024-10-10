@@ -1,9 +1,13 @@
 import type { Ops, Pattern } from "@data-maki/schemas";
 import { shallowEqual } from "fast-equals";
-import { dbg } from "../log";
-import { addOps } from "./answer";
+import { dbg } from "../workers/log";
 import { type Context, DOWN, type Direction, LEFT, type Point, UP } from "./types";
 import { countElementsColumnWise, dbgBoard, removeStringRange, reverseCells } from "./utils";
+
+export const addOps = (c: Context, ops: Ops) => {
+  c.n += 1;
+  c.ops.push(ops);
+};
 
 const generatePatternData = (
   dir: Direction,
@@ -41,7 +45,7 @@ const generatePatternData = (
       };
 
 export const katanuki = (c: Context, p: Pattern, x: number, y: number, dir: Direction) => {
-  dbg("katanuki", { p: p.p, x, y, dir });
+  dbg(c.worker, "katanuki", { p: p.p, x, y, dir });
 
   if (x + p.width <= 0 || x >= c.width || y + p.height <= 0 || y >= c.height) {
     throw new Error("Cannot pick any cells: out of range");
@@ -113,6 +117,6 @@ export const katanuki = (c: Context, p: Pattern, x: number, y: number, dir: Dire
     addOps(c, op);
     dbgBoard(c);
   } else {
-    dbg(c.board, b);
+    dbg(c.worker, c.board, b);
   }
 };

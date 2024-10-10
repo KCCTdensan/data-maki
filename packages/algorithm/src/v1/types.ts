@@ -9,11 +9,9 @@ export const RIGHT = 3;
 export type Point = { x: number; y: number };
 export type Direction = typeof UP | typeof DOWN | typeof LEFT | typeof RIGHT;
 export type CellCounts = FixedLengthArray<number, 4>;
-export type ProgressFn = (board: string[], n: number, op: Ops | null) => void | Promise<void>;
 
 export interface Context {
-  onProgress: ProgressFn;
-
+  worker?: Worker;
   board: string[];
   goalBoard: string[];
   // Element counts per column

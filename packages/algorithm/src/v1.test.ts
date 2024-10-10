@@ -1,10 +1,14 @@
 import { describe, expect, test } from "bun:test";
+import type { Answer } from "@data-maki/schemas";
 
 import type { Question } from "@data-maki/schemas";
 import typia from "typia";
 import dataExample from "../examples/input.json";
-import { solve } from "./v1";
+import { createContext, fromPattern } from "./v1";
+import { katanuki } from "./v1/katanuki";
+import type { Direction } from "./v1/types";
 import { reverseCells } from "./v1/utils";
+import { solve } from "./workers/v1.master";
 
 describe("reverseCells", () => {
   test("rotate-90", () => {
@@ -18,20 +22,27 @@ describe("reverseCells", () => {
 });
 
 describe("algorithm v1 tests", () => {
-  test("example data correctly solves", () => {
-    const question = typia.assert<Question>(dataExample);
+  let question: Question;
+  let answer: Answer;
+
+  test("example data correctly solves", async () => {
+    question = typia.assert<Question>(dataExample);
 
     const expected = question.board.goal;
-    let actual: string[];
+    const [actualAnswer, actual] = await solve(structuredClone(question));
 
-    const answer = solve(
-      question,
-      () => {},
-      (finalBoard) => {
-        actual = finalBoard;
-      },
-    );
+    answer = actualAnswer;
 
     expect(actual).toStrictEqual(expected);
+  });
+
+  test("katanuki works", () => {
+    const c = createContext(question);
+
+    for (const op of answer.ops) {
+      katanuki(c, fromPattern(op.p, question.general), op.x, op.y, op.s as Direction);
+    }
+
+    expect(c.board).toStrictEqual(question.board.goal);
   });
 });

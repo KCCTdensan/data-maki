@@ -52,7 +52,7 @@ jobs:
 
       - name: Build (standalone)
         working-directory: apps/solver
-        run: bun build --minify --sourcemap --compile --bytecode --target=${{ matrix.target }} --outfile=dist/${{ matrix.outfile }} dist/*.js
+        run: bun build --minify --sourcemap --compile --bytecode --target=${{ matrix.target }} --outfile=dist/${{ matrix.outfile }} dist/**/*.js
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4

@@ -1,7 +1,10 @@
-import { isProduction } from "./env";
+import { isProduction, isTest } from "../env";
 
-export const dbg = (...args: unknown[]) => {
-  if (!isProduction) {
-    console.debug(...args);
+export const dbg = (self?: Worker, ...args: unknown[]) => {
+  if (!(isProduction || isTest) || process.env.SOLVER_DEBUG) {
+    self?.postMessage({
+      type: "dbg",
+      args,
+    });
   }
 };

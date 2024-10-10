@@ -66,27 +66,23 @@ export class AlgorithmFeature extends FeatureBase {
 
       const scope = span(this.log, "Solve finished");
 
-      const answer = this.#solve(
-        solvingState.question,
-        () => {},
-        (finalBoard) => {
-          if (deepEqual(finalBoard, solvingState.question.board.goal)) {
-            this.log
-              .withMetadata({
-                id: solvingState.id,
-              })
-              .info("Answer is correct");
-          } else {
-            this.log
-              .withMetadata({
-                id: solvingState.id,
-                expected: solvingState.question.board.goal,
-                actual: finalBoard,
-              })
-              .error("Answer is incorrect");
-          }
-        },
-      );
+      const [answer, finalBoard] = await this.#solve(solvingState.question);
+
+      if (deepEqual(finalBoard, solvingState.question.board.goal)) {
+        this.log
+          .withMetadata({
+            id: solvingState.id,
+          })
+          .info("Answer is correct");
+      } else {
+        this.log
+          .withMetadata({
+            id: solvingState.id,
+            expected: solvingState.question.board.goal,
+            actual: finalBoard,
+          })
+          .error("Answer is incorrect");
+      }
 
       scope.end();
 

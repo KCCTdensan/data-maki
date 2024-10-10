@@ -1,4 +1,4 @@
-import { dbg } from "../log";
+import { dbg } from "../workers/log";
 import type { CellCounts, Context } from "./types";
 
 export const zip = <T, U>(a: T[], b: U[]): Array<[T, U]> => a.map((e, i) => [e, b[i]]);
@@ -8,10 +8,10 @@ export const removeStringRange = (str: string, start: number, end: number): stri
 
 export const dbgBoard = (c: Context) => {
   for (const column of c.board) {
-    dbg(column);
+    dbg(c.worker, column);
   }
 
-  dbg();
+  dbg(c.worker);
 };
 
 export type ReverseOperation = "reverse-90" | "reverse-up-down" | "reverse-left-right";

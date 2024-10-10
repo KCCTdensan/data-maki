@@ -1,6 +1,5 @@
-import type { Answer, Board, Ops, Question } from "@data-maki/schemas";
-import { solve as solveV1 } from "./v1";
-import type { ProgressFn } from "./v1/types";
+import type { Answer, Question } from "@data-maki/schemas";
+import { solve as solveV1 } from "./workers/v1.master";
 
 export const VERSIONS = ["v1"] as const;
 
@@ -14,8 +13,4 @@ export const isSolveFuncVersion = (version: string): version is (typeof VERSIONS
 export const getSolveFunc = (version: (typeof VERSIONS)[number]): SolveFunc => solveFuncs[version];
 export const LATEST_VERSION = VERSIONS[VERSIONS.length - 1];
 
-export type SolveFunc = (
-  question: Question,
-  onProgress: ProgressFn,
-  onFinish: (finalBoard: string[]) => void | Promise<void>,
-) => Answer;
+export type SolveFunc = (question: Question) => Promise<[answer: Answer, board: string[]]>;
