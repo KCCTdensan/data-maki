@@ -6,6 +6,7 @@
   "main": "src/index.ts",
   "scripts": {
     "prepare": "tsup && bun -b run tsup --config tsup.worker.ts",
+    "bench": "vitest bench",
     "lint": "biome lint --write ."
   },
   "exports": {
@@ -25,6 +26,7 @@
   "devDependencies": {
     "@data-maki/biome-config": "workspace:*",
     "@data-maki/typescript-config": "workspace:*",
-    "tsup": "^8.3.0"
+    "tsup": "^8.3.0",
+    "vitest": "^2.1.2"
   }
 }

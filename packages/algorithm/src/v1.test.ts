@@ -19,6 +19,24 @@ describe("reverseCells", () => {
 
     expect(actual).toStrictEqual(expected);
   });
+
+  test("reverse-up-down", () => {
+    const cells = ["133", "121", "312"];
+    const expected = ["312", "121", "133"];
+
+    const actual = reverseCells(cells, "reverse-up-down");
+
+    expect(actual).toStrictEqual(expected);
+  });
+
+  test("reverse-left-right", () => {
+    const cells = ["133", "121", "312"];
+    const expected = ["331", "121", "213"];
+
+    const actual = reverseCells(cells, "reverse-left-right");
+
+    expect(actual).toStrictEqual(expected);
+  });
 });
 
 describe("algorithm v1 tests", () => {
