@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prepare": "tsup",
+    "build": "tsup",
     "lint": "biome lint --write ."
   },
   "exports": {
