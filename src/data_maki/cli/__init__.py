@@ -14,8 +14,8 @@ def main():
     fname = sys.argv[1]
 
     with open(fname, "r") as f:
-        question = json.load(f)
+        problem = json.load(f)
 
-    answer, _ = solve(question)
+    answer, _ = solve(problem)
 
     print(json.dumps(answer, indent=2, cls=EnhancedJSONEncoder))

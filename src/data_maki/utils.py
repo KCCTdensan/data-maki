@@ -50,7 +50,7 @@ def list_rv(arr: TwoDimensionalIntArray, strategy: ReverseOperation):
         case ReverseOperation.ReverseLeftRight:
             return arr.reverse_row_wise()
 
-    return lst
+    return arr
 
 
 def count_elements(b: TwoDimensionalIntArray):
