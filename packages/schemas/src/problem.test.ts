@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 
 import typia from "typia";
-import type { Question } from "./question";
+import type { Problem } from "./problem";
 
 const exampleJson = `
 {
@@ -73,11 +73,11 @@ const expectedObject = {
   },
 };
 
-describe("question parsing", () => {
-  test("example question json correctly parses", () => {
+describe("problem parsing", () => {
+  test("example problem json correctly parses", () => {
     const object = JSON.parse(exampleJson);
-    const question = typia.assertEquals<Question>(object);
+    const problem = typia.assertEquals<Problem>(object);
 
-    expect(question).toStrictEqual(expectedObject);
+    expect(problem).toStrictEqual(expectedObject);
   });
 });

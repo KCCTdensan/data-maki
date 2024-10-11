@@ -1,4 +1,4 @@
-import type { Pattern } from "./question";
+import type { Pattern } from "./problem";
 
 /*
  * Schemas of fixed patterns.

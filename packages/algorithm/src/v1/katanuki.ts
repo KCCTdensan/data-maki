@@ -1,10 +1,10 @@
-import type { Ops, Pattern } from "@data-maki/schemas";
+import type { Op, Pattern } from "@data-maki/schemas";
 import { shallowEqual } from "fast-equals";
 import { dbg } from "../workers/log";
 import { type Context, DOWN, type Direction, LEFT, type Point, UP } from "./types";
 import { countElementsColumnWise, dbgBoard, removeStringRange, reverseCells } from "./utils";
 
-export const addOps = (c: Context, ops: Ops) => {
+export const addOp = (c: Context, ops: Op) => {
   c.n += 1;
   c.ops.push(ops);
 };
@@ -107,14 +107,14 @@ export const katanuki = (c: Context, p: Pattern, x: number, y: number, dir: Dire
     c.board = [...b];
     c.currentElementCounts = countElementsColumnWise(c.board, c.height);
 
-    const op: Ops = {
+    const op: Op = {
       p: p.p,
       x,
       y,
       s: dir,
     };
 
-    addOps(c, op);
+    addOp(c, op);
     dbgBoard(c);
   } else {
     dbg(c.worker, c.board, b);

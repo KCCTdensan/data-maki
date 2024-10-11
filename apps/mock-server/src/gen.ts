@@ -1,4 +1,4 @@
-import type { Question } from "@data-maki/schemas";
+import type { Problem } from "@data-maki/schemas";
 import type { FixedLengthArray } from "type-fest";
 import { getRandomInt } from "./utils/number";
 
@@ -18,7 +18,7 @@ export const generateProblem = (generateSettings: {
   heightRandom: boolean;
   width: number;
   height: number;
-}): [id: number, question: Question] => {
+}): [id: number, problem: Problem] => {
   console.time("Problem generation successful");
 
   const width: number = generateSettings.widthRandom ? getRandomInt(32, 257) : generateSettings.width;
@@ -49,7 +49,7 @@ export const generateProblem = (generateSettings: {
   const start: string[] = getBoardArrayFromNumbers(numbers, width);
   const goal: string[] = getBoardArrayFromNumbers(numbers.toSorted() /* 目標盤面の生成 */, width);
 
-  const problem: Question = {
+  const problem: Problem = {
     board: {
       width: width as number,
       height: height as number,

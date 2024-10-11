@@ -1,4 +1,4 @@
-import type { Board, Ops } from "@data-maki/schemas";
+import type { Board, Op } from "@data-maki/schemas";
 import type { FixedLengthArray } from "type-fest";
 
 export const UP = 0;
@@ -21,5 +21,5 @@ export interface Context {
 
   // Answer
   n: number;
-  ops: Array<Ops>;
+  ops: Array<Op>;
 }

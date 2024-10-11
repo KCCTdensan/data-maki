@@ -1,4 +1,4 @@
-import type { Question } from "@data-maki/schemas";
+import type { Problem } from "@data-maki/schemas";
 import { Grid, Heading, Spacer, Text, VStack } from "@yamada-ui/react";
 import { useState } from "react";
 import { ScrollSync } from "scroll-sync-react";
@@ -8,7 +8,7 @@ import { StatsCard } from "../stats/StatsCard";
 import { Board } from "./Board";
 import { ZoomLevelSlider } from "./ZoomLevelSlider";
 
-const testBoard: Question = {
+const testBoard: Problem = {
   board: {
     width: 18,
     height: 4,

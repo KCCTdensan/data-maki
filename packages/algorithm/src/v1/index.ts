@@ -1,4 +1,4 @@
-import { type Answer, type Question, fixedPatterns } from "@data-maki/schemas";
+import { type Answer, type Problem, fixedPatterns } from "@data-maki/schemas";
 import type { General, Pattern } from "@data-maki/schemas";
 import { shallowEqual } from "fast-equals";
 import { dbg } from "../workers/log";
@@ -6,15 +6,15 @@ import { katanuki } from "./katanuki";
 import { type CellCounts, type Context, DOWN, LEFT, RIGHT, UP } from "./types";
 import { countElementsColumnWise, dbgBoard, getDelta } from "./utils";
 
-export const createContext = (question: Question, self?: Worker): Context => ({
+export const createContext = (problem: Problem, self?: Worker): Context => ({
   worker: self,
-  board: question.board.start,
-  goalBoard: question.board.goal,
+  board: problem.board.start,
+  goalBoard: problem.board.goal,
 
-  currentElementCounts: countElementsColumnWise(question.board.start, question.board.height),
+  currentElementCounts: countElementsColumnWise(problem.board.start, problem.board.height),
 
-  width: question.board.width,
-  height: question.board.height,
+  width: problem.board.width,
+  height: problem.board.height,
   n: 0,
   ops: [],
 });
@@ -27,9 +27,9 @@ export const fromPattern = (index: number, general: General): Pattern => {
   return index < fixedPatterns.length ? fixedPatterns[index] : general.patterns[index - fixedPatterns.length];
 };
 
-export const solve = (self: Worker, question: Question): [answer: Answer, board: string[]] => {
-  const { board } = question;
-  const c = createContext(question, self);
+export const solve = (self: Worker, problem: Problem): [answer: Answer, board: string[]] => {
+  const { board } = problem;
+  const c = createContext(problem, self);
 
   dbgBoard(c);
 
@@ -62,7 +62,7 @@ export const solve = (self: Worker, question: Question): [answer: Answer, board:
         lookingCell = Number(c.board[k][j]);
 
         if (delta[lookingCell] < 0) {
-          katanuki(c, fromPattern(0, question.general), j, k, UP);
+          katanuki(c, fromPattern(0, problem.general), j, k, UP);
 
           isFilled = true;
 
@@ -104,7 +104,7 @@ export const solve = (self: Worker, question: Question): [answer: Answer, board:
               if (m % 2 === (c.height - 1) % 2) {
                 dbg(c.worker, "protect confusion");
 
-                katanuki(c, fromPattern(3, question.general), rx, y, UP);
+                katanuki(c, fromPattern(3, problem.general), rx, y, UP);
 
                 irregular = true;
                 y = c.height - 2;
@@ -115,7 +115,7 @@ export const solve = (self: Worker, question: Question): [answer: Answer, board:
               while (ln > 0) {
                 if (ln % 2 === 1) {
                   // border nukigata (else: 1 * 1)
-                  katanuki(c, fromPattern(cnt !== 0 ? 3 * cnt - 1 : 0, question.general), rx - (1 << cnt), y, LEFT);
+                  katanuki(c, fromPattern(cnt !== 0 ? 3 * cnt - 1 : 0, problem.general), rx - (1 << cnt), y, LEFT);
 
                   rx -= 1 << cnt;
                 }
@@ -124,10 +124,10 @@ export const solve = (self: Worker, question: Question): [answer: Answer, board:
                 cnt++;
               }
 
-              katanuki(c, fromPattern(0, question.general), rx, y, UP);
+              katanuki(c, fromPattern(0, problem.general), rx, y, UP);
 
               if (irregular) {
-                katanuki(c, fromPattern(0, question.general), j + k, c.height - 3, UP);
+                katanuki(c, fromPattern(0, problem.general), j + k, c.height - 3, UP);
               }
 
               delta = getDelta(c.currentElementCounts[c.height - 1], goalElementCounts[i]);
@@ -160,7 +160,7 @@ export const solve = (self: Worker, question: Question): [answer: Answer, board:
               if (m % 2 === (c.height - 1) % 2) {
                 dbg(c.worker, "protect confusion");
 
-                katanuki(c, fromPattern(3, question.general), lx, y, UP);
+                katanuki(c, fromPattern(3, problem.general), lx, y, UP);
 
                 irregular = true;
                 y = c.height - 2;
@@ -171,7 +171,7 @@ export const solve = (self: Worker, question: Question): [answer: Answer, board:
               while (ln > 0) {
                 if (ln % 2 === 1) {
                   // border nukigata (else: 1 * 1)
-                  katanuki(c, fromPattern(cnt !== 0 ? 3 * cnt - 1 : 0, question.general), lx + 1, y, RIGHT);
+                  katanuki(c, fromPattern(cnt !== 0 ? 3 * cnt - 1 : 0, problem.general), lx + 1, y, RIGHT);
 
                   lx += 1 << cnt;
                 }

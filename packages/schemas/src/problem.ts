@@ -2,7 +2,7 @@ import type { tags } from "typia";
 
 // Example schema
 
-export interface Question {
+export interface Problem {
   board: Board;
   general: General;
 }

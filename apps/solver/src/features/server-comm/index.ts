@@ -1,4 +1,4 @@
-import type { Answer, AnswerResponse, Question } from "@data-maki/schemas";
+import type { Answer, AnswerResponse, Problem } from "@data-maki/schemas";
 import cuid2 from "@paralleldrive/cuid2";
 import axios, { type AxiosInstance, isAxiosError } from "axios";
 import type { LogLayer } from "loglayer";
@@ -14,7 +14,7 @@ import { ServerUnavailableError } from "./errors/server-unavailable.ts";
 
 export const SERVER_COMMUNICATOR_POLL_INTERVAL = 1000;
 
-export const createQuestionId = cuid2.init({
+export const createProblemId = cuid2.init({
   length: 8,
 });
 
@@ -40,9 +40,9 @@ export class ServerCommunicatorFeature extends FeatureBase {
         })
         .info("Polling problem...");
 
-      const question = await this.#client
+      const problem = await this.#client
         .get<unknown>("/problem")
-        .then(({ data }) => (data ? typia.assert<Question>(data) : undefined))
+        .then(({ data }) => (data ? typia.assert<Problem>(data) : undefined))
         .catch((e) => {
           if (isAxiosError(e)) {
             if (e.response?.status === 403) return undefined;
@@ -53,22 +53,22 @@ export class ServerCommunicatorFeature extends FeatureBase {
           throw e;
         });
 
-      const id = createQuestionId();
+      const id = createProblemId();
 
-      if (question) {
+      if (problem) {
         this.log
           .withMetadata({
             id,
             tries,
             data: {
-              width: question.board.width,
-              height: question.board.height,
-              generalCount: question.general.n,
+              width: problem.board.width,
+              height: problem.board.height,
+              generalCount: problem.general.n,
             },
           })
           .info("Received problem");
 
-        return [id, question] as const;
+        return [id, problem] as const;
       }
 
       tries++;
@@ -118,9 +118,9 @@ export class ServerCommunicatorFeature extends FeatureBase {
   async start() {
     StateManager.instance.state$.subscribe(async (state) => {
       if (state.stateName === IdleState.stateName) {
-        const [id, question] = await this.pollProblem();
+        const [id, problem] = await this.pollProblem();
 
-        StateManager.instance.setState(new SolvingState(id, question));
+        StateManager.instance.setState(new SolvingState(id, problem));
 
         return;
       }

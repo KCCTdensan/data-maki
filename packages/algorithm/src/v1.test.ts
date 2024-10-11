@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import type { Answer } from "@data-maki/schemas";
 
-import type { Question } from "@data-maki/schemas";
+import type { Problem } from "@data-maki/schemas";
 import typia from "typia";
 import dataExample from "../examples/input.json";
 import { createContext, fromPattern } from "./v1";
@@ -40,14 +40,14 @@ describe("reverseCells", () => {
 });
 
 describe("algorithm v1 tests", () => {
-  let question: Question;
+  let problem: Problem;
   let answer: Answer;
 
   test("example data correctly solves", async () => {
-    question = typia.assert<Question>(dataExample);
+    problem = typia.assert<Problem>(dataExample);
 
-    const expected = question.board.goal;
-    const [actualAnswer, actual] = await solve(structuredClone(question));
+    const expected = problem.board.goal;
+    const [actualAnswer, actual] = await solve(structuredClone(problem));
 
     answer = actualAnswer;
 
@@ -55,12 +55,12 @@ describe("algorithm v1 tests", () => {
   });
 
   test("katanuki works", () => {
-    const c = createContext(question);
+    const c = createContext(problem);
 
     for (const op of answer.ops) {
-      katanuki(c, fromPattern(op.p, question.general), op.x, op.y, op.s as Direction);
+      katanuki(c, fromPattern(op.p, problem.general), op.x, op.y, op.s as Direction);
     }
 
-    expect(c.board).toStrictEqual(question.board.goal);
+    expect(c.board).toStrictEqual(problem.board.goal);
   });
 });
