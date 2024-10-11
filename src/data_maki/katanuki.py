@@ -1,36 +1,71 @@
 from . import utils
-from .create_answer import add_ops
 from .global_value import g
-from .models.answer import Direction
+from .models.answer import Direction, Op
 from .models.problem import Pattern
-from .utils import ListReverseStrategy
+from .utils import ReverseOperation
+from .patterns import get_pattern
+from .arrays import TwoDimensionalIntArray
 
 
-def katanuki(p: Pattern, x: int, y: int, s: Direction):
-    print([p["cells"], x, y, s])
+def add_ops(p: int, x: int, y: int, s: Direction):
+    # this function can't correct x&y confused by ud or lr
+    if g.rv_op.has_reverse_left_right:
+        if s == Direction.LEFT:
+            s = Direction.RIGHT
+        elif s == Direction.RIGHT:
+            s = Direction.LEFT
 
-    if x + p["width"] <= 0 or x >= g.width or y + p["height"] <= 0 or y >= g.height:
+    if g.rv_op.has_reverse90:
+        if s == Direction.UP:
+            s = Direction.LEFT
+        elif s == Direction.DOWN:
+            s = Direction.RIGHT
+        elif s == Direction.LEFT:
+            s = Direction.UP
+        elif s == Direction.RIGHT:
+            s = Direction.DOWN
+
+        val = x
+        x = y
+        y = val
+
+    if g.rv_op.has_reverse_up_down:
+        if s == Direction.UP:
+            s = Direction.DOWN
+        elif s == Direction.DOWN:
+            s = Direction.UP
+
+    g.n += 1
+    g.ops.append(Op(p, x, y, s))
+
+
+def katanuki(p: int, x: int, y: int, s: Direction):
+    pattern = get_pattern(p)
+
+    print([p, x, y, s])
+
+    if x + pattern["width"] <= 0 or x >= g.width or y + pattern["height"] <= 0 or y >= g.height:
         raise Exception("Nukigata can't pick any cells :(")
 
     # stripe -> reverse / border -> normal
     if s == Direction.UP or s == Direction.DOWN:
-        b = utils.list_rv(g.board, ListReverseStrategy.Reverse90)
+        b = utils.list_rv(g.board.current, ReverseOperation.Reverse90)
         bx = g.height
         by = g.width
-        pw = p["height"]
-        ph = p["width"]
+        pw = pattern["height"]
+        ph = pattern["width"]
         px = y
         py = x
-        pattern = utils.list_rv(p["cells"], ListReverseStrategy.Reverse90)
+        pattern = utils.list_rv_str(pattern["cells"], ReverseOperation.Reverse90)
     elif s == Direction.LEFT or s == Direction.RIGHT:
-        b = g.board[:]
+        b = g.board.current.copy()
         bx = g.width
         by = g.height
-        pw = p["width"]
-        ph = p["height"]
+        pw = pattern["width"]
+        ph = pattern["height"]
         px = x
         py = y
-        pattern = p["cells"]
+        pattern = pattern["cells"]
     else:
         raise Exception("the direction is not exist! :(")
 
@@ -38,56 +73,62 @@ def katanuki(p: Pattern, x: int, y: int, s: Direction):
     pattern = utils.list_rv(pattern, g.rv_uldr, g.rv_ud, g.rv_lr)
     """
 
-    # nukigata de nuita cell
-    picked = ["" for _ in range(ph)]
-
     """
+    before
     3 2 1
     | | |
     | | |
     V V V
-    """
-    for i in range(pw - 1, -1, -1):
-        lx = px + i
-        # out of range
-        if lx < 0:
-            break
-        if lx >= bx:
-            continue
 
-        for j in range(ph):
-            ly = py + j
+    after
+    <---1
+    <---2
+    <---3
+    """
+
+    for i in range(ph):
+        ly = py + i
+        # out of range
+        if ly < 0:
+            continue
+        if ly >= by:
+            break
+
+        now_col: list[int] = b.get_column(ly)
+        # nukigata de nuita cell
+        picked = []
+
+        for j in range(pw - 1, -1, -1):
+            lx = px + j
             # out of range
-            if ly < 0:
+            if lx >= bx:
                 continue
-            if ly >= by:
+            if lx < 0:
                 break
 
-            if pattern[j][i] == "0":
+            if pattern[i][j] == "0":
                 continue
 
-            # pick the cell looked at
-            picked[j] = b[ly][lx] + picked[j]
-            b[ly] = utils.str_delete(b[ly], lx, lx + 1)
+            # pick and remove the cell looked at
+            picked.insert(0, now_col.pop(lx))
 
-    for i in range(0, ph):
-        # up/left -> add at end / down/right -> add at begin
-        ly = py + i
-        if ly < 0 or ly >= by:
-            continue
         if s == Direction.UP or s == Direction.LEFT:
-            b[ly] = b[ly] + picked[i]
+            now_col += picked
         else:
-            b[ly] = picked[i] + b[ly]
+            now_col = picked + now_col
+
+        b.set_column(ly, now_col)
 
     if s == Direction.UP or s == Direction.DOWN:
-        b = utils.list_rv(b, ListReverseStrategy.Reverse90)
+        b = utils.list_rv(b, ReverseOperation.Reverse90)
 
-    if g.board != b:
-        g.board = b[:]
-        add_ops(p["p"], x, y, s)
+    if g.board.current != b:
+        g.board.current = b.copy()
 
-        g.elems_now = utils.count_elements(g.board[:])
-        utils.print_board()
+        add_ops(p, x, y, s)
+
+        g.elems_now = utils.count_elements(g.board.current)
+
+        utils.print_board(g.board.current)
 
     return

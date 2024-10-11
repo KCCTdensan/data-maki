@@ -1,6 +1,23 @@
 from enum import StrEnum
+from threading import Thread
 
-from .global_value import g
+from .arrays import TwoDimensionalIntArray
+
+
+class ReturnableThread[T](Thread):
+    _result: T | None = None
+
+    def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None):
+        Thread.__init__(self, group, target, name, args, kwargs)
+
+    def run(self):
+        if self._target is not None:
+            self._return = self._target(*self._args, **self._kwargs)
+
+    def join(self, *args):
+        Thread.join(self, *args)
+
+        return self._return
 
 
 # delete string from begin to end (not include end)
@@ -8,40 +25,57 @@ def str_delete(value: str, begin: int, end: int) -> str:
     return value[:begin] + value[end:]
 
 
-def print_board():
-    for column in g.board:
-        print(column)
+def print_board(board: TwoDimensionalIntArray):
+    for col in board.loop_column():
+        print(col)
 
     print()
 
     return
 
 
-class ListReverseStrategy(StrEnum):
+class ReverseOperation(StrEnum):
     Reverse90 = "reverse-90"
     ReverseUpDown = "reverse-up-down"
     ReverseLeftRight = "reverse-left-right"
 
 
-def list_rv(lst: list[str], strategy: ListReverseStrategy) -> list[str]:
+class ReverseOperationPatterns:
+    has_reverse90 = False
+    has_reverse_up_down = False
+    has_reverse_left_right = False
+
+
+def list_rv_str(arr: list[str], strategy: ReverseOperation) -> list[str]:
     match strategy:
-        case ListReverseStrategy.Reverse90:
-            lst = ["".join(x) for x in zip(*lst)]
-        case ListReverseStrategy.ReverseUpDown:
-            lst = list(reversed(lst))
-        case ListReverseStrategy.ReverseLeftRight:
-            lst = ["".join(x) for x in reversed(lst)]
+        case ReverseOperation.Reverse90:
+            return list(zip(*arr))
+        case ReverseOperation.ReverseUpDown:
+            return list(reversed(arr))
+        case ReverseOperation.ReverseLeftRight:
+            return [row[::-1] for row in arr]
+
+    return arr
+
+
+def list_rv(arr: TwoDimensionalIntArray, strategy: ReverseOperation):
+    match strategy:
+        case ReverseOperation.Reverse90:
+            return arr.transpose()
+        case ReverseOperation.ReverseUpDown:
+            return arr.reverse_column_wise()
+        case ReverseOperation.ReverseLeftRight:
+            return arr.reverse_row_wise()
 
     return lst
 
 
-def count_elements(b: list[str]):
-    elems = [[0, 0, 0, 0] for _ in range(g.height)]
+def count_elements(b: TwoDimensionalIntArray):
+    elems = [[0, 0, 0, 0] for _ in range(b.height)]
 
-    for i in range(g.height):
-        for j in b[i]:
-            elem = int(j)
-            elems[i][elem] += 1
+    for i, cols in enumerate(b.loop_column()):
+        for cell in cols:
+            elems[i][cell] += 1
 
     return elems
 

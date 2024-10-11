@@ -1,8 +1,3 @@
-import json
-
-from ..models.problem import Problem
-
-board_json = """
 {
     "board": {
         "width":16,
@@ -45,6 +40,3 @@ board_json = """
         ]
     }
 }
-"""  # Currently there is no generals
-
-example_data: Problem = json.loads(board_json)
