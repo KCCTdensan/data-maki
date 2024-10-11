@@ -30,6 +30,28 @@ class Problem(TypedDict):
 
 
 @dataclass
+class InternalPattern:
+    p: int
+    cells: TwoDimensionalIntArray
+
+    @staticmethod
+    def from_pattern(pattern: Pattern) -> "InternalPattern":
+        cells = [int(cell) for row in pattern["cells"] for cell in row]
+
+        return InternalPattern(
+            p=pattern["p"], cells=TwoDimensionalIntArray(inner=cells, width=pattern["width"], height=pattern["height"])
+        )
+
+    @property
+    def width(self) -> int:
+        return self.cells.width
+
+    @property
+    def height(self) -> int:
+        return self.cells.height
+
+
+@dataclass
 class InternalProblem:
     current: TwoDimensionalIntArray
     goal: TwoDimensionalIntArray

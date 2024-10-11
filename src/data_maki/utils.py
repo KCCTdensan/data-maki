@@ -20,11 +20,6 @@ class ReturnableThread[T](Thread):
         return self._return
 
 
-# delete string from begin to end (not include end)
-def str_delete(value: str, begin: int, end: int) -> str:
-    return value[:begin] + value[end:]
-
-
 def print_board(board: TwoDimensionalIntArray):
     for col in board.loop_column():
         print(col)
@@ -44,18 +39,6 @@ class ReverseOperationPatterns:
     has_reverse90 = False
     has_reverse_up_down = False
     has_reverse_left_right = False
-
-
-def list_rv_str(arr: list[str], strategy: ReverseOperation) -> list[str]:
-    match strategy:
-        case ReverseOperation.Reverse90:
-            return list(zip(*arr))
-        case ReverseOperation.ReverseUpDown:
-            return list(reversed(arr))
-        case ReverseOperation.ReverseLeftRight:
-            return [row[::-1] for row in arr]
-
-    return arr
 
 
 def list_rv(arr: TwoDimensionalIntArray, strategy: ReverseOperation):

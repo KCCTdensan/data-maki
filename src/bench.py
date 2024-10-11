@@ -91,7 +91,7 @@ def main():
     datas: list[tuple[str, Problem]] = [(name, json.loads(data_json)) for (name, data_json) in data_jsons]
     ns = []
 
-    for (name, data) in datas:
+    for name, data in datas:
         print(f"{name}...", end=" ")
 
         with redirect_stdout(open(os.devnull, "w")):

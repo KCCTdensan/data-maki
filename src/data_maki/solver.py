@@ -1,6 +1,7 @@
-from threading import Thread, Barrier, local
+from threading import Barrier
+
 from . import utils
-from .global_value import g
+from .context import Context
 from .katanuki import katanuki
 from .models.answer import Answer, Direction
 from .models.problem import InternalProblem, Problem
@@ -22,49 +23,51 @@ def solve(problem: Problem):
 
 
 def solve_worker(problem: Problem):
+    c = Context()
+
     delta = [0, 0, 0, 0]
 
     worker_barrier.wait()
 
-    g.width = problem["board"]["width"]
-    g.height = problem["board"]["height"]
-    g.board = InternalProblem.from_problem(problem)
+    c.width = problem["board"]["width"]
+    c.height = problem["board"]["height"]
+    c.board = InternalProblem.from_problem(problem)
 
     # counts of 0~3 in each of columns
-    elems_goal = utils.count_elements(g.board.goal)
-    g.elems_now = utils.count_elements(g.board.current)
+    elems_goal = utils.count_elements(c.board.goal)
+    c.elems_now = utils.count_elements(c.board.current)
 
-    utils.print_board(g.board.current)
+    utils.print_board(c.board.current)
 
-    for i in range(g.height - 1, -1, -1):
-        cmped = g.height - i - 1  # counts of columns completed yet
-        delta = utils.get_delta(g.elems_now[g.height - 1], elems_goal[i])
+    for i in range(c.height - 1, -1, -1):
+        cmped = c.height - i - 1  # counts of columns completed yet
+        delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
 
         print(f"delta = {delta}")
 
         unfilled = []
 
         # only stripe
-        for j in range(g.width):
+        for j in range(c.width):
             if delta == [0, 0, 0, 0]:
                 break
 
-            cell_lk = g.board.current.get(g.height - 1, j)
+            cell_lk = c.board.current.get(c.height - 1, j)
 
             if delta[cell_lk] <= 0:
                 continue
 
             is_filled = False
 
-            for k in range(g.height - 2, cmped - 1, -1):
-                cell_lk = g.board.current.get(k, j)
+            for k in range(c.height - 2, cmped - 1, -1):
+                cell_lk = c.board.current.get(k, j)
 
                 if delta[cell_lk] < 0:
                     # now, only nukigata 0 is used. I can't imagine how to use other nukigata:(
-                    katanuki(0, j, k, Direction.UP)
+                    katanuki(c, 0, j, k, Direction.UP)
                     is_filled = True
 
-                    delta = utils.get_delta(g.elems_now[g.height - 1], elems_goal[i])
+                    delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
 
                     break
 
@@ -79,14 +82,14 @@ def solve_worker(problem: Problem):
 
             print(f"fill row {j}")
 
-            for k in range(1, max(j, g.width - j - 1) + 1):
+            for k in range(1, max(j, c.width - j - 1) + 1):
                 # right side
                 x = j + k
                 print(f"check row {x}")
 
-                if x < g.width:
-                    for m in range(g.height - 2, cmped - 1, -1):
-                        cell_lk = g.board.current.get(m, x)
+                if x < c.width:
+                    for m in range(c.height - 2, cmped - 1, -1):
+                        cell_lk = c.board.current.get(m, x)
 
                         if delta[cell_lk] < 0:
                             y = m
@@ -96,12 +99,12 @@ def solve_worker(problem: Problem):
                             print(f"bring {cell_lk} from {x} {y}")
 
                             # if border nukigata confuse
-                            if m % 2 == (g.height - 1) % 2:
+                            if m % 2 == (c.height - 1) % 2:
                                 print("protect confusing")
                                 # move cell_lk the place confused and move the deepest cell the place not confused
-                                katanuki(3, x, y, Direction.UP)
+                                katanuki(c, 3, x, y, Direction.UP)
                                 irregular = True
-                                y = g.height - 2
+                                y = c.height - 2
 
                             cnt = 0
 
@@ -109,6 +112,7 @@ def solve_worker(problem: Problem):
                                 if ln % 2 == 1:
                                     # border nukigata (else...1*1)
                                     katanuki(
+                                        c,
                                         3 * cnt - 1 if cnt != 0 else 0,
                                         x - (1 << cnt),
                                         y,
@@ -119,12 +123,12 @@ def solve_worker(problem: Problem):
                                 ln >>= 1
                                 cnt += 1
 
-                            katanuki(0, x, y, Direction.UP)
+                            katanuki(c, 0, x, y, Direction.UP)
 
                             if irregular:
-                                katanuki(0, j + k, g.height - 3, Direction.UP)
+                                katanuki(c, 0, j + k, c.height - 3, Direction.UP)
 
-                            delta = utils.get_delta(g.elems_now[g.height - 1], elems_goal[i])
+                            delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
 
                             is_filled = True
 
@@ -139,8 +143,8 @@ def solve_worker(problem: Problem):
                 print(f"check row {x}")
 
                 if x >= 0:
-                    for m in range(g.height - 2, cmped - 1, -1):
-                        cell_lk = g.board.current.get(m, x)
+                    for m in range(c.height - 2, cmped - 1, -1):
+                        cell_lk = c.board.current.get(m, x)
 
                         if delta[cell_lk] < 0:
                             y = m
@@ -150,13 +154,13 @@ def solve_worker(problem: Problem):
                             print(f"bring {cell_lk} from {x} {y}")
 
                             # if border nukigata confuse
-                            if m % 2 == (g.height - 1) % 2:
+                            if m % 2 == (c.height - 1) % 2:
                                 print("protect confusing")
 
                                 # move cell_lk the place confused and move the deepest cell the place not confused
-                                katanuki(3, x, y, Direction.UP)
+                                katanuki(c, 3, x, y, Direction.UP)
                                 irregular = True
-                                y = g.height - 2
+                                y = c.height - 2
 
                             cnt = 0
 
@@ -164,6 +168,7 @@ def solve_worker(problem: Problem):
                                 if ln % 2 == 1:
                                     # border nukigata (else...1*1)
                                     katanuki(
+                                        c,
                                         3 * cnt - 1 if cnt != 0 else 0,
                                         x + 1,
                                         y,
@@ -175,12 +180,12 @@ def solve_worker(problem: Problem):
                                 ln >>= 1
                                 cnt += 1
 
-                            katanuki(0, x, y, Direction.UP)
+                            katanuki(c, 0, x, y, Direction.UP)
 
                             if irregular:
-                                katanuki(0, j - k, g.height - 3, Direction.UP)
+                                katanuki(c, 0, j - k, c.height - 3, Direction.UP)
 
-                            delta = utils.get_delta(g.elems_now[g.height - 1], elems_goal[i])
+                            delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
 
                             is_filled = True
 
@@ -190,45 +195,45 @@ def solve_worker(problem: Problem):
                     break
 
         # next column
-        katanuki(22, 0, g.height - 1, Direction.DOWN)
+        katanuki(c, 22, 0, c.height - 1, Direction.DOWN)
 
-        delta = utils.get_delta(g.elems_now[g.height - 1], elems_goal[i])
+        delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
 
     """
-    g.rv_uldr = True
-    g.board.goal = func.list_rv(g.board.goal, g.rv_uldr, g.rv_ud, g.rv_lr)
-    g.board_now = func.list_rv(g.board_now, g.rv_uldr, g.rv_ud, g.rv_lr)
+    c.rv_uldr = True
+    c.board.goal = func.list_rv(c.board.goal, c.rv_uldr, c.rv_ud, c.rv_lr)
+    c.board_now = func.list_rv(c.board_now, c.rv_uldr, c.rv_ud, c.rv_lr)
 
-    print(f"reversed ULDR: {g.rv_uldr}, UD: {g.rv_ud}, LR: {g.rv_lr},")
+    print(f"reversed ULDR: {c.rv_uldr}, UD: {c.rv_ud}, LR: {c.rv_lr},")
     func.print_board()
 
     """
 
-    for i in range(g.width - 1, -1, -1):
-        cmped = g.width - i - 1  # counts of columns completed yet
+    for i in range(c.width - 1, -1, -1):
+        cmped = c.width - i - 1  # counts of columns completed yet
 
         # only stripe
-        for j in range(g.height):
-            cell_cr = g.board.goal.get(j, i)
+        for j in range(c.height):
+            cell_cr = c.board.goal.get(j, i)
 
-            if g.board.current.get(j, g.width - 1) == cell_cr:
+            if c.board.current.get(j, c.width - 1) == cell_cr:
                 continue
 
-            for k in range(g.width - 2, cmped - 1, -1):
-                cell_lk = g.board.current.get(j, k)
+            for k in range(c.width - 2, cmped - 1, -1):
+                cell_lk = c.board.current.get(j, k)
 
                 if cell_cr == cell_lk:
                     # now, only nukigata 0 is used. I can't imagine how to use other nukigata:(
-                    katanuki(0, k, j, Direction.LEFT)
+                    katanuki(c, 0, k, j, Direction.LEFT)
                     break
 
         # next column
-        katanuki(22, g.width - 1, 0, Direction.RIGHT)
+        katanuki(c, 22, c.width - 1, 0, Direction.RIGHT)
 
     """
-    g.board = utils.list_rv(g.board, g.rv_uldr, g.rv_ud, g.rv_lr)
+    c.board = utils.list_rv(c.board, c.rv_uldr, c.rv_ud, c.rv_lr)
     """
 
-    answer = Answer(g.n, g.ops)
+    answer = Answer(c.n, c.ops)
 
-    return answer, g.board
+    return answer, c.board
