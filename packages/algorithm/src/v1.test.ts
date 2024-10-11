@@ -1,43 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import type { Answer } from "@data-maki/schemas";
-
-import type { Problem } from "@data-maki/schemas";
+import type { Answer, Problem } from "@data-maki/schemas";
 import typia from "typia";
 import dataExample from "../examples/input.json";
-import { createContext, fromPattern } from "./v1";
-import { katanuki } from "./v1/katanuki";
-import type { Direction } from "./v1/types";
-import { reverseCells } from "./v1/utils";
+import { katanuki } from "./katanuki";
+import { cellsToBoard } from "./models/answer";
+import type { Direction } from "./types";
+import { createContext } from "./v1";
 import { solve } from "./workers/v1.master";
-
-describe("reverseCells", () => {
-  test("rotate-90", () => {
-    const cells = ["133", "121", "312"];
-    const expected = ["113", "321", "312"];
-
-    const actual = reverseCells(cells, "reverse-90");
-
-    expect(actual).toStrictEqual(expected);
-  });
-
-  test("reverse-up-down", () => {
-    const cells = ["133", "121", "312"];
-    const expected = ["312", "121", "133"];
-
-    const actual = reverseCells(cells, "reverse-up-down");
-
-    expect(actual).toStrictEqual(expected);
-  });
-
-  test("reverse-left-right", () => {
-    const cells = ["133", "121", "312"];
-    const expected = ["331", "121", "213"];
-
-    const actual = reverseCells(cells, "reverse-left-right");
-
-    expect(actual).toStrictEqual(expected);
-  });
-});
 
 describe("algorithm v1 tests", () => {
   let problem: Problem;
@@ -58,9 +27,9 @@ describe("algorithm v1 tests", () => {
     const c = createContext(problem);
 
     for (const op of answer.ops) {
-      katanuki(c, fromPattern(op.p, problem.general), op.x, op.y, op.s as Direction);
+      katanuki(c, op.p, op.x, op.y, op.s as Direction);
     }
 
-    expect(c.board).toStrictEqual(problem.board.goal);
+    expect(cellsToBoard(c.board)).toStrictEqual(problem.board.goal);
   });
 });

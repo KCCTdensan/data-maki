@@ -72,12 +72,14 @@ export class AlgorithmFeature extends FeatureBase {
         this.log
           .withMetadata({
             id: solvingState.id,
+            turns: answer.ops.length,
           })
           .info("Answer is correct");
       } else {
         this.log
           .withMetadata({
             id: solvingState.id,
+            turns: answer.ops.length,
             expected: solvingState.problem.board.goal,
             actual: finalBoard,
           })
