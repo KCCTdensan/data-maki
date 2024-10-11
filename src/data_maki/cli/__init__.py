@@ -7,6 +7,6 @@ from .encoder import EnhancedJSONEncoder
 
 
 def main():
-    answer = solve(example_data)
+    answer, _ = solve(example_data)
 
     print(json.dumps(answer, indent=2, cls=EnhancedJSONEncoder))

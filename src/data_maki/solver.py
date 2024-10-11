@@ -215,4 +215,4 @@ def solve(problem: Problem):
 
     answer = Answer(g.n, g.ops)
 
-    return answer
+    return answer, g.board
