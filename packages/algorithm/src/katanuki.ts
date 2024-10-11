@@ -95,7 +95,7 @@ export const katanuki = (c: Context, p: number, x: number, y: number, dir: Direc
   }
 
   if (!c.board.equals(b)) {
-    c.board = b.clone();
+    c.board = b;
     c.currentElementCounts = countElementsColumnWise(c.board, c.worker);
 
     const op: Op = {

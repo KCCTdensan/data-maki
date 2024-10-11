@@ -77,6 +77,9 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
     for (const j of unfilled) {
       let isFilled = false;
 
+      let lookingCell = c.board.get(c.height - 1, j);
+      if (delta[lookingCell] <= 0) continue;
+
       dbg(c.worker, "fill row", j);
 
       for (let k = 1; k <= Math.max(j, c.width - j - 1); k++) {
