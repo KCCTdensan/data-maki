@@ -79,7 +79,7 @@ def solve_worker(problem: Problem):
         # unFilled
         for j in unfilled:
             is_filled = False
-            cell_lk = c.board.current.get(c.height, j)
+            cell_lk = c.board.current.get(c.height - 1, j)
             if delta[cell_lk] <= 0:
                 continue
 
