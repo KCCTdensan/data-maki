@@ -2,9 +2,10 @@ from threading import Barrier
 
 from . import utils
 from .context import Context
-from .katanuki import katanuki
+from .katanuki import katanuki, katanuki_board
 from .models.answer import Answer, Direction
 from .models.problem import InternalProblem, Problem
+from .evaluation import evaluate_col_elem, evaluate_row_piece
 
 TOTAL_WORKERS = 1
 
@@ -69,8 +70,30 @@ def solve_worker(problem: Problem):
                 cell_lk = c.board.current.get(k, j)
 
                 if delta[cell_lk] < 0:
-                    # now, only nukigata 0 is used. I can't imagine how to use other nukigata:(
-                    katanuki(c, 0, j, k, Direction.UP)
+                    cnt = 0
+                    value = (0, 0, 0, 256) # value = p, x, y, evaluation
+                    while k - (1 << cnt) + 1 >= cmped:
+                        x = j
+                        y = k - (1 << cnt) + 1
+                        p = 0
+                        evaluation = 0
+
+                        if cnt != 0:
+                            p = cnt * 3 - 1
+                            evaluation = evaluate_col_elem(c, p, x, y + 1, elems_goal[i])
+
+                            if value[3] > evaluation:
+                                value = (p, x, y + 1, evaluation)
+
+                        p = cnt * 3
+                        evaluation = evaluate_col_elem(c, p, x, y, elems_goal[i])
+
+                        if value[3] > evaluation:
+                            value = (p, x, y, evaluation)
+
+                        cnt += 1
+
+                    katanuki(c, value[0], value[1], value[2], Direction.UP)
                     is_filled = True
 
                     delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
@@ -211,10 +234,11 @@ def solve_worker(problem: Problem):
     cnt_unmoved = 0
     for i in range(c.width - 1, -1, -1):
         cmped = c.width - i - 1 - cnt_unmoved  # counts of rows completed yet
+        row_goal = c.board.goal.get_row(i)
 
         # only border
         for j in range(c.height):
-            cell_cr = c.board.goal.get(j, i)
+            cell_cr = row_goal[j]
 
             if c.board.current.get(j, c.width - 1 - cnt_unmoved) == cell_cr:
                 continue
@@ -228,8 +252,37 @@ def solve_worker(problem: Problem):
                 cell_lk = c.board.current.get(j, k)
 
                 if cell_cr == cell_lk:
-                    # now, only nukigata 0 is used. I can't imagine how to use other nukigata:(
-                    katanuki(c, 0, k, j, Direction.LEFT)
+                    cnt = 0
+                    value = (0, 0, 0, 256)
+                    while k - (1 << cnt) + 1 >= cmped:
+                        x = k - (1 << cnt) + 1
+                        y = j
+                        p = 0
+                        evaluation = 0
+
+                        if cnt != 0:
+                            p = cnt * 3 - 1
+                            evaluation = evaluate_row_piece(c, p, x, y, row_goal)
+
+                            if value[3] > evaluation:
+                                value = (p, x, y, evaluation)
+
+                            p = cnt * 3
+                            evaluation = evaluate_row_piece(c, p, x + 1, y, row_goal)
+
+                            if value[3] > evaluation:
+                                value = (p, x + 1, y, evaluation)
+
+                        else:
+                            p = 0
+                            evaluation = evaluate_row_piece(c, p, x, y, row_goal)
+
+                            if value[3] > evaluation:
+                                value = (p, x, y, evaluation)
+
+                        cnt += 1
+
+                    katanuki(c, value[0], value[1], value[2], Direction.LEFT)
                     break
 
         cnt_unmoved += 1

@@ -37,10 +37,8 @@ def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
     c.ops.append(Op(p, x, y, s))
 
 
-def katanuki(c: Context, p: int, x: int, y: int, s: Direction):
+def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
     pattern = get_pattern(p, c.patterns)
-
-    print([p, x, y, s])
 
     if x + pattern.width <= 0 or x >= c.width or y + pattern.height <= 0 or y >= c.height:
         raise Exception("Nukigata can't pick any cells :(")
@@ -119,6 +117,14 @@ def katanuki(c: Context, p: int, x: int, y: int, s: Direction):
 
     if s == Direction.UP or s == Direction.DOWN:
         b = utils.list_rv(b, ReverseOperation.Reverse90)
+
+    return b
+
+
+def katanuki(c: Context, p: int, x: int, y: int, s: Direction):
+    print([p, x, y, s])
+
+    b = katanuki_board(c, p, x, y, s)
 
     if c.board.current != b:
         c.board.current = b.copy()
