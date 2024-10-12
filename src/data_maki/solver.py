@@ -39,9 +39,10 @@ def solve_worker(problem: Problem):
 
     utils.print_board(c.board.current)
 
+    cnt_unmoved = 0
     for i in range(c.height - 1, -1, -1):
-        cmped = c.height - i - 1  # counts of columns completed yet
-        delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+        cmped = c.height - i - 1 - cnt_unmoved  # counts of columns completed yet
+        delta = utils.get_delta(c.elems_now[c.height - 1 - cnt_unmoved], elems_goal[i])
 
         print(f"delta = {delta}")
 
@@ -51,6 +52,11 @@ def solve_worker(problem: Problem):
         for j in range(c.width):
             if delta == [0, 0, 0, 0]:
                 break
+
+            if cnt_unmoved > 0:
+                katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
+                cmped += cnt_unmoved
+                cnt_unmoved = 0
 
             cell_lk = c.board.current.get(c.height - 1, j)
 
@@ -88,9 +94,9 @@ def solve_worker(problem: Problem):
             for k in range(1, max(j, c.width - j - 1) + 1):
                 # right side
                 x = j + k
-                print(f"check row {x}")
 
                 if x < c.width:
+                    print(f"check row {x}")
                     for m in range(c.height - 2, cmped - 1, -1):
                         cell_lk = c.board.current.get(m, x)
 
@@ -143,9 +149,8 @@ def solve_worker(problem: Problem):
                 # left side
                 x = j - k
 
-                print(f"check row {x}")
-
                 if x >= 0:
+                    print(f"check row {x}")
                     for m in range(c.height - 2, cmped - 1, -1):
                         cell_lk = c.board.current.get(m, x)
 
@@ -197,30 +202,27 @@ def solve_worker(problem: Problem):
                 if is_filled:
                     break
 
-        # next column
-        katanuki(c, 22, 0, c.height - 1, Direction.DOWN)
+        cnt_unmoved += 1
 
-        delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+        if i == 0:
+            katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
 
-    """
-    c.rv_uldr = True
-    c.board.goal = func.list_rv(c.board.goal, c.rv_uldr, c.rv_ud, c.rv_lr)
-    c.board_now = func.list_rv(c.board_now, c.rv_uldr, c.rv_ud, c.rv_lr)
 
-    print(f"reversed ULDR: {c.rv_uldr}, UD: {c.rv_ud}, LR: {c.rv_lr},")
-    func.print_board()
-
-    """
-
+    cnt_unmoved = 0
     for i in range(c.width - 1, -1, -1):
-        cmped = c.width - i - 1  # counts of columns completed yet
+        cmped = c.width - i - 1 - cnt_unmoved  # counts of rows completed yet
 
-        # only stripe
+        # only border
         for j in range(c.height):
             cell_cr = c.board.goal.get(j, i)
 
-            if c.board.current.get(j, c.width - 1) == cell_cr:
+            if c.board.current.get(j, c.width - 1 - cnt_unmoved) == cell_cr:
                 continue
+
+            if cnt_unmoved > 0:
+                katanuki(c, 22, c.width - cnt_unmoved, 0, Direction.RIGHT)
+                cmped += cnt_unmoved
+                cnt_unmoved = 0
 
             for k in range(c.width - 2, cmped - 1, -1):
                 cell_lk = c.board.current.get(j, k)
@@ -230,8 +232,10 @@ def solve_worker(problem: Problem):
                     katanuki(c, 0, k, j, Direction.LEFT)
                     break
 
-        # next column
-        katanuki(c, 22, c.width - 1, 0, Direction.RIGHT)
+        cnt_unmoved += 1
+
+        if i == 0:
+            katanuki(c, 22, c.width - cnt_unmoved, 0, Direction.RIGHT)
 
     """
     c.board = utils.list_rv(c.board, c.rv_uldr, c.rv_ud, c.rv_lr)
