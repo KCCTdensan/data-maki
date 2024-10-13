@@ -21,8 +21,8 @@ class ReturnableThread[T](Thread):
 
 
 def print_board(board: TwoDimensionalIntArray):
-    for col in board.loop_column():
-        print(col)
+    for row in board.loop_row():
+        print(row)
 
     print()
 
@@ -46,9 +46,45 @@ def list_rv(arr: TwoDimensionalIntArray, strategy: ReverseOperation):
         case ReverseOperation.Reverse90:
             return arr.transpose()
         case ReverseOperation.ReverseUpDown:
-            return arr.reverse_column_wise()
-        case ReverseOperation.ReverseLeftRight:
             return arr.reverse_row_wise()
+        case ReverseOperation.ReverseLeftRight:
+            return arr.reverse_column_wise()
+
+    return arr
+
+
+def reverse(arr: TwoDimensionalIntArray, rv_op: ReverseOperationPatterns):
+    if rv_op.has_reverse90:
+        arr = arr.transpose()
+
+        if rv_op.has_reverse_left_right:
+            arr = arr.reverse_row_wise()
+        if rv_op.has_reverse_up_down:
+            arr = arr.reverse_column_wise()
+
+    else:
+        if rv_op.has_reverse_left_right:
+            arr = arr.reverse_column_wise()
+        if rv_op.has_reverse_up_down:
+            arr = arr.reverse_row_wise()
+
+    return arr
+
+
+def dereverse(arr: TwoDimensionalIntArray, rv_op: ReverseOperationPatterns):
+    if rv_op.has_reverse90:
+        if rv_op.has_reverse_left_right:
+            arr = arr.reverse_row_wise()
+        if rv_op.has_reverse_up_down:
+            arr = arr.reverse_column_wise()
+
+        arr = arr.transpose()
+
+    else:
+        if rv_op.has_reverse_left_right:
+            arr = arr.reverse_column_wise()
+        if rv_op.has_reverse_up_down:
+            arr = arr.reverse_row_wise()
 
     return arr
 
@@ -56,8 +92,8 @@ def list_rv(arr: TwoDimensionalIntArray, strategy: ReverseOperation):
 def count_elements(b: TwoDimensionalIntArray):
     elems = [[0, 0, 0, 0] for _ in range(b.height)]
 
-    for i, cols in enumerate(b.loop_column()):
-        for cell in cols:
+    for i, rows in enumerate(b.loop_row()):
+        for cell in rows:
             elems[i][cell] += 1
 
     return elems

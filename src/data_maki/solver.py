@@ -5,7 +5,7 @@ from .context import Context
 from .katanuki import katanuki, katanuki_board
 from .models.answer import Answer, Direction
 from .models.problem import InternalProblem, Problem
-from .evaluation import evaluate_col_elem, evaluate_row_piece
+from .evaluation import evaluate_row_elem, evaluate_col_piece
 
 TOTAL_WORKERS = 1
 
@@ -30,9 +30,25 @@ def solve_worker(problem: Problem):
 
     worker_barrier.wait()
 
-    c.width = problem["board"]["width"]
-    c.height = problem["board"]["height"]
+    rv_ul = False
+    rv_ud = False
+    rv_lr = False
+
+    c.rv_op.has_reverse90 = rv_ul
+    c.rv_op.has_reverse_up_down = rv_ud
+    c.rv_op.has_reverse_left_right = rv_lr
+
+    if c.rv_op.has_reverse90:
+        c.width = problem["board"]["height"]
+        c.height = problem["board"]["width"]
+    else:
+        c.width = problem["board"]["width"]
+        c.height = problem["board"]["height"]
+
     c.board = InternalProblem.from_problem(problem)
+
+    c.board.current = utils.reverse(c.board.current, c.rv_op)
+    c.board.goal = utils.reverse(c.board.goal, c.rv_op)
 
     # counts of 0~3 in each of columns
     elems_goal = utils.count_elements(c.board.goal)
@@ -70,26 +86,42 @@ def solve_worker(problem: Problem):
                 cell_lk = c.board.current.get(k, j)
 
                 if delta[cell_lk] < 0:
+                    print(f"looking at {cell_lk} on x: {j} y: {k}")
                     cnt = 0
                     value = (0, 0, 0, 256) # value = p, x, y, evaluation
                     while k - (1 << cnt) + 1 >= cmped:
                         x = j
                         y = k - (1 << cnt) + 1
                         p = 0
+                        px = 0
+                        py = 0
                         evaluation = 0
 
                         if cnt != 0:
                             p = cnt * 3 - 1
-                            evaluation = evaluate_col_elem(c, p, x, y + 1, elems_goal[i])
+                            px = x - 1 if rv_ul and rv_ud else x
+                            py = y + 1 if not rv_ul and not rv_ud else y
+                            evaluation = evaluate_row_elem(c, p, px, py, elems_goal[i])
 
                             if value[3] > evaluation:
-                                value = (p, x, y + 1, evaluation)
+                                value = (p, px, py, evaluation)
 
-                        p = cnt * 3
-                        evaluation = evaluate_col_elem(c, p, x, y, elems_goal[i])
+                            p = cnt * 3
+                            px = x - 1 if not rv_ul and rv_lr else x
+                            py = y + 1 if rv_ul and not rv_lr else y
+                            evaluation = evaluate_row_elem(c, p, px, py, elems_goal[i])
 
-                        if value[3] > evaluation:
-                            value = (p, x, y, evaluation)
+                            if value[3] > evaluation:
+                                value = (p, px, py, evaluation)
+
+                        else:
+                            p = 0
+                            px = x
+                            py = y
+                            evaluation = evaluate_row_elem(c, p, px, py, elems_goal[i])
+
+                            if value[3] > evaluation:
+                                value = (p, px, py, evaluation)
 
                         cnt += 1
 
@@ -112,14 +144,14 @@ def solve_worker(problem: Problem):
             if delta[cell_lk] <= 0:
                 continue
 
-            print(f"fill row {j}")
+            print(f"fill column {j}")
 
             for k in range(1, max(j, c.width - j - 1) + 1):
                 # right side
                 x = j + k
 
                 if x < c.width:
-                    print(f"check row {x}")
+                    print(f"check column {x}")
                     for m in range(c.height - 2, cmped - 1, -1):
                         cell_lk = c.board.current.get(m, x)
 
@@ -134,7 +166,13 @@ def solve_worker(problem: Problem):
                             if m % 2 == (c.height - 1) % 2:
                                 print("protect confusing")
                                 # move cell_lk the place confused and move the deepest cell the place not confused
-                                katanuki(c, 3, x, y, Direction.UP)
+                                katanuki(
+                                    c,
+                                    2 if rv_ul else 3,
+                                    x if not rv_ul and not rv_lr or rv_ul and not rv_ud else x - 1,
+                                    y,
+                                    Direction.UP
+                                )
                                 irregular = True
                                 y = c.height - 2
 
@@ -145,9 +183,9 @@ def solve_worker(problem: Problem):
                                     # border nukigata (else...1*1)
                                     katanuki(
                                         c,
-                                        3 * cnt - 1 if cnt != 0 else 0,
+                                        0 if cnt == 0 else 3 * cnt if rv_ul else 3 * cnt - 1,
                                         x - (1 << cnt),
-                                        y,
+                                        y if not rv_ud and not rv_ul or not rv_lr and rv_ul or cnt == 0 else y - 1,
                                         Direction.LEFT,
                                     )
                                     x -= 1 << cnt
@@ -173,7 +211,7 @@ def solve_worker(problem: Problem):
                 x = j - k
 
                 if x >= 0:
-                    print(f"check row {x}")
+                    print(f"check column {x}")
                     for m in range(c.height - 2, cmped - 1, -1):
                         cell_lk = c.board.current.get(m, x)
 
@@ -189,7 +227,13 @@ def solve_worker(problem: Problem):
                                 print("protect confusing")
 
                                 # move cell_lk the place confused and move the deepest cell the place not confused
-                                katanuki(c, 3, x, y, Direction.UP)
+                                katanuki(
+                                    c,
+                                    2 if rv_ul else 3,
+                                    x if not rv_ul and not rv_lr or rv_ul and not rv_ud else x - 1,
+                                    y,
+                                    Direction.UP
+                                )
                                 irregular = True
                                 y = c.height - 2
 
@@ -200,9 +244,9 @@ def solve_worker(problem: Problem):
                                     # border nukigata (else...1*1)
                                     katanuki(
                                         c,
-                                        3 * cnt - 1 if cnt != 0 else 0,
+                                        0 if cnt == 0 else 3 * cnt if rv_ul else 3 * cnt - 1,
                                         x + 1,
-                                        y,
+                                        y if not rv_ud and not rv_ul or not rv_lr and rv_ul or cnt == 0 else y - 1,
                                         Direction.RIGHT,
                                     )
 
@@ -233,12 +277,12 @@ def solve_worker(problem: Problem):
 
     cnt_unmoved = 0
     for i in range(c.width - 1, -1, -1):
-        cmped = c.width - i - 1 - cnt_unmoved  # counts of rows completed yet
-        row_goal = c.board.goal.get_row(i)
+        cmped = c.width - i - 1 - cnt_unmoved  # counts of columns completed yet
+        column_goal = c.board.goal.get_column(i)
 
         # only border
         for j in range(c.height):
-            cell_cr = row_goal[j]
+            cell_cr = column_goal[j]
 
             if c.board.current.get(j, c.width - 1 - cnt_unmoved) == cell_cr:
                 continue
@@ -258,27 +302,35 @@ def solve_worker(problem: Problem):
                         x = k - (1 << cnt) + 1
                         y = j
                         p = 0
+                        px = 0
+                        py = 0
                         evaluation = 0
 
                         if cnt != 0:
                             p = cnt * 3 - 1
-                            evaluation = evaluate_row_piece(c, p, x, y, row_goal)
+                            px = x + 1 if rv_ul and not rv_ud else x
+                            py = y - 1 if not rv_ul and rv_ud else y
+                            evaluation = evaluate_col_piece(c, p, px, py, column_goal)
 
                             if value[3] > evaluation:
-                                value = (p, x, y, evaluation)
+                                value = (p, px, py, evaluation)
 
                             p = cnt * 3
-                            evaluation = evaluate_row_piece(c, p, x + 1, y, row_goal)
+                            px = x + 1 if not rv_ul and not rv_lr else x
+                            py = y - 1 if rv_ul and rv_lr else y
+                            evaluation = evaluate_col_piece(c, p, px, py, column_goal)
 
                             if value[3] > evaluation:
-                                value = (p, x + 1, y, evaluation)
+                                value = (p, px, py, evaluation)
 
                         else:
                             p = 0
-                            evaluation = evaluate_row_piece(c, p, x, y, row_goal)
+                            px = x
+                            py = y
+                            evaluation = evaluate_col_piece(c, p, px, py, column_goal)
 
                             if value[3] > evaluation:
-                                value = (p, x, y, evaluation)
+                                value = (p, px, py, evaluation)
 
                         cnt += 1
 
@@ -290,9 +342,11 @@ def solve_worker(problem: Problem):
         if i == 0:
             katanuki(c, 22, c.width - cnt_unmoved, 0, Direction.RIGHT)
 
-    """
-    c.board = utils.list_rv(c.board, c.rv_uldr, c.rv_ud, c.rv_lr)
-    """
+    c.board.current = utils.dereverse(c.board.current, c.rv_op)
+    c.board.goal = utils.dereverse(c.board.goal, c.rv_op)
+
+    print("dereverse")
+    utils.print_board(c.board.current)
 
     answer = Answer(c.n, c.ops)
 

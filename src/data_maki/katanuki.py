@@ -6,14 +6,30 @@ from .utils import ReverseOperation
 
 
 def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
-    # this function can't correct x&y confused by ud or lr
-    if c.rv_op.has_reverse_left_right:
-        if s == Direction.LEFT:
-            s = Direction.RIGHT
-        elif s == Direction.RIGHT:
-            s = Direction.LEFT
+    pattern = get_pattern(p, c.patterns)
 
+    # this function can't correct x&y confused by ud or lr
     if c.rv_op.has_reverse90:
+        val = x
+        x = y
+        y = val
+
+        if c.rv_op.has_reverse_up_down:
+            y -= pattern.height - 1
+
+            if s == Direction.LEFT:
+                s = Direction.RIGHT
+            elif s == Direction.RIGHT:
+                s = Direction.LEFT
+
+        if c.rv_op.has_reverse_left_right:
+            x -= pattern.width - 1
+
+            if s == Direction.UP:
+                s = Direction.DOWN
+            elif s == Direction.DOWN:
+                s = Direction.UP
+
         if s == Direction.UP:
             s = Direction.LEFT
         elif s == Direction.DOWN:
@@ -23,15 +39,25 @@ def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
         elif s == Direction.RIGHT:
             s = Direction.DOWN
 
-        val = x
-        x = y
-        y = val
 
-    if c.rv_op.has_reverse_up_down:
-        if s == Direction.UP:
-            s = Direction.DOWN
-        elif s == Direction.DOWN:
-            s = Direction.UP
+    else:
+        if c.rv_op.has_reverse_up_down:
+            y -= pattern.height - 1
+
+            if s == Direction.UP:
+                s = Direction.DOWN
+            elif s == Direction.DOWN:
+                s = Direction.UP
+
+        if c.rv_op.has_reverse_left_right:
+            x -= pattern.width - 1
+
+            if s == Direction.LEFT:
+                s = Direction.RIGHT
+            elif s == Direction.RIGHT:
+                s = Direction.LEFT
+
+
 
     c.n += 1
     c.ops.append(Op(p, x, y, s))
@@ -39,6 +65,7 @@ def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
 
 def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
     pattern = get_pattern(p, c.patterns)
+    pt = utils.reverse(pattern.cells, c.rv_op)
 
     if x + pattern.width <= 0 or x >= c.width or y + pattern.height <= 0 or y >= c.height:
         raise Exception("Nukigata can't pick any cells :(")
@@ -48,20 +75,20 @@ def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
         b = utils.list_rv(c.board.current, ReverseOperation.Reverse90)
         bx = c.height
         by = c.width
-        pw = pattern.height
-        ph = pattern.width
+        pw = pt.height
+        ph = pt.width
         px = y
         py = x
-        pattern = utils.list_rv(pattern.cells, ReverseOperation.Reverse90)
+        pattern = utils.list_rv(pt, ReverseOperation.Reverse90)
     elif s == Direction.LEFT or s == Direction.RIGHT:
         b = c.board.current.copy()
         bx = c.width
         by = c.height
-        pw = pattern.width
-        ph = pattern.height
+        pw = pt.width
+        ph = pt.height
         px = x
         py = y
-        pattern = pattern.cells.copy()
+        pattern = pt.copy()
     else:
         raise Exception("the direction is not exist! :(")
 
@@ -90,7 +117,7 @@ def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
         if ly >= by:
             break
 
-        now_col: list[int] = b.get_column(ly)
+        now_col: list[int] = b.get_row(ly)
         # nukigata de nuita cell
         picked = []
 
@@ -113,7 +140,7 @@ def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
         else:
             now_col = picked + now_col
 
-        b.set_column(ly, now_col)
+        b.set_row(ly, now_col)
 
     if s == Direction.UP or s == Direction.DOWN:
         b = utils.list_rv(b, ReverseOperation.Reverse90)
