@@ -1,7 +1,7 @@
 import type { Op } from "@data-maki/schemas";
 import { type InternalPattern, getPattern } from "./models/pattern";
 import { type Context, DOWN, type Direction, LEFT, type Point, UP } from "./types";
-import { TwoDimensionalCells, dbgCells, reverseCells } from "./utils/arrays";
+import { type TwoDimensionalCells, dbgCells, reverseCells } from "./utils/arrays";
 import { countElementsColumnWise } from "./utils/board";
 import { dbg } from "./workers/log";
 
@@ -67,7 +67,7 @@ export const katanuki = (c: Context, p: number, x: number, y: number, dir: Direc
     if (l.y < 0) continue;
     if (l.y >= by) break;
 
-    const currentCol = b.getColumn(l.y);
+    const currentRow = b.getRow(l.y);
     const picked: number[] = [];
 
     for (let j = pw - 1; j > -1; j--) {
@@ -78,16 +78,16 @@ export const katanuki = (c: Context, p: number, x: number, y: number, dir: Direc
 
       if (pattern.get(i, j) === 0) continue;
 
-      picked.unshift(currentCol.splice(l.x, 1)[0]);
+      picked.unshift(currentRow.splice(l.x, 1)[0]);
     }
 
     if (dir === UP || dir === LEFT) {
-      currentCol.push(...picked);
+      currentRow.push(...picked);
     } else {
-      currentCol.unshift(...picked);
+      currentRow.unshift(...picked);
     }
 
-    b.setColumn(l.y, currentCol);
+    b.setRow(l.y, currentRow);
   }
 
   if (dir === UP || dir === DOWN) {

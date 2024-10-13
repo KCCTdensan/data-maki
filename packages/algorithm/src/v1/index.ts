@@ -35,7 +35,7 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
   let delta: CellCounts;
 
   for (let i = c.height - 1; i > -1; i--) {
-    const completedColumns = c.height - i - 1;
+    const completedRows = c.height - i - 1;
 
     delta = getDelta(c.currentElementCounts[c.height - 1], goalElementCounts[i]);
 
@@ -55,7 +55,7 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
 
       let isFilled = false;
 
-      for (let k = c.height - 2; k > completedColumns - 1; k--) {
+      for (let k = c.height - 2; k > completedRows - 1; k--) {
         lookingCell = c.board.get(k, j);
 
         if (delta[lookingCell] < 0) {
@@ -77,10 +77,10 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
     for (const j of unfilled) {
       let isFilled = false;
 
-      let lookingCell = c.board.get(c.height - 1, j);
+      const lookingCell = c.board.get(c.height - 1, j);
       if (delta[lookingCell] <= 0) continue;
 
-      dbg(c.worker, "fill row", j);
+      dbg(c.worker, "fill column", j);
 
       for (let k = 1; k <= Math.max(j, c.width - j - 1); k++) {
         // TODO: compare and combine right side and left side
@@ -88,10 +88,10 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
         // right side
         let rx = j + k;
 
-        dbg(c.worker, "check row", rx);
+        dbg(c.worker, "check column", rx);
 
         if (rx < c.width) {
-          for (let m = c.height - 2; m >= completedColumns; m--) {
+          for (let m = c.height - 2; m >= completedRows; m--) {
             const lookingCell = c.board.get(m, rx);
 
             if (delta[lookingCell] < 0) {
@@ -144,10 +144,10 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
         // left side
         let lx = j - k;
 
-        dbg(c.worker, "check row", lx);
+        dbg(c.worker, "check column", lx);
 
         if (lx >= 0) {
-          for (let m = c.height - 2; m >= completedColumns; m--) {
+          for (let m = c.height - 2; m >= completedRows; m--) {
             const lookingCell = c.board.get(m, lx);
 
             if (delta[lookingCell] < 0) {
@@ -199,13 +199,13 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
       }
     }
 
-    // Next column
+    // Next row
     katanuki(c, 22, 0, c.height - 1, DOWN);
     delta = getDelta(c.currentElementCounts[c.height - 1], goalElementCounts[i]);
   }
 
   for (let i = c.width - 1; i > -1; i--) {
-    const completedColumns = c.width - i - 1;
+    const completedRows = c.width - i - 1;
 
     // Only stripe
     for (const j of Array(c.height).keys()) {
@@ -213,7 +213,7 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
 
       if (c.board.get(j, c.width - 1) === correctCell) continue;
 
-      for (let k = c.width - 2; k > completedColumns - 1; k--) {
+      for (let k = c.width - 2; k > completedRows - 1; k--) {
         const lookingCell = c.board.get(j, k);
 
         if (lookingCell === correctCell) {
@@ -225,7 +225,7 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
       }
     }
 
-    // Next column
+    // Next row
     katanuki(c, 22, c.width - 1, 0, RIGHT);
   }
 

@@ -15,7 +15,7 @@ export class Barrier {
   }
 
   private add(n: number) {
-    let current = n + Atomics.add(this.#barrier, 0, n);
+    const current = n + Atomics.add(this.#barrier, 0, n);
 
     if (current < 0) throw new Error("Barrier is poisoned: negative count");
     if (current > 0) return;
