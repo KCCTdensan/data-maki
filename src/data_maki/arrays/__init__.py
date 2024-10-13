@@ -1,4 +1,6 @@
 from dataclasses import dataclass, field
+import numpy as np
+import numpy.typing as npt
 
 
 def flatten[T](arr: list[list[T]]) -> list[T]:
@@ -7,7 +9,7 @@ def flatten[T](arr: list[list[T]]) -> list[T]:
 
 @dataclass()
 class TwoDimensionalIntArray:
-    inner: list[int]
+    inner: npt.NDArray[np.int64]
     width: int
     height: int
 
@@ -22,7 +24,10 @@ class TwoDimensionalIntArray:
         if not isinstance(value, TwoDimensionalIntArray):
             return False
 
-        return self.inner == value.inner and self.width == value.width and self.height == value.height
+        return np.array_equal(self.inner, value.inner) and self.width == value.width and self.height == value.height
+
+    def size(self):
+        return self.width * self.height
 
     def copy(self) -> "TwoDimensionalIntArray":
         return TwoDimensionalIntArray(inner=self.inner.copy(), width=self.width, height=self.height)
@@ -31,11 +36,17 @@ class TwoDimensionalIntArray:
         if idx_row < 0 or idx_row >= self.height or idx_column < 0 or idx_column >= self.width:
             raise IndexError(f"Out of range in get({idx_row}, {idx_column})")
 
-        return self.inner[self.width * idx_row + idx_column]
+        return self.inner[self.width * idx_row + idx_column].item()
 
     def get_multiple(self, offset: int, length: int) -> list[int]:
         if offset < 0 or offset >= len(self.inner) or offset + length > len(self.inner):
             raise IndexError(f"Out of range in get_multiple({offset}, {length})")
+
+        return [e.item() for e in self.inner[offset : offset + length].copy()]
+
+    def get_multiple_view(self, offset: int, length: int) -> npt.NDArray[np.int64]:
+        if offset < 0 or offset >= len(self.inner) or offset + length > len(self.inner):
+            raise IndexError(f"Out of range in get_multiple_view({offset}, {length})")
 
         return self.inner[offset : offset + length]
 
@@ -45,15 +56,25 @@ class TwoDimensionalIntArray:
 
         return self.get_multiple(self.width * idx, self.width)
 
+    def get_row_view(self, idx: int) -> npt.NDArray[np.int64]:
+        if idx < 0 or idx >= self.height:
+            raise IndexError(f"Out of range in get_column({idx})")
+
+        return self.get_multiple_view(self.width * idx, self.width)
+
     def loop_row(self):
         for i in range(self.height):
             yield self.get_row(i)
+
+    def loop_row_views(self):
+        for i in range(self.height):
+            yield self.get_row_view(i)
 
     def get_column(self, idx: int) -> list[int]:
         if idx < 0 or idx >= self.width:
             raise IndexError(f"Out of range in get_row({idx})")
 
-        return self.inner[idx :: self.width]
+        return [e.item() for e in self.inner[idx :: self.width].copy()]
 
     def loop_column(self):
         for i in range(self.width):
@@ -78,17 +99,34 @@ class TwoDimensionalIntArray:
 
         self.set_multiple(self.width * idx, *row)
 
+    def transpose_inplace(self):
+        self.inner = self.inner.reshape(self.height, self.width).T.flatten()
+
+        self.width, self.height = self.height, self.width
+
     def transpose(self) -> "TwoDimensionalIntArray":
-        return TwoDimensionalIntArray(
-            flatten([self.get_column(x) for x in range(self.width)]), width=self.height, height=self.width
-        )
+        inner = self.copy()
+
+        inner.transpose_inplace()
+
+        return inner
+
+    def reverse_row_wise_inplace(self):
+        self.inner = flatten([self.get_row(x) for x in range(self.height - 1, -1, -1)])
 
     def reverse_row_wise(self) -> "TwoDimensionalIntArray":
-        return TwoDimensionalIntArray(
-            flatten([self.get_row(x) for x in range(self.height - 1, -1, -1)]), width=self.width, height=self.height
-        )
+        inner = self.copy()
+
+        inner.reverse_row_wise_inplace()
+
+        return inner
+
+    def reverse_column_wise_inplace(self):
+        self.inner = flatten([self.get_row(x)[::-1] for x in range(self.height)])
 
     def reverse_column_wise(self) -> "TwoDimensionalIntArray":
-        return TwoDimensionalIntArray(
-            flatten([self.get_row(x)[::-1] for x in range(self.height)]), width=self.width, height=self.height
-        )
+        inner = self.copy()
+
+        inner.reverse_column_wise_inplace()
+
+        return inner

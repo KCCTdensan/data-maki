@@ -95,7 +95,7 @@ def main():
         print(f"{name}...", end=" ")
 
         with redirect_stdout(open(os.devnull, "w")):
-            answer = solve(data)
+            answer, board = solve(data)
 
         print(f"{answer.n} turns")
         ns.append(answer.n)

@@ -88,7 +88,7 @@ def solve_worker(problem: Problem):
                 if delta[cell_lk] < 0:
                     print(f"looking at {cell_lk} on x: {j} y: {k}")
                     cnt = 0
-                    value = (0, 0, 0, 256) # value = p, x, y, evaluation
+                    value = (0, 0, 0, 256)  # value = p, x, y, evaluation
                     while k - (1 << cnt) + 1 >= cmped:
                         x = j
                         y = k - (1 << cnt) + 1
@@ -171,7 +171,7 @@ def solve_worker(problem: Problem):
                                     2 if rv_ul else 3,
                                     x if not rv_ul and not rv_lr or rv_ul and not rv_ud else x - 1,
                                     y,
-                                    Direction.UP
+                                    Direction.UP,
                                 )
                                 irregular = True
                                 y = c.height - 2
@@ -232,7 +232,7 @@ def solve_worker(problem: Problem):
                                     2 if rv_ul else 3,
                                     x if not rv_ul and not rv_lr or rv_ul and not rv_ud else x - 1,
                                     y,
-                                    Direction.UP
+                                    Direction.UP,
                                 )
                                 irregular = True
                                 y = c.height - 2
@@ -273,7 +273,6 @@ def solve_worker(problem: Problem):
 
         if i == 0:
             katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
-
 
     cnt_unmoved = 0
     for i in range(c.width - 1, -1, -1):

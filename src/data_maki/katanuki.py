@@ -39,7 +39,6 @@ def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
         elif s == Direction.RIGHT:
             s = Direction.DOWN
 
-
     else:
         if c.rv_op.has_reverse_up_down:
             y -= pattern.height - 1
@@ -57,17 +56,15 @@ def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
             elif s == Direction.RIGHT:
                 s = Direction.LEFT
 
-
-
     c.n += 1
     c.ops.append(Op(p, x, y, s))
 
 
 def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
-    pattern = get_pattern(p, c.patterns)
-    pt = utils.reverse(pattern.cells, c.rv_op)
+    pattern_ = get_pattern(p, c.patterns)
+    pattern = utils.reverse(pattern_.cells, c.rv_op)
 
-    if x + pattern.width <= 0 or x >= c.width or y + pattern.height <= 0 or y >= c.height:
+    if x + pattern_.width <= 0 or x >= c.width or y + pattern_.height <= 0 or y >= c.height:
         raise Exception("Nukigata can't pick any cells :(")
 
     # stripe -> reverse / border -> normal
@@ -75,20 +72,20 @@ def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
         b = utils.list_rv(c.board.current, ReverseOperation.Reverse90)
         bx = c.height
         by = c.width
-        pw = pt.height
-        ph = pt.width
+        pw = pattern.height
+        ph = pattern.width
         px = y
         py = x
-        pattern = utils.list_rv(pt, ReverseOperation.Reverse90)
+        pattern = utils.list_rv(pattern, ReverseOperation.Reverse90)
     elif s == Direction.LEFT or s == Direction.RIGHT:
         b = c.board.current.copy()
         bx = c.width
         by = c.height
-        pw = pt.width
-        ph = pt.height
+        pw = pattern.width
+        ph = pattern.height
         px = x
         py = y
-        pattern = pt.copy()
+        # pattern: do nothing
     else:
         raise Exception("the direction is not exist! :(")
 
@@ -154,7 +151,7 @@ def katanuki(c: Context, p: int, x: int, y: int, s: Direction):
     b = katanuki_board(c, p, x, y, s)
 
     if c.board.current != b:
-        c.board.current = b.copy()
+        c.board.current = b
 
         add_ops(c, p, x, y, s)
 

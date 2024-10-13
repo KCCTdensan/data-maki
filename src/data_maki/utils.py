@@ -92,9 +92,9 @@ def dereverse(arr: TwoDimensionalIntArray, rv_op: ReverseOperationPatterns):
 def count_elements(b: TwoDimensionalIntArray):
     elems = [[0, 0, 0, 0] for _ in range(b.height)]
 
-    for i, rows in enumerate(b.loop_row()):
+    for i, rows in enumerate(b.loop_row_views()):
         for cell in rows:
-            elems[i][cell] += 1
+            elems[i][cell.item()] += 1
 
     return elems
 

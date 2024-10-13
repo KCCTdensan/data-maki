@@ -16,6 +16,8 @@ marshmallow==3.22.0
     # via dataclasses-json
 mypy-extensions==1.0.0
     # via typing-inspect
+numpy==2.1.2
+    # via data-maki
 packaging==24.1
     # via marshmallow
 typing-extensions==4.12.2
