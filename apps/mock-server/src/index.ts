@@ -19,18 +19,23 @@ const validateAnswer = typia.createValidate<Answer>();
 
 const validTokens = new Set(config.teams);
 
-const generationSettings: { widthRandom: boolean; heightRandom: boolean; width: number; height: number } = {
+const generationSettings: {
+  widthRandom: boolean;
+  heightRandom: boolean;
+  width: number;
+  height: number;
+  genKind: number;
+} = {
   widthRandom: true,
   heightRandom: true,
   width: 0,
   height: 0,
+  genKind: 0,
 };
 
 function getRandomInt<TMin extends number, TMax extends number>(min: TMin, max: TMax): IntRange<TMin, TMax> {
   return Math.floor(Math.random() * (max - min) + min) as unknown as IntRange<TMin, TMax>; // [min,max]
 }
-
-const [id, problem] = generateProblem(generationSettings);
 
 const app = new Hono();
 
@@ -48,6 +53,8 @@ app.use(async (c, next) => {
 });
 
 app.get("/problem", (c) => {
+  const [id, problem] = generateProblem(generationSettings);
+
   c.header("X-Data-Maki-Problem-ID", id.toString());
 
   return c.json(problem);
@@ -73,6 +80,7 @@ app.post("/settings", async (c) => {
   generationSettings.heightRandom = settings.heightRandom;
   generationSettings.width = settings.width;
   generationSettings.height = settings.height;
+  generationSettings.genKind = settings.genKind;
 
   return c.json({ success: true });
 });

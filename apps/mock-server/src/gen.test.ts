@@ -11,6 +11,7 @@ describe("generated problem parsing", () => {
       heightRandom: true,
       width: 0,
       height: 0,
+      genKind: 0,
     });
 
     typia.assert<Problem>(problem);
