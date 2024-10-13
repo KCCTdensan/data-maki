@@ -42,7 +42,7 @@ const generatePatternData = (
           x,
           y,
         },
-        pattern: pattern.cells.clone(),
+        pattern: pattern.cells,
       };
 
 export const katanuki = (c: Context, p: number, x: number, y: number, dir: Direction) => {
