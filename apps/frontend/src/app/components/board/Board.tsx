@@ -1,6 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Box, ScrollArea } from "@yamada-ui/react";
-import { Fragment, forwardRef, useCallback, useRef } from "react";
+import { Fragment, useCallback, useRef } from "react";
 import { ScrollSyncNode } from "scroll-sync-react";
 import { BoardCell } from "./Cell";
 

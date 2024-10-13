@@ -3,13 +3,15 @@ import { localizeSolverEvent } from "@/lib/events";
 import { type Board, isSolverEvent, isUIMessageEvent } from "@data-maki/schemas";
 import { Box, Card, CardBody, CardHeader, Grid, Heading, Text } from "@yamada-ui/react";
 import { useAtomValue } from "jotai";
+import { RealtimeDuration } from "../date/RealtimeDuration";
 
-type Props = {
+type Props = Partial<{
+  solveId: string;
   board: Board;
   startedAt: Date;
-};
+}>;
 
-export const StatsCard = ({ board, startedAt }: Props) => {
+export const StatsCard = ({ solveId, board, startedAt }: Props) => {
   const connectionStatus = useAtomValue(connectionStatusAtom);
   const currentEvent = useAtomValue(eventStreamAtom);
 
@@ -31,6 +33,10 @@ export const StatsCard = ({ board, startedAt }: Props) => {
                     <td>{localizeSolverEvent(currentEvent)}</td>
                   </tr>
                   <tr>
+                    <td>ID:</td>
+                    <td>{solveId}</td>
+                  </tr>
+                  <tr>
                     <td>Width:</td>
                     <td>{board.width}</td>
                   </tr>
@@ -40,7 +46,9 @@ export const StatsCard = ({ board, startedAt }: Props) => {
                   </tr>
                   <tr>
                     <td>Time:</td>
-                    <td>TODO!()</td>
+                    <td>
+                      <RealtimeDuration startDate={startedAt} interval={800} />
+                    </td>
                   </tr>
                 </>
               ) : (

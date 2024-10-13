@@ -121,7 +121,10 @@ export const eventStreamAtom = atom(
               if (!isSolverEvent(event)) return;
 
               if (event.eventName === "solve.start") {
-                set(solverDataAtom, event);
+                set(solverDataAtom, {
+                  ...event,
+                  startedAt: new Date(event.startedAt),
+                });
               }
             },
           }),

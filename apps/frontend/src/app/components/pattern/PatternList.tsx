@@ -1,5 +1,4 @@
 import { type Pattern as PatternSchema, fixedPatterns } from "@data-maki/schemas";
-import { css } from "@style/css";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Box, Card, CardBody, FormControl, HStack, Option, ScrollArea, Select } from "@yamada-ui/react";
 import { Fragment, useRef, useState } from "react";
@@ -11,12 +10,7 @@ type Props = Readonly<{
   patterns: PatternSchema[];
 }>;
 
-export const PatternListInner = ({
-  patterns,
-  truncate,
-}: Props & {
-  truncate?: boolean;
-}) => {
+export const PatternListInner = ({ patterns }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const virtualizer = useVirtualizer({
@@ -69,10 +63,7 @@ export const PatternList = ({ patterns }: Props) => {
         </Select>
       </FormControl>
       <Card variant="outline" w="75vw">
-        <PatternListInner
-          patterns={patternType === "general" ? patterns : fixedPatterns.slice(0, 7)}
-          truncate={patternType === "fixed"}
-        />
+        <PatternListInner patterns={patternType === "general" ? patterns : fixedPatterns.slice(0, 7)} />
       </Card>
     </HStack>
   );

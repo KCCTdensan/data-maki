@@ -1,6 +1,5 @@
 import type { Board as BoardSchema } from "@data-maki/schemas";
 import { Grid } from "@yamada-ui/react";
-import { ScrollSyncNode } from "scroll-sync-react";
 import { Board } from "./Board";
 
 type Props = Readonly<{
