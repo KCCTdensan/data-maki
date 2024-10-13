@@ -73,6 +73,7 @@ export class AlgorithmFeature extends FeatureBase {
         workers: 1, // TODO: Implement multi-worker solving
         startedAt: solvingState.startedAt,
         board: solvingState.problem.board,
+        general: solvingState.problem.general,
       } satisfies SolveStartEvent);
 
       const scope = span(this.log, "Solve finished");
@@ -113,7 +114,7 @@ export class AlgorithmFeature extends FeatureBase {
 
       this.sendEvent({
         eventName: "solve.finished",
-        id: solvingState.id,
+        solveId: solvingState.id,
         correct,
         turns: answer.ops.length,
         revision,

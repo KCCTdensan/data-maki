@@ -1,5 +1,5 @@
 import type { UIMessageEventBase } from "..";
-import type { Board } from "../../problem";
+import type { Board, General } from "../../problem";
 
 export interface SolveStartEvent extends UIMessageEventBase {
   eventName: "solve.start";
@@ -7,4 +7,5 @@ export interface SolveStartEvent extends UIMessageEventBase {
   workers: number;
   startedAt: Date;
   board: Board;
+  general: General;
 }

@@ -29,6 +29,7 @@ export const BoardCell = memo(function BoardCell({ cell, size, style, ...rest }:
         minWidth: size,
         minHeight: size,
         backgroundColor: `var(--${colors[cell]}-5)`,
+        color: "var(--cell-color)",
         ...style,
       }}
       {...rest}

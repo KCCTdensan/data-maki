@@ -117,7 +117,6 @@ export const eventStreamAtom = atom(
               event.eventName = message.event;
 
               set(currentEventAtom, event);
-              console.log(event);
 
               if (!isSolverEvent(event)) return;
 

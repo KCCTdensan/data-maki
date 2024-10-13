@@ -1,3 +1,4 @@
+import type { SolveStartEvent } from "@data-maki/schemas";
 import type { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
 import { eventToSSE } from "../../events.ts";
@@ -37,10 +38,12 @@ export const createRouteDefinition = <T extends Env>(app: Hono<T>) =>
         await stream.writeSSE(
           eventToSSE({
             eventName: "solve.start",
-            id: solvingState.id,
+            solveId: solvingState.id,
+            workers: 1, // TODO: Implement multi-worker solving
             startedAt: solvingState.startedAt,
             board: solvingState.problem.board,
-          }),
+            general: solvingState.problem.general,
+          } satisfies SolveStartEvent),
         );
       }
 
