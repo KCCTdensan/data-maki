@@ -1,9 +1,8 @@
+import type { UIMessageEventBase } from "@data-maki/schemas";
 import type { LogLayer } from "loglayer";
 import { FeatureError } from "./errors/feature.ts";
-import type { UIMessageEvent } from "./events/base.ts";
 import { createFeatures } from "./features";
 import { span } from "./logging";
-import { IdleState } from "./state/idle.ts";
 import { StateManager } from "./state/manager.ts";
 import { spmc } from "./util/channel";
 
@@ -15,7 +14,7 @@ export const bootstrap = async (log_: LogLayer) => {
 
   const features = createFeatures(log_);
 
-  StateManager.init(log, spmc<UIMessageEvent>().tx);
+  StateManager.init(log, spmc<UIMessageEventBase>().tx);
 
   log
     .withMetadata({ features: features.map((feature) => feature.getName()) })

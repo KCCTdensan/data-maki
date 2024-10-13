@@ -1,14 +1,17 @@
-import { connectionStatusAtom } from "@/atoms/client";
-import type { Board } from "@data-maki/schemas";
+import { connectionStatusAtom, eventStreamAtom } from "@/atoms/client";
+import { localizeSolverEvent } from "@/lib/events";
+import { type Board, isSolverEvent, isUIMessageEvent } from "@data-maki/schemas";
 import { Box, Card, CardBody, CardHeader, Grid, Heading, Text } from "@yamada-ui/react";
 import { useAtomValue } from "jotai";
 
 type Props = {
   board: Board;
+  startedAt: Date;
 };
 
-export const StatsCard = ({ board }: Props) => {
+export const StatsCard = ({ board, startedAt }: Props) => {
   const connectionStatus = useAtomValue(connectionStatusAtom);
+  const currentEvent = useAtomValue(eventStreamAtom);
 
   return (
     <Card as="section" variant="outline" w="100%" h="100%">
@@ -17,30 +20,37 @@ export const StatsCard = ({ board }: Props) => {
           Stats
         </Heading>
       </CardHeader>
-      {connectionStatus === "connected" ? (
+      {connectionStatus === "connected" && isUIMessageEvent(currentEvent) ? (
         <CardBody>
           <Box as="table" fontFeatureSettings='"tnum"'>
             <tbody>
-              <tr>
-                <td>State:</td>
-                <td>Idle</td>
-              </tr>
-              <tr>
-                <td>Width:</td>
-                <td>{board.width}</td>
-              </tr>
-              <tr>
-                <td>Height:</td>
-                <td>{board.height}</td>
-              </tr>
-              <tr>
-                <td>Turn:</td>
-                <td>TODO!()</td>
-              </tr>
-              <tr>
-                <td>Time:</td>
-                <td>TODO!()</td>
-              </tr>
+              {isSolverEvent(currentEvent) && board && startedAt ? (
+                <>
+                  <tr>
+                    <td>State:</td>
+                    <td>{localizeSolverEvent(currentEvent)}</td>
+                  </tr>
+                  <tr>
+                    <td>Width:</td>
+                    <td>{board.width}</td>
+                  </tr>
+                  <tr>
+                    <td>Height:</td>
+                    <td>{board.height}</td>
+                  </tr>
+                  <tr>
+                    <td>Time:</td>
+                    <td>TODO!()</td>
+                  </tr>
+                </>
+              ) : (
+                <>
+                  <tr>
+                    <td>State:</td>
+                    <td>Idle</td>
+                  </tr>
+                </>
+              )}
             </tbody>
           </Box>
         </CardBody>

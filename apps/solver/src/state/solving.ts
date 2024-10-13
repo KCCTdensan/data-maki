@@ -6,6 +6,7 @@ export class SolvingState extends StateBase {
 
   constructor(
     readonly id: string,
+    readonly startedAt: Date,
     readonly problem: Problem,
   ) {
     super();

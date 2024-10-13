@@ -7,7 +7,7 @@ This app uses state machine and features modular architecture, communicates with
 ## Structure
 
 - `src`: source code
-  - `src/index.ts`: Entry point
+  - `src/events.ts`: Entry point
   - `src/features`: Feature modules
   - `src/events`: SSE event definition
   - `src/state`: State machine definition

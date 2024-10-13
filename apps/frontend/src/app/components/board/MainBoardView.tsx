@@ -1,5 +1,7 @@
+import { solverDataAtom } from "@/atoms/solver";
 import type { Problem } from "@data-maki/schemas";
 import { Grid, Heading, Spacer, Text, VStack } from "@yamada-ui/react";
+import { useAtomValue } from "jotai";
 import { useState } from "react";
 import { ScrollSync } from "scroll-sync-react";
 import { PatternList } from "../pattern/PatternList";
@@ -36,18 +38,19 @@ const testBoard: Problem = {
 
 export const MainBoardView = () => {
   const [zoomLevel, setZoomLevel] = useState(1.0);
+  const { board, startedAt } = useAtomValue(solverDataAtom);
 
   return (
     <>
       <Grid templateColumns="1fr 1fr" autoRows="1fr" gap="md">
         <ConnectionManagerCard />
-        <StatsCard board={testBoard.board} />
+        <StatsCard board={board} startedAt={startedAt} />
       </Grid>
-      <VStack as="section" h="100vh">
+      <VStack as="section" minH="100vh">
         <Heading as="h2" size="lg" fontWeight="medium" lineHeight={1.2}>
           Board
         </Heading>
-        {false ? (
+        {board ? (
           <>
             <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
               <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
@@ -59,8 +62,8 @@ export const MainBoardView = () => {
             </Grid>
             <ScrollSync>
               <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
-                <Board board={testBoard.board.start} width={testBoard.board.width} zoomLevel={zoomLevel} />
-                <Board board={testBoard.board.goal} width={testBoard.board.width} zoomLevel={zoomLevel} />
+                <Board board={board.start} width={board.width} height={board.height} zoomLevel={zoomLevel} />
+                <Board board={board.goal} width={board.width} height={board.height} zoomLevel={zoomLevel} />
               </Grid>
             </ScrollSync>
             <Grid as="section" templateColumns="1fr auto" w="100%" mb={4}>

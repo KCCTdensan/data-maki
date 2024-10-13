@@ -95,6 +95,10 @@ export class ServerCommunicatorFeature extends FeatureBase {
 
     scope.end();
 
+    setTimeout(() => {
+      StateManager.instance.setState(IdleState.instance);
+    }, 1000);
+
     return revision;
   }
 
@@ -120,19 +124,9 @@ export class ServerCommunicatorFeature extends FeatureBase {
       if (state.stateName === IdleState.stateName) {
         const [id, problem] = await this.pollProblem();
 
-        StateManager.instance.setState(new SolvingState(id, problem));
+        StateManager.instance.setState(new SolvingState(id, new Date(), problem));
 
         return;
-      }
-
-      if (state.stateName === DoneState.stateName) {
-        const doneState = state as DoneState;
-
-        const revision = await this.submitAnswer(doneState.id, doneState.answer);
-
-        setTimeout(() => {
-          StateManager.instance.setState(IdleState.instance);
-        }, 1000);
       }
     });
   }

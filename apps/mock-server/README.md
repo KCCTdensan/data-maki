@@ -5,7 +5,7 @@ Data maki mock server using Hono.
 ## Structure
 
 - `src`: source code
-  - `src/index.ts`: Entry point
+  - `src/events.ts`: Entry point
 
 ## Setup
 
@@ -24,5 +24,5 @@ Edit `resources/input.json` to change the default data that will be used by the 
 Alternatively, you can use file path as an argument to the server.
 
 ```bash
-bun run src/index.ts foo.json
+bun run src/events.ts foo.json
 ```

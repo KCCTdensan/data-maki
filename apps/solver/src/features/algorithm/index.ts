@@ -1,9 +1,12 @@
 import { ALGO_VERSION } from "@/constants/env";
 import { LATEST_VERSION, type SolveFunc, getSolveFunc, isSolveFuncVersion } from "@data-maki/algorithm";
+import type { UIMessageEventBase } from "@data-maki/schemas";
+import type { SolveStartEvent } from "@data-maki/schemas";
+import type { SolveProgressEvent } from "@data-maki/schemas";
+import type { SolveFinishedEvent } from "@data-maki/schemas";
 import deepEqual from "fast-deep-equal";
 import type { LogLayer } from "loglayer";
 import type { ChannelTx, ReadonlyStore } from "reactive-channel";
-import type { UIMessageEvent } from "../../events/base.ts";
 import { span } from "../../logging";
 import { DoneState } from "../../state/done.ts";
 import { StateManager } from "../../state/manager.ts";
@@ -13,13 +16,13 @@ import type { ServerCommunicatorFeature } from "../server-comm";
 import { InvalidAlgorithmVersionError } from "./errors/invalid-algo";
 
 export class AlgorithmFeature extends FeatureBase {
-  #tx: ChannelTx<UIMessageEvent>;
+  #tx: ChannelTx<UIMessageEventBase>;
   #subscriberCount$: ReadonlyStore<number>;
-  #solve: SolveFunc;
+  readonly #solve: SolveFunc;
 
   constructor(
     log: LogLayer,
-    tx: ChannelTx<UIMessageEvent>,
+    tx: ChannelTx<UIMessageEventBase>,
     subscriberCount$: ReadonlyStore<number>,
     private serverComm: ServerCommunicatorFeature,
   ) {
@@ -44,7 +47,7 @@ export class AlgorithmFeature extends FeatureBase {
     this.#solve = getSolveFunc(version);
   }
 
-  private sendEvent(event: UIMessageEvent) {
+  private sendEvent(event: UIMessageEventBase) {
     if (this.#subscriberCount$.content() > 0) {
       this.#tx.send(event);
     }
@@ -64,11 +67,29 @@ export class AlgorithmFeature extends FeatureBase {
         })
         .info("Solver started");
 
+      this.sendEvent({
+        eventName: "solve.start",
+        solveId: solvingState.id,
+        workers: 1, // TODO: Implement multi-worker solving
+        startedAt: solvingState.startedAt,
+        board: solvingState.problem.board,
+      } satisfies SolveStartEvent);
+
       const scope = span(this.log, "Solve finished");
 
       const [answer, finalBoard] = await this.#solve(solvingState.problem);
 
-      if (deepEqual(finalBoard, solvingState.problem.board.goal)) {
+      this.sendEvent({
+        eventName: "solve.progress",
+        solveId: solvingState.id,
+        workerId: 1, // TODO: Implement multi-worker solving
+        board: finalBoard,
+        turns: answer.ops.length,
+      } satisfies SolveProgressEvent);
+
+      const correct = deepEqual(finalBoard, solvingState.problem.board.goal);
+
+      if (correct) {
         this.log
           .withMetadata({
             id: solvingState.id,
@@ -87,6 +108,16 @@ export class AlgorithmFeature extends FeatureBase {
       }
 
       scope.end();
+
+      const revision = await this.serverComm.submitAnswer(solvingState.id, answer);
+
+      this.sendEvent({
+        eventName: "solve.finished",
+        id: solvingState.id,
+        correct,
+        turns: answer.ops.length,
+        revision,
+      } satisfies SolveFinishedEvent);
 
       StateManager.instance.setState(new DoneState(solvingState.id, answer));
     });

@@ -1,7 +1,7 @@
+import type { UIMessageEventBase } from "@data-maki/schemas";
 import type { LogLayer } from "loglayer";
 import type { ChannelTx, ReadonlyStore } from "reactive-channel";
 import { type Store, makeStore } from "universal-stores";
-import type { UIMessageEvent } from "../events/base.ts";
 import type { StateBase } from "./base.ts";
 import { InitState } from "./init.ts";
 
@@ -11,18 +11,18 @@ export class StateManager {
   static #instance: StateManager;
   readonly #state$: Store<StateBase>;
   #oldState: StateBase;
-  #tx: ChannelTx<UIMessageEvent>;
+  #tx: ChannelTx<UIMessageEventBase>;
 
   private constructor(
     private log: LogLayer,
-    tx: ChannelTx<UIMessageEvent>,
+    tx: ChannelTx<UIMessageEventBase>,
   ) {
     this.#state$ = makeStore(INITIAL_STATE);
     this.#oldState = INITIAL_STATE;
     this.#tx = tx;
   }
 
-  static init(log_: LogLayer, tx: ChannelTx<UIMessageEvent>) {
+  static init(log_: LogLayer, tx: ChannelTx<UIMessageEventBase>) {
     if (StateManager.#instance) {
       throw new Error("State manager already initialized");
     }

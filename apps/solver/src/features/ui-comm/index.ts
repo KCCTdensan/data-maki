@@ -1,10 +1,10 @@
+import type { UIMessageEventBase } from "@data-maki/schemas";
 import type { Serve, Server } from "bun";
 import { Hono } from "hono";
 import { logger } from "hono-pino";
 import { cors } from "hono/cors";
 import type { LogLayer } from "loglayer";
 import { HOST, PORT, isDevelopment } from "../../constants/env.ts";
-import type { UIMessageEvent } from "../../events/base.ts";
 import { internalPinoLogger } from "../../logging";
 import type { SPMCReceiverCreator } from "../../util/channel.ts";
 import { FeatureBase } from "../base.ts";
@@ -12,7 +12,7 @@ import { createRouteDefinition } from "./route.ts";
 
 export type Env = {
   Variables: {
-    tee: SPMCReceiverCreator<UIMessageEvent>;
+    tee: SPMCReceiverCreator<UIMessageEventBase>;
   };
 };
 
@@ -38,9 +38,9 @@ app.use(
 
 export class UICommunicatorFeature extends FeatureBase {
   #server!: Server;
-  readonly #tee: SPMCReceiverCreator<UIMessageEvent>;
+  readonly #tee: SPMCReceiverCreator<UIMessageEventBase>;
 
-  constructor(log: LogLayer, tee: SPMCReceiverCreator<UIMessageEvent>) {
+  constructor(log: LogLayer, tee: SPMCReceiverCreator<UIMessageEventBase>) {
     super("UI Communicator", log);
 
     this.#tee = tee;
