@@ -8,7 +8,7 @@ export const countElementsColumnWise = (b: TwoDimensionalCells, self?: Worker): 
   [...Array(b.height).keys()].map((i) => {
     const counts: CellCounts = [0, 0, 0, 0];
 
-    for (const cell of b.getRow(i)) {
+    for (const cell of b.getRowView(i)) {
       counts[cell as 0 | 1 | 2 | 3]++;
     }
 
