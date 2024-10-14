@@ -1,9 +1,12 @@
+import { type UIMessageEventBase, isSolverEvent } from "@data-maki/schemas";
 import type { SolverApp } from "@data-maki/solver";
 import type { ParsedEvent, ReconnectInterval } from "eventsource-parser";
 import { EventSourceParserStream } from "eventsource-parser/stream";
 import type { hc } from "hono/client";
 import { atom } from "jotai";
+import { IGNOREABLE_EVENTS } from "../constants/events";
 import { isClient } from "../lib/client";
+import { solverDataAtom } from "./solver";
 
 // Code execution on module load
 
@@ -48,7 +51,7 @@ export const connectionStatusToText = (status: ConnectionStatus) => {
 export const connectionStatusAtom = atom<ConnectionStatus>("idle");
 
 const controllerAtom = atom<[controller: AbortController, onClose: () => void] | false>(false);
-const currentEventAtom = atom<ParsedEvent | false>(false);
+const currentEventAtom = atom<UIMessageEventBase | false>(false);
 
 export const eventStreamAtom = atom(
   (get) => get(currentEventAtom),
@@ -107,7 +110,22 @@ export const eventStreamAtom = atom(
                 return;
               }
 
-              set(currentEventAtom, message);
+              if (IGNOREABLE_EVENTS.includes(message.event)) return;
+
+              const event = JSON.parse(message.data) as UIMessageEventBase;
+
+              event.eventName = message.event;
+
+              set(currentEventAtom, event);
+
+              if (!isSolverEvent(event)) return;
+
+              if (event.eventName === "solve.start") {
+                set(solverDataAtom, {
+                  ...event,
+                  startedAt: new Date(event.startedAt),
+                });
+              }
             },
           }),
         );

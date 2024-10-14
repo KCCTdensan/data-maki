@@ -1,6 +1,7 @@
+import type { UIMessageEventBase } from "@data-maki/schemas";
+import type { LogLayer } from "loglayer";
 import type { ChannelTx, ReadonlyStore } from "reactive-channel";
 import { type Store, makeStore } from "universal-stores";
-import type { UIMessageEvent } from "../events/base.ts";
 import type { StateBase } from "./base.ts";
 import { InitState } from "./init.ts";
 
@@ -10,22 +11,31 @@ export class StateManager {
   static #instance: StateManager;
   readonly #state$: Store<StateBase>;
   #oldState: StateBase;
-  #tx: ChannelTx<UIMessageEvent>;
+  #tx: ChannelTx<UIMessageEventBase>;
 
-  private constructor(tx: ChannelTx<UIMessageEvent>) {
+  private constructor(
+    private log: LogLayer,
+    tx: ChannelTx<UIMessageEventBase>,
+  ) {
     this.#state$ = makeStore(INITIAL_STATE);
     this.#oldState = INITIAL_STATE;
     this.#tx = tx;
   }
 
-  static init(tx: ChannelTx<UIMessageEvent>) {
+  static init(log_: LogLayer, tx: ChannelTx<UIMessageEventBase>) {
     if (StateManager.#instance) {
       throw new Error("State manager already initialized");
     }
 
-    StateManager.#instance = new StateManager(tx);
+    const log = log_.child().withContext({ feature: "State Manager" });
 
-    console.info("State manager initialized with:", INITIAL_STATE.getName());
+    StateManager.#instance = new StateManager(log, tx);
+
+    log
+      .withMetadata({
+        initialState: INITIAL_STATE.stateName,
+      })
+      .info("Initialized");
   }
 
   static get instance() {
@@ -36,15 +46,22 @@ export class StateManager {
     return StateManager.#instance;
   }
 
-  setState(state: StateBase) {
+  setState<T extends StateBase>(state: T) {
     if (state === this.#state$.content()) {
-      return;
+      return state;
     }
 
-    console.info("[State change]", this.#oldState.getName(), "-->", state.getName());
+    this.log
+      .withMetadata({
+        oldState: this.#oldState.stateName,
+        newState: state.stateName,
+      })
+      .info("Changing state");
 
     this.#oldState = this.#state$.content();
     this.#state$.set(state);
+
+    return state;
   }
 
   get state$(): ReadonlyStore<StateBase> {

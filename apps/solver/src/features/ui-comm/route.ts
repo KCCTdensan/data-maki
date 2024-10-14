@@ -1,7 +1,9 @@
+import type { SolveStartEvent } from "@data-maki/schemas";
 import type { Hono } from "hono";
 import { streamSSE } from "hono/streaming";
-import { HelloEvent } from "../../events/hello.ts";
-import { KeepAliveEvent } from "../../events/keep-alive.ts";
+import { eventToSSE } from "../../events.ts";
+import { StateManager } from "../../state/manager.ts";
+import { SolvingState } from "../../state/solving.ts";
 import type { Env } from "./index.ts";
 
 let id = 0;
@@ -10,7 +12,7 @@ export const createRouteDefinition = <T extends Env>(app: Hono<T>) =>
   app.get("/rpc", (c) =>
     streamSSE(c, async (stream) => {
       // To send first response (headers, etc.), we need to send a hello event first
-      await stream.writeSSE(new HelloEvent().toSSE());
+      await stream.writeSSE(eventToSSE({ eventName: "hello" }));
 
       const { tee } = c.var;
       const [rx, dispose] = tee();
@@ -19,7 +21,7 @@ export const createRouteDefinition = <T extends Env>(app: Hono<T>) =>
       // HACK: Some browsers require keep-alive event to be sent every several seconds
       // See: https://github.com/enisdenjo/graphql-sse/issues/99
       const keepAliveInterval = setInterval(() => {
-        stream.writeSSE(new KeepAliveEvent().toSSE());
+        stream.writeSSE(eventToSSE({ eventName: "keep-alive" }));
       }, 5000);
 
       stream.onAbort(() => {
@@ -28,12 +30,29 @@ export const createRouteDefinition = <T extends Env>(app: Hono<T>) =>
         dispose();
       });
 
+      const state = StateManager.instance.state$.content();
+
+      if (state.stateName === SolvingState.stateName) {
+        const solvingState = state as SolvingState;
+
+        await stream.writeSSE(
+          eventToSSE({
+            eventName: "solve.start",
+            solveId: solvingState.id,
+            workers: 1, // TODO: Implement multi-worker solving
+            startedAt: solvingState.startedAt,
+            board: solvingState.problem.board,
+            general: solvingState.problem.general,
+          } satisfies SolveStartEvent),
+        );
+      }
+
       while (true) {
         try {
           const event = await rx.recv({ signal: controller.signal });
 
           await stream.writeSSE({
-            ...event,
+            ...eventToSSE(event),
             id: String(id++),
           });
         } catch (e) {

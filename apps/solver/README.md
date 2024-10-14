@@ -7,18 +7,19 @@ This app uses state machine and features modular architecture, communicates with
 ## Structure
 
 - `src`: source code
-  - `src/index.ts`: Entry point
+  - `src/events.ts`: Entry point
   - `src/features`: Feature modules
   - `src/events`: SSE event definition
   - `src/state`: State machine definition
 
 ## Setup
 
-This app has `.env` file for setting server url.
-Copy `.env.example` to `.env` and set the server url.
+This app has `.env` file for setting some information.
+Copy `.env.example` to `.env.local` and edit the file.
 
 ```
 SERVER_URL=http://localhost:4000
+SERVER_TOKEN=token1
 ```
 
 ## Develop

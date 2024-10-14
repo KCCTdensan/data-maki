@@ -24,14 +24,18 @@
     "@remix-run/cloudflare": "2.12.0",
     "@remix-run/cloudflare-pages": "2.12.0",
     "@remix-run/react": "2.12.0",
+    "@tanstack/react-virtual": "^3.10.8",
     "@yamada-ui/react": "^1.5.3",
+    "dataclass": "^2.1.1",
     "eventsource-parser": "^2.0.1",
     "hono": "^4.6.3",
     "isbot": "^4.4.0",
     "jotai": "^2.10.0",
+    "luxon": "^3.5.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "scroll-sync-react": "^1.2.0"
+    "scroll-sync-react": "^1.2.0",
+    "use-debounce": "^10.0.4"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20240925.0",
@@ -40,6 +44,7 @@
     "@pandacss/dev": "^0.42.0",
     "@remix-run/dev": "2.12.0",
     "@ryoppippi/unplugin-typia": "npm:@jsr/ryoppippi__unplugin-typia",
+    "@types/luxon": "^3.4.2",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "browserslist": "^4.24.0",

@@ -21,6 +21,7 @@ const indexHtml = `
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/blue.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/green.css">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/yellow.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@radix-ui/colors@latest/orange.css">
 </head>
 <body>
   <div id="app"><!-- Remix SPA --></body>

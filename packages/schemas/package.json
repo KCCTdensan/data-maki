@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "prepare": "tsup",
+    "build": "tsup",
     "lint": "biome lint --write ."
   },
   "exports": {
@@ -23,7 +23,6 @@
   "devDependencies": {
     "@data-maki/biome-config": "workspace:*",
     "@data-maki/typescript-config": "workspace:*",
-    "@ryoppippi/unplugin-typia": "npm:@jsr/ryoppippi__unplugin-typia",
     "tsup": "^8.3.0"
   }
 }

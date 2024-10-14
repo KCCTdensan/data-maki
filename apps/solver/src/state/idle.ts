@@ -1,11 +1,9 @@
 import { StateBase } from "./base.ts";
 
 export class IdleState extends StateBase {
-  static #instance: IdleState;
+  static readonly stateName = "Idle";
 
-  constructor() {
-    super("Idle");
-  }
+  static #instance: IdleState;
 
   static get instance() {
     if (!IdleState.#instance) {

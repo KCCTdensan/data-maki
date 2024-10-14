@@ -22,7 +22,7 @@ import {
 } from "@yamada-ui/react";
 import { hc } from "hono/client";
 import { useAtom, useSetAtom } from "jotai";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 export const ConnectionManagerCard = () => {
   const [endpoint, setEndpoint] = useState("");
@@ -31,6 +31,33 @@ export const ConnectionManagerCard = () => {
   const [connectionStatus, setConnectionStatus] = useAtom(connectionStatusAtom);
   const setEventStream = useSetAtom(eventStreamAtom);
   const loading = connectionStatus === "connecting";
+
+  const connect = useCallback(async () => {
+    const client = hc<SolverApp>(endpoint);
+
+    setClient(client);
+
+    await setEventStream(
+      client.rpc.$url(),
+      () => setConnectionStatus("connecting"),
+      () => {
+        setConnectionStatus("connected");
+        setError(null);
+      },
+      () => setConnectionStatus("idle"),
+      (e) => {
+        setConnectionStatus("error");
+
+        setError(e.message);
+        console.error(e);
+      },
+      (res) => {
+        setConnectionStatus("error");
+
+        setError(res.statusText);
+      },
+    );
+  }, [endpoint, setClient, setEventStream, setConnectionStatus]);
 
   return (
     <Card as="section" variant="outline" w="100%" h="100%">
@@ -50,35 +77,9 @@ export const ConnectionManagerCard = () => {
               required
               value={endpoint}
               onChange={(e) => setEndpoint(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && connect()}
             />
-            <Button
-              paddingInline={4}
-              colorScheme="primary"
-              disabled={loading}
-              onClick={async () => {
-                const client = hc<SolverApp>(endpoint);
-
-                setClient(client);
-
-                await setEventStream(
-                  client.rpc.$url(),
-                  () => setConnectionStatus("connecting"),
-                  () => setConnectionStatus("connected"),
-                  () => setConnectionStatus("idle"),
-                  (e) => {
-                    setConnectionStatus("error");
-
-                    setError(e.message);
-                    console.error(e);
-                  },
-                  (res) => {
-                    setConnectionStatus("error");
-
-                    setError(res.statusText);
-                  },
-                );
-              }}
-            >
+            <Button paddingInline={4} colorScheme="primary" disabled={loading} onClick={connect}>
               Connect
             </Button>
           </Flex>

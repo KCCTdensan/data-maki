@@ -1,29 +1,47 @@
+import type { UIMessageEventBase } from "@data-maki/schemas";
 import type { Serve, Server } from "bun";
 import { Hono } from "hono";
-import { showRoutes } from "hono/dev";
-import { logger } from "hono/logger";
+import { logger } from "hono-pino";
+import { cors } from "hono/cors";
+import type { LogLayer } from "loglayer";
 import { HOST, PORT, isDevelopment } from "../../constants/env.ts";
-import type { UIMessageEvent } from "../../events/base.ts";
+import { internalPinoLogger } from "../../logging";
 import type { SPMCReceiverCreator } from "../../util/channel.ts";
 import { FeatureBase } from "../base.ts";
 import { createRouteDefinition } from "./route.ts";
 
 export type Env = {
   Variables: {
-    tee: SPMCReceiverCreator<UIMessageEvent>;
+    tee: SPMCReceiverCreator<UIMessageEventBase>;
   };
 };
 
 const app = new Hono<Env>();
 
-app.use(logger());
+app.use(
+  logger({
+    pino: internalPinoLogger.child({ feature: "UI Communicator" }),
+  }),
+);
+
+app.use(
+  cors({
+    origin: (origin) => {
+      if (isDevelopment) {
+        return origin;
+      }
+
+      return origin.endsWith("data-maki.pages.dev") ? origin : "";
+    },
+  }),
+);
 
 export class UICommunicatorFeature extends FeatureBase {
   #server!: Server;
-  readonly #tee: SPMCReceiverCreator<UIMessageEvent>;
+  readonly #tee: SPMCReceiverCreator<UIMessageEventBase>;
 
-  constructor(tee: SPMCReceiverCreator<UIMessageEvent>) {
-    super("UI Communicator");
+  constructor(log: LogLayer, tee: SPMCReceiverCreator<UIMessageEventBase>) {
+    super("UI Communicator", log);
 
     this.#tee = tee;
   }
@@ -44,16 +62,14 @@ export class UICommunicatorFeature extends FeatureBase {
     };
 
     this.#server = Bun.serve(serveConfig);
-
-    if (isDevelopment) {
-      console.info("Current routes:");
-
-      showRoutes(app, { verbose: true });
-    }
   }
 
   async start() {
-    console.info(`UI Communicator is ready at http://${HOST}:${PORT}`);
+    this.log
+      .withMetadata({
+        url: `http://${HOST}:${PORT}`,
+      })
+      .info("UI Communicator is ready");
   }
 }
 

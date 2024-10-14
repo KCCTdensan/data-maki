@@ -32,13 +32,13 @@ export const spmc = <T>(): SPMCChannel<T> => {
   rx.canRead$.subscribe(async (canRead) => {
     if (!canRead) return;
 
-    while (rx.filledInboxSlots$.content() > 0) {
-      const data = await rx.recv();
-
-      for (const channel of channels) {
-        channel.send(data);
+    setTimeout(async () => {
+      for await (const data of rx) {
+        for (const channel of channels) {
+          channel.send(data);
+        }
       }
-    }
+    });
   });
 
   return {

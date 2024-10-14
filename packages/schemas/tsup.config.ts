@@ -1,4 +1,3 @@
-import typia from "@ryoppippi/unplugin-typia/esbuild";
 import { defineConfig } from "tsup";
 
 export default defineConfig({
@@ -8,5 +7,4 @@ export default defineConfig({
   sourcemap: true,
   dts: true,
   clean: true,
-  plugins: [typia()],
 });
