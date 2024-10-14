@@ -24,13 +24,15 @@ const generationSettings: {
   heightRandom: boolean;
   width: number;
   height: number;
-  genKind: number;
+  genKindStart: number;
+  genKindGoal: number;
 } = {
   widthRandom: true,
   heightRandom: true,
   width: 0,
   height: 0,
-  genKind: 0,
+  genKindStart: 0,
+  genKindGoal: 0,
 };
 
 function getRandomInt<TMin extends number, TMax extends number>(min: TMin, max: TMax): IntRange<TMin, TMax> {
@@ -80,7 +82,8 @@ app.post("/settings", async (c) => {
   generationSettings.heightRandom = settings.heightRandom;
   generationSettings.width = settings.width;
   generationSettings.height = settings.height;
-  generationSettings.genKind = settings.genKind;
+  generationSettings.genKindStart = settings.genKindStart;
+  generationSettings.genKindGoal = settings.genKindGoal;
 
   return c.json({ success: true });
 });
