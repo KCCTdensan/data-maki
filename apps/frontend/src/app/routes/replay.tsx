@@ -3,6 +3,7 @@ import type { Board as BoardSchema, ReplayInfo } from "@data-maki/schemas";
 import { Box, Checkbox, Flex, Grid, HStack, Heading, SimpleGrid, Spacer, Text, useBoolean } from "@yamada-ui/react";
 import { useMemo, useState } from "react";
 import { ScrollSync } from "scroll-sync-react";
+import { useDebounce } from "use-debounce";
 import { BoardCell } from "../components/board/Cell";
 import { StartGoalBoard } from "../components/board/StartGoalBoard";
 import { ZoomLevelSlider } from "../components/board/ZoomLevelSlider";
@@ -11,7 +12,8 @@ import { InputFileCard } from "../components/replay/InputFileCard";
 import { TimelineCard } from "../components/replay/TimelineCard";
 
 export default function Page() {
-  const [turn, setTurn] = useState(0);
+  const [rawTurn, setTurn] = useState(0);
+  const [turn] = useDebounce(rawTurn, 400);
   const [replayInfo, setReplayInfo] = useState<ReplayInfo | null>(null);
   const [showDebugOverlay, setDebugOverlay] = useState(true);
   const [hideCellNumber, { toggle: toggleHideCellNumber }] = useBoolean(false);
@@ -60,7 +62,7 @@ export default function Page() {
           }}
         />
         <TimelineCard
-          currentTurn={turn}
+          currentTurn={rawTurn}
           turns={turns}
           onChangeTurn={setTurn}
           showDebugOverlay={showDebugOverlay}
@@ -107,7 +109,7 @@ export default function Page() {
               </Heading>
             </Grid>
             <ScrollSync>
-              <StartGoalBoard board={board} zoomLevel={zoomLevel} syncScroll={syncScroll} />
+              <StartGoalBoard board={board} zoomLevel={zoomLevel} syncScroll={syncScroll} extraInfo={extraOpInfo} />
             </ScrollSync>
             <Grid as="section" templateColumns="auto 1fr auto" w="100%" mb={4}>
               <SimpleGrid columns={2} gap="md">

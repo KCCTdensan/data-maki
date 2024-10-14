@@ -1,4 +1,4 @@
-import type { ExtraOpInfo } from "@data-maki/schemas";
+import type { CellsMark } from "@data-maki/schemas";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Box, ScrollArea } from "@yamada-ui/react";
 import { Fragment, useCallback, useRef } from "react";
@@ -9,12 +9,18 @@ type Props = Readonly<{
   board: string[];
   width: number;
   height: number;
-  extraInfo?: ExtraOpInfo;
+  marks?: CellsMark;
   zoomLevel: number;
   scrollGroup?: string;
 }>;
 
-export const Board = ({ width, height, zoomLevel, scrollGroup, board }: Props) => {
+const shouldMark = (marks: CellsMark, x: number, y: number) => {
+  if (marks.type === "row" && marks.index === y) return true;
+  if (marks.type === "column" && marks.index === x) return true;
+  return marks.type === "point" && marks.index === y && marks.index2 === x;
+};
+
+export const Board = ({ board, width, height, zoomLevel, marks, scrollGroup }: Props) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const estimateSize = useCallback(() => 32 * zoomLevel, [zoomLevel]);
@@ -48,12 +54,16 @@ export const Board = ({ width, height, zoomLevel, scrollGroup, board }: Props) =
         <Fragment key={virtualRow.key}>
           {columnVirtualizer.getVirtualItems().map((virtualColumn) => {
             const cell = board[virtualRow.index][virtualColumn.index] as "0" | "1" | "2" | "3";
+            const borderColor = shouldMark(marks, virtualColumn.index, virtualRow.index)
+              ? "var(--orange-8)"
+              : "var(--mauve-2)";
 
             return (
               <BoardCell
                 key={virtualColumn.key}
                 cell={cell}
                 size={`${virtualColumn.size}px`}
+                borderColor={borderColor}
                 style={{
                   position: "absolute",
                   top: 0,

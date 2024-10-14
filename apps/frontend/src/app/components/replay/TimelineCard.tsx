@@ -11,6 +11,7 @@ import {
   InputGroup,
   InputLeftElement,
   InputRightElement,
+  NumberInput,
   Slider,
   SliderMark,
   Text,
@@ -37,9 +38,8 @@ export const TimelineCard = ({
   onChangeDebugOverlay,
 }: Props) => {
   const [isPlaying, { off: pause, toggle: togglePlaying }] = useBoolean(false);
-  const [rawInterval, setRawInterval] = useState("");
-  const parsedInterval = Number.parseInt(rawInterval, 10);
-  const interval = Number.isNaN(parsedInterval) ? null : parsedInterval;
+  const [rawInterval, setRawInterval] = useState<string>("");
+  const interval = rawInterval === "" ? null : Number(rawInterval);
 
   const turns = actualTurns - 1; // turn starts from 0
 
@@ -68,7 +68,7 @@ export const TimelineCard = ({
             <Button
               colorScheme={isPlaying ? undefined : "primary"}
               onClick={togglePlaying}
-              isDisabled={interval === null || turns === 0}
+              isDisabled={interval === null || turns <= 0}
             >
               {isPlaying ? "Pause" : "Play"}
             </Button>
@@ -77,18 +77,21 @@ export const TimelineCard = ({
                 <p>/</p>
               </InputLeftElement>
 
-              <Input
+              <NumberInput
                 placeholder="1000"
-                type="number"
+                fontFeatureSettings="'tnum'"
+                min={100}
+                max={999999}
+                step={100}
                 value={rawInterval}
-                onChange={(e) => setRawInterval(e.target.value)}
+                onChange={setRawInterval}
               />
 
-              <InputRightElement>
+              <InputRightElement mr={4}>
                 <p>ms</p>
               </InputRightElement>
             </InputGroup>
-            <ButtonGroup isAttached isDisabled={turns === 0} variant="outline" gap="sm">
+            <ButtonGroup isAttached isDisabled={turns <= 0} variant="outline" gap="sm">
               <Button onClick={() => onChangeTurn(clamp(currentTurn - 10, 0, turns))}>-10</Button>
               <Button onClick={() => onChangeTurn(clamp(currentTurn + 10, 0, turns))}>+10</Button>
             </ButtonGroup>
@@ -114,18 +117,28 @@ export const TimelineCard = ({
                 {currentTurn}
               </span>
             </Text>
-            <Slider value={currentTurn} min={0} max={turns} onChange={onChangeTurn} isDisabled={turns === 0}>
-              <SliderMark value={0} w={10} ml={-5}>
-                {0}
-              </SliderMark>
+            <Slider
+              value={currentTurn}
+              min={0}
+              max={Math.max(0, turns)}
+              onChange={onChangeTurn}
+              isDisabled={turns <= 0}
+            >
+              {turns > 0 && (
+                <SliderMark value={0} w={10} ml={-5}>
+                  {0}
+                </SliderMark>
+              )}
               {Array.from({ length: turns / 20 }, (_, i) => i * 20).map((value) => (
                 <SliderMark key={value} value={value} w={10} ml={-5}>
                   {value}
                 </SliderMark>
               ))}
-              <SliderMark value={turns} w={10} ml={-5}>
-                {turns}
-              </SliderMark>
+              {turns > 0 && (
+                <SliderMark value={turns} w={10} ml={-5}>
+                  {turns}
+                </SliderMark>
+              )}
             </Slider>
           </HStack>
         </VStack>

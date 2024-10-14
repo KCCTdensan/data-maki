@@ -17,11 +17,18 @@ export const StartGoalBoard = ({ board, extraInfo, syncScroll, zoomLevel }: Prop
           board={board.start}
           width={board.width}
           height={board.height}
-          extraInfo={extraInfo}
+          marks={extraInfo?.currentMark}
           zoomLevel={zoomLevel}
           scrollGroup="board"
         />
-        <Board board={board.goal} width={board.width} height={board.height} zoomLevel={zoomLevel} scrollGroup="board" />
+        <Board
+          board={board.goal}
+          width={board.width}
+          height={board.height}
+          marks={extraInfo?.goalMark}
+          zoomLevel={zoomLevel}
+          scrollGroup="board"
+        />
       </Grid>
     );
   }
@@ -32,10 +39,16 @@ export const StartGoalBoard = ({ board, extraInfo, syncScroll, zoomLevel }: Prop
         board={board.start}
         width={board.width}
         height={board.height}
-        extraInfo={extraInfo}
+        marks={extraInfo?.currentMark}
         zoomLevel={zoomLevel}
       />
-      <Board board={board.goal} width={board.width} height={board.height} zoomLevel={zoomLevel} />
+      <Board
+        board={board.goal}
+        width={board.width}
+        height={board.height}
+        marks={extraInfo?.goalMark}
+        zoomLevel={zoomLevel}
+      />
     </Grid>
   );
 };

@@ -34,7 +34,7 @@ export default function Page() {
         <ConnectionManagerCard />
         <StatsCard solveId={solveId} board={board} startedAt={startedAt} />
       </Grid>
-      <VStack
+      <Box
         as="section"
         minH="100vh"
         style={
@@ -106,7 +106,7 @@ export default function Page() {
         ) : (
           <Text>Waiting solver to start solving...</Text>
         )}
-      </VStack>
+      </Box>
     </>
   );
 }
