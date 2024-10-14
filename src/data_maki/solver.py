@@ -2,9 +2,10 @@ from threading import Barrier
 
 from . import utils
 from .context import Context
-from .katanuki import katanuki, katanuki_board
+from .katanuki import katanuki
 from .models.answer import Answer, Direction
 from .models.problem import InternalProblem, Problem
+from .models.replay import MarkType, CellsMark, ExtraOpInfo, ReplayInfo
 from .evaluation import evaluate_row_elem, evaluate_col_piece
 
 TOTAL_WORKERS = 1
@@ -26,8 +27,6 @@ def solve(problem: Problem):
 def solve_worker(problem: Problem):
     c = Context()
 
-    delta = [0, 0, 0, 0]
-
     worker_barrier.wait()
 
     rv_ul = False
@@ -45,6 +44,8 @@ def solve_worker(problem: Problem):
         c.width = problem["board"]["width"]
         c.height = problem["board"]["height"]
 
+    c.info_now = ExtraOpInfo(CellsMark(MarkType.POINT, 0, 0), CellsMark(MarkType.ROW, 0, None), [0, 0, 0, 0])
+
     c.board = InternalProblem.from_problem(problem)
 
     c.board.current = utils.reverse(c.board.current, c.rv_op)
@@ -57,27 +58,32 @@ def solve_worker(problem: Problem):
     utils.print_board(c.board.current)
 
     cnt_unmoved = 0
+    c.info_now.goalMark.type = MarkType.ROW
     for i in range(c.height - 1, -1, -1):
+        c.info_now.goalMark.index = i
         cmped = c.height - i - 1 - cnt_unmoved  # counts of columns completed yet
-        delta = utils.get_delta(c.elems_now[c.height - 1 - cnt_unmoved], elems_goal[i])
+        c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1 - cnt_unmoved], elems_goal[i])
 
-        print(f"delta = {delta}")
+        print(f"delta = {c.info_now.delta}")
 
         unfilled = []
 
         # only stripe
         for j in range(c.width):
-            if delta == [0, 0, 0, 0]:
+            if c.info_now.delta == [0, 0, 0, 0]:
                 break
 
             if cnt_unmoved > 0:
+                c.info_now.currentMark.index = c.height - cnt_unmoved
+                c.info_now.currentMark.index2 = 0
                 katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
                 cmped += cnt_unmoved
                 cnt_unmoved = 0
+                c.info_now.index = c.height - 1
 
             cell_lk = c.board.current.get(c.height - 1, j)
 
-            if delta[cell_lk] <= 0:
+            if c.info_now.delta[cell_lk] <= 0:
                 continue
 
             is_filled = False
@@ -85,7 +91,7 @@ def solve_worker(problem: Problem):
             for k in range(c.height - 2, cmped - 1, -1):
                 cell_lk = c.board.current.get(k, j)
 
-                if delta[cell_lk] < 0:
+                if c.info_now.delta[cell_lk] < 0:
                     print(f"looking at {cell_lk} on x: {j} y: {k}")
                     cnt = 0
                     value = (0, 0, 0, 256)  # value = p, x, y, evaluation
@@ -125,10 +131,12 @@ def solve_worker(problem: Problem):
 
                         cnt += 1
 
+                    c.info_now.currentMark.index = k
+                    c.info_now.currentMark.index2 = j
                     katanuki(c, value[0], value[1], value[2], Direction.UP)
                     is_filled = True
 
-                    delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                    c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
 
                     break
 
@@ -141,7 +149,7 @@ def solve_worker(problem: Problem):
         for j in unfilled:
             is_filled = False
             cell_lk = c.board.current.get(c.height - 1, j)
-            if delta[cell_lk] <= 0:
+            if c.info_now.delta[cell_lk] <= 0:
                 continue
 
             print(f"fill column {j}")
@@ -155,7 +163,7 @@ def solve_worker(problem: Problem):
                     for m in range(c.height - 2, cmped - 1, -1):
                         cell_lk = c.board.current.get(m, x)
 
-                        if delta[cell_lk] < 0:
+                        if c.info_now.delta[cell_lk] < 0:
                             y = m
                             ln = k
                             irregular = False
@@ -165,6 +173,9 @@ def solve_worker(problem: Problem):
                             # if border nukigata confuse
                             if m % 2 == (c.height - 1) % 2:
                                 print("protect confusing")
+
+                                c.info_now.currentMark.index = y
+                                c.info_now.currentMark.index2 = x
                                 # move cell_lk the place confused and move the deepest cell the place not confused
                                 katanuki(
                                     c,
@@ -173,6 +184,7 @@ def solve_worker(problem: Problem):
                                     y,
                                     Direction.UP,
                                 )
+                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
                                 irregular = True
                                 y = c.height - 2
 
@@ -181,6 +193,8 @@ def solve_worker(problem: Problem):
                             while ln > 0:
                                 if ln % 2 == 1:
                                     # border nukigata (else...1*1)
+                                    c.info_now.currentMark.index = y
+                                    c.info_now.currentMark.index2 = x
                                     katanuki(
                                         c,
                                         0 if cnt == 0 else 3 * cnt if rv_ul else 3 * cnt - 1,
@@ -193,12 +207,17 @@ def solve_worker(problem: Problem):
                                 ln >>= 1
                                 cnt += 1
 
+                            c.info_now.currentMark.index = y
+                            c.info_now.currentMark.index2 = x
                             katanuki(c, 0, x, y, Direction.UP)
 
                             if irregular:
+                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                                c.info_now.currentMark.index = c.height - 3
+                                c.info_now.currentMark.index2 = j + k
                                 katanuki(c, 0, j + k, c.height - 3, Direction.UP)
 
-                            delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                            c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
 
                             is_filled = True
 
@@ -215,7 +234,7 @@ def solve_worker(problem: Problem):
                     for m in range(c.height - 2, cmped - 1, -1):
                         cell_lk = c.board.current.get(m, x)
 
-                        if delta[cell_lk] < 0:
+                        if c.info_now.delta[cell_lk] < 0:
                             y = m
                             ln = k
                             irregular = False
@@ -226,6 +245,8 @@ def solve_worker(problem: Problem):
                             if m % 2 == (c.height - 1) % 2:
                                 print("protect confusing")
 
+                                c.info_now.currentMark.index = y
+                                c.info_now.currentMark.index2 = x
                                 # move cell_lk the place confused and move the deepest cell the place not confused
                                 katanuki(
                                     c,
@@ -234,6 +255,7 @@ def solve_worker(problem: Problem):
                                     y,
                                     Direction.UP,
                                 )
+                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
                                 irregular = True
                                 y = c.height - 2
 
@@ -242,6 +264,8 @@ def solve_worker(problem: Problem):
                             while ln > 0:
                                 if ln % 2 == 1:
                                     # border nukigata (else...1*1)
+                                    c.info_now.currentMark.index = y
+                                    c.info_now.currentMark.index2 = x
                                     katanuki(
                                         c,
                                         0 if cnt == 0 else 3 * cnt if rv_ul else 3 * cnt - 1,
@@ -255,12 +279,17 @@ def solve_worker(problem: Problem):
                                 ln >>= 1
                                 cnt += 1
 
+                            c.info_now.currentMark.index = y
+                            c.info_now.currentMark.index2 = x
                             katanuki(c, 0, x, y, Direction.UP)
 
                             if irregular:
+                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                                c.info_now.currentMark.index = c.height - 3
+                                c.info_now.currentMark.index2 = j - k
                                 katanuki(c, 0, j - k, c.height - 3, Direction.UP)
 
-                            delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                            c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
 
                             is_filled = True
 
@@ -272,10 +301,16 @@ def solve_worker(problem: Problem):
         cnt_unmoved += 1
 
         if i == 0:
+            c.info_now.currentMark.index = c.height - cnt_unmoved
+            c.info_now.currentMark.index2 = 0
             katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
+
+    c.info_now.goalMark.type = MarkType.COLUMN
+    c.info_now.delta = None
 
     cnt_unmoved = 0
     for i in range(c.width - 1, -1, -1):
+        c.info_now.goalMark.index = i
         cmped = c.width - i - 1 - cnt_unmoved  # counts of columns completed yet
         column_goal = c.board.goal.get_column(i)
 
@@ -287,6 +322,8 @@ def solve_worker(problem: Problem):
                 continue
 
             if cnt_unmoved > 0:
+                c.info_now.currentMark.index = 0
+                c.info_now.currentMark.index2 = c.width - cnt_unmoved
                 katanuki(c, 22, c.width - cnt_unmoved, 0, Direction.RIGHT)
                 cmped += cnt_unmoved
                 cnt_unmoved = 0
@@ -333,12 +370,16 @@ def solve_worker(problem: Problem):
 
                         cnt += 1
 
+                    c.info_now.currentMark.index = k
+                    c.info_now.currentMark.index2 = j
                     katanuki(c, value[0], value[1], value[2], Direction.LEFT)
                     break
 
         cnt_unmoved += 1
 
         if i == 0:
+            c.info_now.currentMark.index = 0
+            c.info_now.currentMark.index2 = c.width - cnt_unmoved
             katanuki(c, 22, c.width - cnt_unmoved, 0, Direction.RIGHT)
 
     c.board.current = utils.dereverse(c.board.current, c.rv_op)
@@ -349,4 +390,6 @@ def solve_worker(problem: Problem):
 
     answer = Answer(c.n, c.ops)
 
-    return answer, c.board
+    replay = ReplayInfo(problem, answer, c.info)
+
+    return answer, c.board, replay

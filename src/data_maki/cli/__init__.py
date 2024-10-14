@@ -16,6 +16,7 @@ def main():
     with open(fname, "r") as f:
         problem = json.load(f)
 
-    answer, _ = solve(problem)
+    answer, _, replay = solve(problem)
 
     print(json.dumps(answer, indent=2, cls=EnhancedJSONEncoder))
+    print(json.dumps(replay, indent=2, cls=EnhancedJSONEncoder))
