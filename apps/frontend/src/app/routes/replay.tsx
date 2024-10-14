@@ -2,7 +2,9 @@ import { easyKatanuki } from "@data-maki/algorithm";
 import type { Board as BoardSchema, ReplayInfo } from "@data-maki/schemas";
 import { Box, Checkbox, Flex, Grid, HStack, Heading, SimpleGrid, Spacer, Text, useBoolean } from "@yamada-ui/react";
 import { useMemo, useState } from "react";
+import { ScrollSync } from "scroll-sync-react";
 import { BoardCell } from "../components/board/Cell";
+import { StartGoalBoard } from "../components/board/StartGoalBoard";
 import { ZoomLevelSlider } from "../components/board/ZoomLevelSlider";
 import { PatternList } from "../components/pattern/PatternList";
 import { InputFileCard } from "../components/replay/InputFileCard";
@@ -40,7 +42,13 @@ export default function Page() {
         }
       : null;
 
-  const extraOpInfo = replayInfo?.extraInfo[turn];
+  const extraOpInfo = showDebugOverlay ? replayInfo?.extraInfo[turn] : undefined;
+  const delta =
+    extraOpInfo?.delta ??
+    replayInfo?.extraInfo
+      ?.slice(0, turn)
+      .reverse()
+      .find((info) => info.delta);
 
   return (
     <>
@@ -59,12 +67,48 @@ export default function Page() {
           onChangeDebugOverlay={setDebugOverlay}
         />
       </Grid>
-      <section>
+      <Box as="section" minH="100vh">
         <Heading as="h2" size="lg" fontWeight="medium" lineHeight={1.2}>
           Board
         </Heading>
         {board && extraOpInfo ? (
           <>
+            <section>
+              <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
+                Delta
+              </Heading>
+              {delta ? (
+                <Flex gap="md">
+                  <HStack gap="md">
+                    <BoardCell cell={"0"} size="32px" />
+                    <Text>{delta[0]}</Text>
+                  </HStack>
+                  <HStack gap="md">
+                    <BoardCell cell={"1"} size="32px" />
+                    <Text>{delta[1]}</Text>
+                  </HStack>
+                  <HStack gap="md">
+                    <BoardCell cell={"2"} size="32px" />
+                    <Text>{delta[2]}</Text>
+                  </HStack>
+                  <HStack gap="md">
+                    <BoardCell cell={"3"} size="32px" />
+                    <Text>{delta[3]}</Text>
+                  </HStack>
+                </Flex>
+              ) : null}
+            </section>
+            <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
+              <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
+                Start
+              </Heading>
+              <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
+                Goal
+              </Heading>
+            </Grid>
+            <ScrollSync>
+              <StartGoalBoard board={board} zoomLevel={zoomLevel} syncScroll={syncScroll} />
+            </ScrollSync>
             <Grid as="section" templateColumns="auto 1fr auto" w="100%" mb={4}>
               <SimpleGrid columns={2} gap="md">
                 <Checkbox isChecked={hideCellNumber} onChange={toggleHideCellNumber}>
@@ -110,7 +154,7 @@ export default function Page() {
         ) : (
           <Text>Select a replay file to view the board</Text>
         )}
-      </section>
+      </Box>
     </>
   );
 }
