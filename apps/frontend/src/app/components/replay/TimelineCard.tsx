@@ -29,11 +29,19 @@ type Props = Readonly<{
   onChangeDebugOverlay: (showDebugOverlay: boolean) => void;
 }>;
 
-export const TimelineCard = ({ currentTurn, turns, onChangeTurn, showDebugOverlay, onChangeDebugOverlay }: Props) => {
+export const TimelineCard = ({
+  currentTurn,
+  turns: actualTurns,
+  onChangeTurn,
+  showDebugOverlay,
+  onChangeDebugOverlay,
+}: Props) => {
   const [isPlaying, { off: pause, toggle: togglePlaying }] = useBoolean(false);
   const [rawInterval, setRawInterval] = useState("");
   const parsedInterval = Number.parseInt(rawInterval, 10);
   const interval = Number.isNaN(parsedInterval) ? null : parsedInterval;
+
+  const turns = actualTurns - 1; // turn starts from 0
 
   if (currentTurn === turns - 1) pause();
 

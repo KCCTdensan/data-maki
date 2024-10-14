@@ -25,7 +25,7 @@ export default function Page() {
       boards.push(easyKatanuki(replayInfo.problem, op));
     }
 
-    return [replayInfo.answer.n, boards] as const;
+    return [replayInfo.answer.n + 1, boards] as const;
   }, [replayInfo]);
 
   const boardArray = boards?.[turn];
