@@ -1,5 +1,5 @@
-import * as util from "node:util";
 import type { TypedArray } from "type-fest";
+import { isUint8Array } from "uint8array-extras";
 import { dbg } from "../workers/log";
 
 const sliceJump = <T extends TypedArray>(arr: T, start: number, jump: number) => {
@@ -24,7 +24,7 @@ export class TwoDimensionalCells {
       throw new Error(`Invalid size: ${init.length} !== ${width} * ${height}`);
     }
 
-    this.#inner = util.types.isUint8Array(init) ? init : new Uint8Array(init);
+    this.#inner = isUint8Array(init) ? init : new Uint8Array(init);
   }
 
   get length() {

@@ -33,7 +33,7 @@ export const generateProblem = (generateSettings: {
   const numbers: number[] = Array(width * height).fill(0);
 
   switch (genKindStart) {
-    case 1:
+    case 1: {
       // ランダム
       let flg = true;
       while (flg) {
@@ -53,6 +53,7 @@ export const generateProblem = (generateSettings: {
         }
       }
       break;
+    }
     case 2:
       // 0,1,2,3,0,1,2,3……
       for (let i = 0; i < width * height; i++) {

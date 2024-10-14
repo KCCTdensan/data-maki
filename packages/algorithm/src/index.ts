@@ -1,6 +1,8 @@
 import type { Answer, Problem } from "@data-maki/schemas";
 import { solve as solveV1 } from "./workers/v1.master";
 
+export { easyKatanuki } from "./katanuki";
+
 export const VERSIONS = ["v1"] as const;
 
 const solveFuncs: { [key in (typeof VERSIONS)[number]]: SolveFunc } = {

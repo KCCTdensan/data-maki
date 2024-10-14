@@ -6,6 +6,7 @@ export const isCell = (cell: string): cell is "0" | "1" | "2" | "3" => ["0", "1"
 type Props = {
   cell: "0" | "1" | "2" | "3";
   size: string;
+  borderColor?: string;
   style?: CSSProperties;
 };
 
@@ -16,22 +17,26 @@ const colors = {
   "3": "yellow",
 };
 
-export const BoardCell = memo(function BoardCell({ cell, size, style, ...rest }: Props) {
+export const BoardCell = memo(function BoardCell({
+  cell,
+  size,
+  borderColor = "var(--mauve-2)",
+  style,
+  ...rest
+}: Props) {
   return (
     <Box
       textAlign="center"
       verticalAlign="middle"
-      border="1px solid var(--mauve-2)"
+      border={`1px solid ${borderColor}`}
       fontWeight="medium"
       fontFeatureSettings='"tnum"'
-      style={{
-        fontSize: `calc(${size} / 2)`,
-        minWidth: size,
-        minHeight: size,
-        backgroundColor: `var(--${colors[cell]}-5)`,
-        color: "var(--cell-color)",
-        ...style,
-      }}
+      fontSize={`calc(${size} / 2)`}
+      minWidth={size}
+      minHeight={size}
+      backgroundColor={`var(--${colors[cell]}-5)`}
+      color="var(--cell-color)"
+      style={style}
       {...rest}
     >
       {cell}

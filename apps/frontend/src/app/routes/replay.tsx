@@ -1,137 +1,69 @@
-import {
-  Box,
-  Button,
-  ButtonGroup,
-  Card,
-  CardBody,
-  CardHeader,
-  Checkbox,
-  FileInput,
-  Flex,
-  FormControl,
-  Grid,
-  HStack,
-  Heading,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  InputRightElement,
-  SimpleGrid,
-  Slider,
-  SliderMark,
-  Spacer,
-  Text,
-  VStack,
-  useBoolean,
-} from "@yamada-ui/react";
-import { useState } from "react";
+import { easyKatanuki } from "@data-maki/algorithm";
+import type { Board as BoardSchema, ReplayInfo } from "@data-maki/schemas";
+import { Box, Checkbox, Flex, Grid, HStack, Heading, SimpleGrid, Spacer, Text, useBoolean } from "@yamada-ui/react";
+import { useMemo, useState } from "react";
 import { BoardCell } from "../components/board/Cell";
 import { ZoomLevelSlider } from "../components/board/ZoomLevelSlider";
 import { PatternList } from "../components/pattern/PatternList";
-
-const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+import { InputFileCard } from "../components/replay/InputFileCard";
+import { TimelineCard } from "../components/replay/TimelineCard";
 
 export default function Page() {
-  const turns = 124;
   const [turn, setTurn] = useState(0);
-  const [isPlaying, { toggle: togglePlaying }] = useBoolean(false);
-  const [showDebugOverlay, { toggle: toggleDebugOverlay }] = useBoolean(true);
+  const [replayInfo, setReplayInfo] = useState<ReplayInfo | null>(null);
+  const [showDebugOverlay, setDebugOverlay] = useState(true);
   const [hideCellNumber, { toggle: toggleHideCellNumber }] = useBoolean(false);
   const [syncScroll, { toggle: toggleSyncScroll }] = useBoolean(true);
   const [zoomLevel, setZoomLevel] = useState(1.0);
-  const board = undefined;
+
+  const [turns, boards] = useMemo(() => {
+    if (!replayInfo) return [0, []];
+
+    const boards: string[][] = [replayInfo.problem.board.start];
+
+    for (const op of replayInfo.answer.ops) {
+      boards.push(easyKatanuki(replayInfo.problem, op));
+    }
+
+    return [replayInfo.answer.n, boards] as const;
+  }, [replayInfo]);
+
+  const boardArray = boards?.[turn];
+
+  const board: BoardSchema | null =
+    boardArray && replayInfo
+      ? {
+          start: boardArray,
+          goal: replayInfo.problem.board.goal,
+          width: replayInfo.problem.board.width,
+          height: replayInfo.problem.board.height,
+        }
+      : null;
+
+  const extraOpInfo = replayInfo?.extraInfo[turn];
 
   return (
     <>
       <Grid templateColumns="auto 1fr" autoRows="1fr" gap="md">
-        <Card variant="outline" minW="240px">
-          <CardHeader>
-            <Heading as="h2" size="md" fontWeight="semibold">
-              Input File
-            </Heading>
-          </CardHeader>
-          <CardBody>
-            <FormControl label="File to view replay">
-              <FileInput
-                placeholder="out_2024-10-13_001"
-                accept="application/json"
-                format={({ name }) => name.substring(0, name.lastIndexOf("."))}
-              />
-            </FormControl>
-          </CardBody>
-        </Card>
-        <Card variant="outline">
-          <CardHeader>
-            <Heading as="h2" size="md" fontWeight="semibold">
-              Timeline
-            </Heading>
-          </CardHeader>
-          <CardBody>
-            <VStack px={2} py={4}>
-              <HStack>
-                <Button colorScheme={isPlaying ? undefined : "primary"} onClick={togglePlaying}>
-                  {isPlaying ? "Pause" : "Play"}
-                </Button>
-                <InputGroup maxW="120px">
-                  <InputLeftElement>
-                    <p>/</p>
-                  </InputLeftElement>
-
-                  <Input placeholder="1000" />
-
-                  <InputRightElement>
-                    <p>ms</p>
-                  </InputRightElement>
-                </InputGroup>
-                <ButtonGroup isAttached variant="outline" gap="sm">
-                  <Button onClick={() => setTurn((prev) => clamp(prev - 10, 0, turns))}>-10</Button>
-                  <Button onClick={() => setTurn((prev) => clamp(prev + 10, 0, turns))}>+10</Button>
-                </ButtonGroup>
-                <Checkbox isChecked={showDebugOverlay} onChange={toggleDebugOverlay}>
-                  Debug overlay
-                </Checkbox>
-              </HStack>
-              <HStack alignItems="center">
-                <Text
-                  whiteSpace="nowrap"
-                  style={{
-                    fontFeatureSettings: "'tnum'",
-                  }}
-                >
-                  Turn:{" "}
-                  <span
-                    style={{
-                      display: "inline-block",
-                      textAlign: "end",
-                      minWidth: `${turns.toString().length}ch`,
-                    }}
-                  >
-                    {turn}
-                  </span>
-                </Text>
-                <Slider value={turn} min={0} max={turns} onChange={setTurn}>
-                  <SliderMark value={0} w={10} ml={-5}>
-                    {0}
-                  </SliderMark>
-                  {Array.from({ length: turns / 20 }, (_, i) => i * 20).map((value) => (
-                    <SliderMark key={value} value={value} w={10} ml={-5}>
-                      {value}
-                    </SliderMark>
-                  ))}
-                  <SliderMark value={turns} w={10} ml={-5}>
-                    {turns}
-                  </SliderMark>
-                </Slider>
-              </HStack>
-            </VStack>
-          </CardBody>
-        </Card>
+        <InputFileCard
+          onSetReplayInfo={(replayInfo) => {
+            setReplayInfo(replayInfo);
+            setTurn(0);
+          }}
+        />
+        <TimelineCard
+          currentTurn={turn}
+          turns={turns}
+          onChangeTurn={setTurn}
+          showDebugOverlay={showDebugOverlay}
+          onChangeDebugOverlay={setDebugOverlay}
+        />
       </Grid>
       <section>
         <Heading as="h2" size="lg" fontWeight="medium" lineHeight={1.2}>
           Board
         </Heading>
-        {board ? (
+        {board && extraOpInfo ? (
           <>
             <Grid as="section" templateColumns="auto 1fr auto" w="100%" mb={4}>
               <SimpleGrid columns={2} gap="md">
@@ -172,7 +104,7 @@ export default function Page() {
               <Heading as="h2" size="lg" fontWeight="medium">
                 Patterns
               </Heading>
-              {/*<PatternList patterns={general.patterns} />*/}
+              <PatternList patterns={replayInfo.problem.general.patterns} />
             </section>
           </>
         ) : (

@@ -21,7 +21,8 @@
   },
   "dependencies": {
     "@data-maki/schemas": "workspace:*",
-    "fast-equals": "^5.0.1"
+    "fast-equals": "^5.0.1",
+    "uint8array-extras": "^1.4.0"
   },
   "devDependencies": {
     "@data-maki/biome-config": "workspace:*",

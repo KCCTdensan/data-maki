@@ -1,8 +1,11 @@
-import type { Op } from "@data-maki/schemas";
+import type { Board, Op, Problem } from "@data-maki/schemas";
+import { cellsToBoard } from "./models/answer";
 import { type InternalPattern, getPattern } from "./models/pattern";
+import { boardToCells } from "./models/problem";
 import { type Context, DOWN, type Direction, LEFT, type Point, UP } from "./types";
 import { type TwoDimensionalCells, dbgCells, reverseCells } from "./utils/arrays";
 import { countElementsColumnWise } from "./utils/board";
+import { createContext } from "./v1";
 import { dbg } from "./workers/log";
 
 export const addOp = (c: Context, ops: Op) => {
@@ -110,4 +113,12 @@ export const katanuki = (c: Context, p: number, x: number, y: number, dir: Direc
   } else {
     dbg(c.worker, c.board, b);
   }
+};
+
+export const easyKatanuki = (problem: Problem, op: Op): string[] => {
+  const c = createContext(problem);
+
+  katanuki(c, op.p, op.x, op.y, op.s as Direction);
+
+  return cellsToBoard(c.board);
 };

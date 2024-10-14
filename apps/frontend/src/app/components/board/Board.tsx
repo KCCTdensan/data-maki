@@ -1,3 +1,4 @@
+import type { ExtraOpInfo } from "@data-maki/schemas";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Box, ScrollArea } from "@yamada-ui/react";
 import { Fragment, useCallback, useRef } from "react";
@@ -8,6 +9,7 @@ type Props = Readonly<{
   board: string[];
   width: number;
   height: number;
+  extraInfo?: ExtraOpInfo;
   zoomLevel: number;
   scrollGroup?: string;
 }>;
