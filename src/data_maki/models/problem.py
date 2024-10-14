@@ -41,7 +41,10 @@ class InternalPattern:
         cells = np.array([int(cell) for row in pattern["cells"] for cell in row])
 
         return InternalPattern(
-            p=pattern["p"], cells=TwoDimensionalIntArray(inner=cells, width=pattern["width"], height=pattern["height"])
+            p=pattern["p"],
+            cells=TwoDimensionalIntArray(
+                inner=cells, width=pattern["width"], height=pattern["height"]
+            ),
         )
 
     @property
@@ -60,7 +63,9 @@ class InternalProblem:
 
     @staticmethod
     def from_problem(problem: Problem) -> "InternalProblem":
-        current = np.array([int(cell) for row in problem["board"]["start"] for cell in row])
+        current = np.array(
+            [int(cell) for row in problem["board"]["start"] for cell in row]
+        )
         goal = np.array([int(cell) for row in problem["board"]["goal"] for cell in row])
 
         width = problem["board"]["width"]

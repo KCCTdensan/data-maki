@@ -7,7 +7,9 @@ from .arrays import TwoDimensionalIntArray
 class ReturnableThread[T](Thread):
     _result: T | None = None
 
-    def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None):
+    def __init__(
+        self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None
+    ):
         Thread.__init__(self, group, target, name, args, kwargs)
 
     def run(self):

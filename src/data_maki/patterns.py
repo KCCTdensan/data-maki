@@ -6,9 +6,25 @@ def create_patterns() -> list[InternalPattern]:
 
     for i in range(1, 9):
         num = 1 << i
-        patterns.append({"p": 3 * i - 2, "width": num, "height": num, "cells": ["1" * num] * num})
-        patterns.append({"p": 3 * i - 1, "width": num, "height": num, "cells": ["1" * num, "0" * num] * (num // 2)})
-        patterns.append({"p": 3 * i, "width": num, "height": num, "cells": ["10" * (num // 2)] * num})
+        patterns.append(
+            {"p": 3 * i - 2, "width": num, "height": num, "cells": ["1" * num] * num}
+        )
+        patterns.append(
+            {
+                "p": 3 * i - 1,
+                "width": num,
+                "height": num,
+                "cells": ["1" * num, "0" * num] * (num // 2),
+            }
+        )
+        patterns.append(
+            {
+                "p": 3 * i,
+                "width": num,
+                "height": num,
+                "cells": ["10" * (num // 2)] * num,
+            }
+        )
 
     # nongeneral nukigata append
     # patterns.append({"p": 25, "width": 4, "height": 2, "cells": ["0111", "1001"]})
@@ -24,4 +40,8 @@ def get_pattern(index: int, general: list[Pattern]) -> InternalPattern:
     if index < 0 or index >= len(fixed_patterns) + 256:
         raise Exception(f"Invaild pattern index: {index}")
 
-    return fixed_patterns[index] if index < len(fixed_patterns) else general[index - len(fixed_patterns)]
+    return (
+        fixed_patterns[index]
+        if index < len(fixed_patterns)
+        else general[index - len(fixed_patterns)]
+    )

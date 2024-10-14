@@ -13,16 +13,18 @@ class MarkType(StrEnum):
 
 
 @dataclass
-class CellsMark: # in TypeScript, use branded types of CellsMarkLine and CellsMarkPoint
+class CellsMark:  # in TypeScript, use branded types of CellsMarkLine and CellsMarkPoint
     type: MarkType
     index: int
     index2: Optional[int]
 
+
 @dataclass
 class ExtraOpInfo:
-    currentMark: CellsMark # TypeScript to renkei suru node camel case
+    currentMark: CellsMark  # TypeScript to renkei suru node camel case
     goalMark: CellsMark
     delta: Optional[list[int]]
+
 
 @dataclass
 class ReplayInfo:

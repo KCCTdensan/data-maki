@@ -88,7 +88,9 @@ data_jsons = [
 
 
 def main():
-    datas: list[tuple[str, Problem]] = [(name, json.loads(data_json)) for (name, data_json) in data_jsons]
+    datas: list[tuple[str, Problem]] = [
+        (name, json.loads(data_json)) for (name, data_json) in data_jsons
+    ]
     ns = []
 
     for name, data in datas:

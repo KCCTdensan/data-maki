@@ -44,7 +44,9 @@ def solve_worker(problem: Problem):
         c.width = problem["board"]["width"]
         c.height = problem["board"]["height"]
 
-    c.info_now = ExtraOpInfo(CellsMark(MarkType.POINT, 0, 0), CellsMark(MarkType.ROW, 0, None), [0, 0, 0, 0])
+    c.info_now = ExtraOpInfo(
+        CellsMark(MarkType.POINT, 0, 0), CellsMark(MarkType.ROW, 0, None), [0, 0, 0, 0]
+    )
 
     c.board = InternalProblem.from_problem(problem)
 
@@ -62,7 +64,9 @@ def solve_worker(problem: Problem):
     for i in range(c.height - 1, -1, -1):
         c.info_now.goalMark.index = i
         cmped = c.height - i - 1 - cnt_unmoved  # counts of columns completed yet
-        c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1 - cnt_unmoved], elems_goal[i])
+        c.info_now.delta = utils.get_delta(
+            c.elems_now[c.height - 1 - cnt_unmoved], elems_goal[i]
+        )
 
         print(f"delta = {c.info_now.delta}")
 
@@ -136,7 +140,9 @@ def solve_worker(problem: Problem):
                     katanuki(c, value[0], value[1], value[2], Direction.UP)
                     is_filled = True
 
-                    c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                    c.info_now.delta = utils.get_delta(
+                        c.elems_now[c.height - 1], elems_goal[i]
+                    )
 
                     break
 
@@ -180,11 +186,15 @@ def solve_worker(problem: Problem):
                                 katanuki(
                                     c,
                                     2 if rv_ul else 3,
-                                    x if not rv_ul and not rv_lr or rv_ul and not rv_ud else x - 1,
+                                    x
+                                    if not rv_ul and not rv_lr or rv_ul and not rv_ud
+                                    else x - 1,
                                     y,
                                     Direction.UP,
                                 )
-                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                                c.info_now.delta = utils.get_delta(
+                                    c.elems_now[c.height - 1], elems_goal[i]
+                                )
                                 irregular = True
                                 y = c.height - 2
 
@@ -197,9 +207,19 @@ def solve_worker(problem: Problem):
                                     c.info_now.currentMark.index2 = x
                                     katanuki(
                                         c,
-                                        0 if cnt == 0 else 3 * cnt if rv_ul else 3 * cnt - 1,
+                                        0
+                                        if cnt == 0
+                                        else 3 * cnt
+                                        if rv_ul
+                                        else 3 * cnt - 1,
                                         x - (1 << cnt),
-                                        y if not rv_ud and not rv_ul or not rv_lr and rv_ul or cnt == 0 else y - 1,
+                                        y
+                                        if not rv_ud
+                                        and not rv_ul
+                                        or not rv_lr
+                                        and rv_ul
+                                        or cnt == 0
+                                        else y - 1,
                                         Direction.LEFT,
                                     )
                                     x -= 1 << cnt
@@ -212,12 +232,16 @@ def solve_worker(problem: Problem):
                             katanuki(c, 0, x, y, Direction.UP)
 
                             if irregular:
-                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                                c.info_now.delta = utils.get_delta(
+                                    c.elems_now[c.height - 1], elems_goal[i]
+                                )
                                 c.info_now.currentMark.index = c.height - 3
                                 c.info_now.currentMark.index2 = j + k
                                 katanuki(c, 0, j + k, c.height - 3, Direction.UP)
 
-                            c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                            c.info_now.delta = utils.get_delta(
+                                c.elems_now[c.height - 1], elems_goal[i]
+                            )
 
                             is_filled = True
 
@@ -251,11 +275,15 @@ def solve_worker(problem: Problem):
                                 katanuki(
                                     c,
                                     2 if rv_ul else 3,
-                                    x if not rv_ul and not rv_lr or rv_ul and not rv_ud else x - 1,
+                                    x
+                                    if not rv_ul and not rv_lr or rv_ul and not rv_ud
+                                    else x - 1,
                                     y,
                                     Direction.UP,
                                 )
-                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                                c.info_now.delta = utils.get_delta(
+                                    c.elems_now[c.height - 1], elems_goal[i]
+                                )
                                 irregular = True
                                 y = c.height - 2
 
@@ -268,9 +296,19 @@ def solve_worker(problem: Problem):
                                     c.info_now.currentMark.index2 = x
                                     katanuki(
                                         c,
-                                        0 if cnt == 0 else 3 * cnt if rv_ul else 3 * cnt - 1,
+                                        0
+                                        if cnt == 0
+                                        else 3 * cnt
+                                        if rv_ul
+                                        else 3 * cnt - 1,
                                         x + 1,
-                                        y if not rv_ud and not rv_ul or not rv_lr and rv_ul or cnt == 0 else y - 1,
+                                        y
+                                        if not rv_ud
+                                        and not rv_ul
+                                        or not rv_lr
+                                        and rv_ul
+                                        or cnt == 0
+                                        else y - 1,
                                         Direction.RIGHT,
                                     )
 
@@ -284,12 +322,16 @@ def solve_worker(problem: Problem):
                             katanuki(c, 0, x, y, Direction.UP)
 
                             if irregular:
-                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                                c.info_now.delta = utils.get_delta(
+                                    c.elems_now[c.height - 1], elems_goal[i]
+                                )
                                 c.info_now.currentMark.index = c.height - 3
                                 c.info_now.currentMark.index2 = j - k
                                 katanuki(c, 0, j - k, c.height - 3, Direction.UP)
 
-                            c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                            c.info_now.delta = utils.get_delta(
+                                c.elems_now[c.height - 1], elems_goal[i]
+                            )
 
                             is_filled = True
 

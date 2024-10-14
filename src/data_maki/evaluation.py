@@ -3,6 +3,7 @@ from .context import Context
 from .models.answer import Direction
 from .katanuki import katanuki_board
 
+
 def evaluate_row_elem(c: Context, p: int, x: int, y: int, elem_goal: list[int]):
     board = katanuki_board(c, p, x, y, Direction.UP)
     elems = utils.count_elements(board)
@@ -30,6 +31,3 @@ def evaluate_col_piece(c: Context, p: int, x: int, y: int, column_goal: list[int
     print(f"evaluate: p = {p}, evaluation = {value}")
 
     return value
-
-
-
