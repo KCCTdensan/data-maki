@@ -28,7 +28,6 @@ console.time("Finished building solver");
 
 await Bun.build({
   entrypoints: ["./src/index.ts"],
-  splitting: true,
   sourcemap: "linked",
   plugins: [
     typia({
@@ -38,7 +37,8 @@ await Bun.build({
       transports: ["pino-pretty", "pino-roll"],
     }),
   ],
-  minify: true,
+  //minify: true,
+  //bytecode: true,
   outdir: "./dist",
   target: "bun",
   define: {
