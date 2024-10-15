@@ -4,7 +4,6 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
-import microtime from "microtime";
 import typia from "typia";
 import { type GenerationSettings, generateProblem } from "./gen";
 import type { Config } from "./models/config";
@@ -84,7 +83,7 @@ app.post("/answer", async (c) => {
     }, generationSettings.waitDuration * 1000);
   }
 
-  const revision = microtime.now();
+  const revision = Bun.nanoseconds();
 
   return c.json({ revision });
 });

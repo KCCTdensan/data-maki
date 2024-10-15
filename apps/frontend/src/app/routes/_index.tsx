@@ -1,17 +1,5 @@
-import { solverDataAtom } from "@/atoms/solver";
-import {
-  Box,
-  Checkbox,
-  Flex,
-  Grid,
-  HStack,
-  Heading,
-  SimpleGrid,
-  Spacer,
-  Text,
-  VStack,
-  useBoolean,
-} from "@yamada-ui/react";
+import { solverDataAtom, workersAtom } from "@/app/atoms/solver";
+import { Box, Checkbox, Flex, Grid, HStack, Heading, SimpleGrid, Spacer, Text, useBoolean } from "@yamada-ui/react";
 import { useAtomValue } from "jotai";
 import { type CSSProperties, useState } from "react";
 import { ScrollSync } from "scroll-sync-react";
@@ -21,17 +9,20 @@ import { ZoomLevelSlider } from "../components/board/ZoomLevelSlider";
 import { PatternList } from "../components/pattern/PatternList";
 import { ConnectionManagerCard } from "../components/stats/ConnectionManagerCard";
 import { StatsCard } from "../components/stats/StatsCard";
+import { WorkersCard } from "../components/workers/WorkersCard";
 
 export default function Page() {
   const [zoomLevel, setZoomLevel] = useState(1.0);
   const [hideCellNumber, { toggle: toggleHideCellNumber }] = useBoolean(false);
   const [syncScroll, { toggle: toggleSyncScroll }] = useBoolean(true);
   const { board, general, startedAt, solveId } = useAtomValue(solverDataAtom);
+  const workers = useAtomValue(workersAtom);
 
   return (
     <>
-      <Grid templateColumns="1fr 1fr" autoRows="1fr" gap="md">
+      <Grid templateColumns="repeat(3, 1fr)" autoRows="1fr" gap="md">
         <ConnectionManagerCard />
+        <WorkersCard results={workers} />
         <StatsCard solveId={solveId} board={board} startedAt={startedAt} />
       </Grid>
       <Box

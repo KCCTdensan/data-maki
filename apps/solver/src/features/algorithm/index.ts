@@ -67,26 +67,29 @@ export class AlgorithmFeature extends FeatureBase {
         })
         .info("Solver started");
 
-      this.sendEvent({
-        eventName: "solve.start",
-        solveId: solvingState.id,
-        workers: 1, // TODO: Implement multi-worker solving
-        startedAt: solvingState.startedAt,
-        board: solvingState.problem.board,
-        general: solvingState.problem.general,
-      } satisfies SolveStartEvent);
-
       const scope = span(this.log, "Solve finished");
 
-      const [answer, finalBoard] = await this.#solve(solvingState.problem);
-
-      this.sendEvent({
-        eventName: "solve.progress",
-        solveId: solvingState.id,
-        workerId: 1, // TODO: Implement multi-worker solving
-        board: finalBoard,
-        turns: answer.ops.length,
-      } satisfies SolveProgressEvent);
+      const [answer, finalBoard] = await this.#solve(
+        solvingState.problem,
+        (workers) => {
+          this.sendEvent({
+            eventName: "solve.start",
+            solveId: solvingState.id,
+            workers,
+            startedAt: solvingState.startedAt,
+            board: solvingState.problem.board,
+            general: solvingState.problem.general,
+          } satisfies SolveStartEvent);
+        },
+        (workerId, turns) => {
+          this.sendEvent({
+            eventName: "solve.progress",
+            solveId: solvingState.id,
+            workerId,
+            turns,
+          } satisfies SolveProgressEvent);
+        },
+      );
 
       const correct = deepEqual(finalBoard, solvingState.problem.board.goal);
 
@@ -110,7 +113,7 @@ export class AlgorithmFeature extends FeatureBase {
 
       scope.end();
 
-      const revision = await this.serverComm.submitAnswer(solvingState.id, answer);
+      const revision = await this.serverComm.submitAnswer(solvingState.id, solvingState.problem, answer);
 
       this.sendEvent({
         eventName: "solve.finished",

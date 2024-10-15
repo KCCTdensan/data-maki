@@ -1,3 +1,4 @@
+import type { Problem } from "@data-maki/schemas";
 import { StateBase } from "./base.ts";
 
 export class IdleState extends StateBase {
@@ -12,4 +13,6 @@ export class IdleState extends StateBase {
 
     return IdleState.#instance;
   }
+
+  oldProblem: Problem | null = null;
 }

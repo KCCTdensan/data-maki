@@ -28,7 +28,6 @@ export const PatternListInner = ({ patterns }) => {
       <Box width={`${virtualizer.getTotalSize()}px`} h="100%" position="relative">
         {virtualizer.getVirtualItems().map((virtualItem) => {
           const pattern = patterns[virtualItem.index];
-          const size = pattern.width * 32;
 
           return (
             <Fragment key={virtualItem.key}>
@@ -38,8 +37,6 @@ export const PatternListInner = ({ patterns }) => {
                   position: "absolute",
                   top: 0,
                   left: 0,
-                  width: `${size}px`,
-                  height: `${size}px`,
                   transform: `translateX(${virtualItem.start}px)`,
                 }}
               />

@@ -1,12 +1,12 @@
+import { IGNOREABLE_EVENTS } from "@/constants/events";
+import { isClient } from "@/lib/client";
 import { type UIMessageEventBase, isSolverEvent } from "@data-maki/schemas";
 import type { SolverApp } from "@data-maki/solver";
 import type { ParsedEvent, ReconnectInterval } from "eventsource-parser";
 import { EventSourceParserStream } from "eventsource-parser/stream";
 import type { hc } from "hono/client";
 import { atom } from "jotai";
-import { IGNOREABLE_EVENTS } from "../constants/events";
-import { isClient } from "../lib/client";
-import { solverDataAtom } from "./solver";
+import { solverDataAtom, workersAtom } from "./solver";
 
 // Code execution on module load
 
@@ -124,6 +124,16 @@ export const eventStreamAtom = atom(
                 set(solverDataAtom, {
                   ...event,
                   startedAt: new Date(event.startedAt),
+                });
+
+                set(workersAtom, Array(event.workers).fill(null));
+              } else if (event.eventName === "solve.progress") {
+                set(workersAtom, (workers) => {
+                  const newWorkers = [...workers];
+
+                  newWorkers[event.workerId] = event.turns;
+
+                  return newWorkers;
                 });
               }
             },

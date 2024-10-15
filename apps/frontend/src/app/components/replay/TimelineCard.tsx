@@ -107,7 +107,10 @@ export const TimelineCard = ({
               </Button>
               <Button onClick={() => onChangeTurn(clamp(currentTurn - 10, 0, turns))}>-10</Button>
               <Button onClick={() => onChangeTurn(clamp(currentTurn + 10, 0, turns))}>+10</Button>
-              <Button onClick={() => onChangeTurn(clamp(currentTurn + 1, 0, turns))} isDisabled={currentTurn === turns}>
+              <Button
+                onClick={() => onChangeTurn(clamp(currentTurn + 1, 0, turns))}
+                isDisabled={currentTurn === turns || turns <= 0}
+              >
                 +1
               </Button>
             </ButtonGroup>
