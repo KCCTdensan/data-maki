@@ -1,9 +1,10 @@
 import { easyKatanuki } from "@data-maki/algorithm";
 import type { Board as BoardSchema, ReplayInfo } from "@data-maki/schemas";
 import { Box, Checkbox, Flex, Grid, HStack, Heading, SimpleGrid, Spacer, Text, useBoolean } from "@yamada-ui/react";
-import { useMemo, useState } from "react";
+import { type CSSProperties, useMemo, useState } from "react";
 import { ScrollSync } from "scroll-sync-react";
 import { useDebounce } from "use-debounce";
+import { Board } from "../components/board/Board";
 import { BoardCell } from "../components/board/Cell";
 import { StartGoalBoard } from "../components/board/StartGoalBoard";
 import { ZoomLevelSlider } from "../components/board/ZoomLevelSlider";
@@ -13,7 +14,12 @@ import { TimelineCard } from "../components/replay/TimelineCard";
 
 export default function Page() {
   const [rawTurn, setTurn] = useState(0);
-  const [turn] = useDebounce(rawTurn, 400);
+  const [interval, setIntervalState] = useState(400);
+
+  const [turn] = useDebounce(rawTurn, Math.min(interval, 400), {
+    leading: true /* Need this to prevent delayed updates when playing */,
+  });
+
   const [replayInfo, setReplayInfo] = useState<ReplayInfo | null>(null);
   const [showDebugOverlay, setDebugOverlay] = useState(true);
   const [hideCellNumber, { toggle: toggleHideCellNumber }] = useBoolean(false);
@@ -23,11 +29,17 @@ export default function Page() {
   const [turns, boards] = useMemo(() => {
     if (!replayInfo) return [0, []];
 
-    const boards: string[][] = [replayInfo.problem.board.start];
+    const boards: string[][] = [structuredClone(replayInfo.problem.board.start)];
 
     for (const op of replayInfo.answer.ops) {
-      boards.push(easyKatanuki(replayInfo.problem, op));
+      const afterBoard = easyKatanuki(replayInfo.problem, op);
+
+      replayInfo.problem.board.start = afterBoard;
+
+      boards.push(afterBoard);
     }
+
+    replayInfo.problem.board.start = boards[0];
 
     return [replayInfo.answer.n + 1, boards] as const;
   }, [replayInfo]);
@@ -44,7 +56,7 @@ export default function Page() {
         }
       : null;
 
-  const extraOpInfo = showDebugOverlay ? replayInfo?.extraInfo[turn] : undefined;
+  const extraOpInfo = replayInfo?.extraInfo[turn];
   const delta =
     extraOpInfo?.delta ??
     replayInfo?.extraInfo
@@ -67,15 +79,26 @@ export default function Page() {
           onChangeTurn={setTurn}
           showDebugOverlay={showDebugOverlay}
           onChangeDebugOverlay={setDebugOverlay}
+          onChangeInterval={setIntervalState}
         />
       </Grid>
-      <Box as="section" minH="100vh">
+      <Box
+        as="section"
+        minH="100vh"
+        style={
+          {
+            "--cell-color": hideCellNumber ? "transparent" : "var(--mauve-10)",
+            // color: `var(--${colors[cell]}-8)`,
+            // color: `var(--mauve-10)`,
+          } as CSSProperties
+        }
+      >
         <Heading as="h2" size="lg" fontWeight="medium" lineHeight={1.2}>
           Board
         </Heading>
-        {board && extraOpInfo ? (
+        {(board && extraOpInfo) || turn === turns - 1 ? (
           <>
-            <section>
+            <Box as="section" my={4}>
               <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
                 Delta
               </Heading>
@@ -99,7 +122,7 @@ export default function Page() {
                   </HStack>
                 </Flex>
               ) : null}
-            </section>
+            </Box>
             <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
               <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
                 Start
@@ -109,7 +132,24 @@ export default function Page() {
               </Heading>
             </Grid>
             <ScrollSync>
-              <StartGoalBoard board={board} zoomLevel={zoomLevel} syncScroll={syncScroll} extraInfo={extraOpInfo} />
+              {turn === turns - 1 ? (
+                <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
+                  <Box />
+                  <Board
+                    board={replayInfo?.problem.board.goal}
+                    width={replayInfo?.problem.board.width}
+                    height={replayInfo?.problem.board.height}
+                    zoomLevel={zoomLevel}
+                  />
+                </Grid>
+              ) : (
+                <StartGoalBoard
+                  board={board}
+                  zoomLevel={zoomLevel}
+                  syncScroll={syncScroll}
+                  extraInfo={showDebugOverlay ? extraOpInfo : undefined}
+                />
+              )}
             </ScrollSync>
             <Grid as="section" templateColumns="auto 1fr auto" w="100%" mb={4}>
               <SimpleGrid columns={2} gap="md">

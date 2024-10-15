@@ -18,7 +18,7 @@ export type CellsMark = CellsMarkLine | CellsMarkPoint;
 export interface ExtraOpInfo {
   currentMark: CellsMark;
   goalMark: CellsMark;
-  delta?: (Array<number & tags.Type<"uint32">> & tags.MinItems<4> & tags.MaxItems<4>) | null;
+  delta?: (Array<number & tags.Type<"int32">> & tags.MinItems<4> & tags.MaxItems<4>) | null;
 }
 
 export interface ReplayInfo {

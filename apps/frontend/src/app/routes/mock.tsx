@@ -7,6 +7,8 @@ import {
   Grid,
   HStack,
   Heading,
+  InputGroup,
+  InputRightElement,
   NumberInput,
   Select,
   Switch,
@@ -59,6 +61,8 @@ export default function Page() {
   const height = randomHeight || Number.isNaN(rawHeight) ? 0 : Number(rawHeight);
   const [genKindStart, setGenKindStart] = useState<GenerationKindStart>("all-random");
   const [genKindGoal, setGenKindGoal] = useState<GenerationKindGoal>("all-random");
+  const [rawWaitDuration, setRawWaitDuration] = useState("5");
+  const waitDuration = Number.isNaN(rawWaitDuration) ? 0 : Number(rawWaitDuration);
   const notice = useNotice();
 
   return (
@@ -79,6 +83,7 @@ export default function Page() {
               height,
               genKindStart,
               genKindGoal,
+              waitDuration,
             }),
           });
 
@@ -167,6 +172,24 @@ export default function Page() {
                   value={genKindGoal}
                   onChange={(value) => setGenKindGoal(value as GenerationKindGoal)}
                 />
+              </FormControl>
+            </VStack>
+            <VStack>
+              <FormControl label="Wait Duration">
+                <InputGroup>
+                  <NumberInput
+                    placeholder="10"
+                    fontFeatureSettings="'tnum'"
+                    min={0}
+                    value={rawWaitDuration}
+                    onChange={setRawWaitDuration}
+                    required
+                  />
+
+                  <InputRightElement mr={4}>
+                    <p>s</p>
+                  </InputRightElement>
+                </InputGroup>
               </FormControl>
             </VStack>
           </HStack>

@@ -54,7 +54,11 @@ export const InputFileCard = ({ onSetReplayInfo }: Props) => {
             onChange={(files) => (files ? setFile(files[0]) : setFile(null))}
           />
         </FormControl>
-        {error && <Text color="red">{error}</Text>}
+        {error && (
+          <Text color="red" whiteSpace="no-wrap" textOverflow="ellipsis">
+            {error}
+          </Text>
+        )}
       </CardBody>
     </Card>
   );
