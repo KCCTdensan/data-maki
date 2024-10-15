@@ -13,13 +13,11 @@
   "dependencies": {
     "@data-maki/schemas": "workspace:*",
     "@hono/typia-validator": "^0.0.5",
-    "hono": "^4.6.3",
-    "microtime": "^3.1.1"
+    "hono": "^4.6.3"
   },
   "devDependencies": {
     "@data-maki/biome-config": "workspace:*",
     "@data-maki/typescript-config": "workspace:*",
-    "@ryoppippi/unplugin-typia": "npm:@jsr/ryoppippi__unplugin-typia",
-    "@types/microtime": "^2.1.2"
+    "@ryoppippi/unplugin-typia": "npm:@jsr/ryoppippi__unplugin-typia"
   }
 }

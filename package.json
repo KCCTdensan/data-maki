@@ -35,7 +35,6 @@
     "@data-maki/schemas",
     "esbuild",
     "lefthook",
-    "microtime",
     "workerd"
   ]
 }
