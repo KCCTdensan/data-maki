@@ -110,7 +110,7 @@ export class AlgorithmFeature extends FeatureBase {
 
       scope.end();
 
-      const revision = await this.serverComm.submitAnswer(solvingState.id, answer);
+      const revision = await this.serverComm.submitAnswer(solvingState.id, solvingState.problem, answer);
 
       this.sendEvent({
         eventName: "solve.finished",

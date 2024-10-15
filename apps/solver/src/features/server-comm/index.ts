@@ -1,6 +1,7 @@
 import type { Answer, AnswerResponse, Problem } from "@data-maki/schemas";
 import cuid2 from "@paralleldrive/cuid2";
 import axios, { type AxiosInstance, isAxiosError } from "axios";
+import deepEqual from "fast-deep-equal";
 import type { LogLayer } from "loglayer";
 import typia from "typia";
 import { span } from "../../logging";
@@ -53,6 +54,18 @@ export class ServerCommunicatorFeature extends FeatureBase {
           throw e;
         });
 
+      const oldProblem = IdleState.instance.oldProblem;
+
+      if (problem && deepEqual(problem.board, oldProblem?.board) && deepEqual(problem.general, oldProblem?.general)) {
+        this.log.info("Received same problem, retrying...");
+
+        tries++;
+
+        await new Promise((resolve) => setTimeout(resolve, SERVER_COMMUNICATOR_POLL_INTERVAL));
+
+        continue;
+      }
+
       const id = createProblemId();
 
       if (problem) {
@@ -77,7 +90,7 @@ export class ServerCommunicatorFeature extends FeatureBase {
     }
   }
 
-  async submitAnswer(id: string, answer: Answer): Promise<number> {
+  async submitAnswer(id: string, problem: Problem, answer: Answer): Promise<number> {
     const scope = span(
       this.log.withMetadata({
         answerId: id,
@@ -97,6 +110,8 @@ export class ServerCommunicatorFeature extends FeatureBase {
 
     setTimeout(() => {
       StateManager.instance.setState(IdleState.instance);
+
+      IdleState.instance.oldProblem = problem;
     }, 1000);
 
     return revision;
