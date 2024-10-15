@@ -1,8 +1,9 @@
-import { connectionStatusAtom, eventStreamAtom } from "@/atoms/client";
 import { localizeSolverEvent } from "@/lib/events";
 import { type Board, isSolverEvent, isUIMessageEvent } from "@data-maki/schemas";
 import { Box, Card, CardBody, CardHeader, Grid, Heading, Text } from "@yamada-ui/react";
 import { useAtomValue } from "jotai";
+import { connectionStatusAtom, eventStreamAtom } from "../../atoms/client";
+import { workersAtom } from "../../atoms/solver";
 import { RealtimeDuration } from "../date/RealtimeDuration";
 
 type Props = Partial<{
@@ -14,6 +15,7 @@ type Props = Partial<{
 export const StatsCard = ({ solveId, board, startedAt }: Props) => {
   const connectionStatus = useAtomValue(connectionStatusAtom);
   const currentEvent = useAtomValue(eventStreamAtom);
+  const workers = useAtomValue(workersAtom);
 
   return (
     <Card as="section" variant="outline" w="100%" h="100%">
@@ -48,6 +50,17 @@ export const StatsCard = ({ solveId, board, startedAt }: Props) => {
                     <td>Time:</td>
                     <td>
                       <RealtimeDuration startDate={startedAt} interval={800} />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Shortest turns:</td>
+                    <td>
+                      {workers.length === 0 || workers.every((worker) => worker === null)
+                        ? "Nothing"
+                        : workers.reduce(
+                            (acc, w) => (w ? Math.min(acc, w) : Number.POSITIVE_INFINITY),
+                            Number.POSITIVE_INFINITY,
+                          )}
                     </td>
                   </tr>
                 </>

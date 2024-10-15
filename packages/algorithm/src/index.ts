@@ -15,4 +15,8 @@ export const isSolveFuncVersion = (version: string): version is (typeof VERSIONS
 export const getSolveFunc = (version: (typeof VERSIONS)[number]): SolveFunc => solveFuncs[version];
 export const LATEST_VERSION = VERSIONS[VERSIONS.length - 1];
 
-export type SolveFunc = (problem: Problem) => Promise<[answer: Answer, board: string[]]>;
+export type SolveFunc = (
+  problem: Problem,
+  onStartWorker: (totalWorkers: number) => void,
+  onWorkerFinish: (workerId: number, turns: number) => void,
+) => Promise<[answer: Answer, board: string[]]>;

@@ -4,7 +4,7 @@ import {
   connectionStatusToColor,
   connectionStatusToText,
   eventStreamAtom,
-} from "@/atoms/client";
+} from "@/app/atoms/client";
 import type { SolverApp } from "@data-maki/solver";
 import {
   Button,
