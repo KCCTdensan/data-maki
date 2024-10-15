@@ -1,20 +1,26 @@
 import json
 import sys
 
+from dotenv import load_dotenv
+
+from data_maki.cli.client import create_client, get_problem
+
+
 from ..solver import solve
 from .encoder import EnhancedJSONEncoder
+
+load_dotenv()
 
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: rye run data-maki <input_file>")
+        client = create_client()
+        problem = get_problem(client)
+    else:
+        fname = sys.argv[1]
 
-        sys.exit(1)
-
-    fname = sys.argv[1]
-
-    with open(fname, "r") as f:
-        problem = json.load(f)
+        with open(fname, "r") as f:
+            problem = json.load(f)
 
     # answer, _, replay = solve(problem)
     for i in range(7, -1, -1):
