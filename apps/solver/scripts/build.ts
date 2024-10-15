@@ -37,8 +37,8 @@ await Bun.build({
       transports: ["pino-pretty", "pino-roll"],
     }),
   ],
-  //minify: true,
-  //bytecode: true,
+  minify: true,
+  bytecode: true,
   outdir: "./dist",
   target: "bun",
   define: {
