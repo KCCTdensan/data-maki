@@ -4,6 +4,7 @@ import { flatRoutes } from "remix-flat-routes";
 import { remixRoutes } from "remix-routes/vite";
 import { defineConfig } from "vite";
 import { denyImports, envOnlyMacros } from "vite-env-only";
+import env from "vite-plugin-env-compatible";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
@@ -11,6 +12,7 @@ export default defineConfig({
     minify: true,
     sourcemap: true,
   },
+  envPrefix: "SOLVER_",
   plugins: [
     cloudflareDevProxyVitePlugin(),
     remix({
@@ -43,6 +45,7 @@ export default defineConfig({
     typia({
       log: false,
     }),
+    env({ prefix: "SOLVER", mountedPath: "process.env" }),
   ],
   ssr: {
     resolve: {

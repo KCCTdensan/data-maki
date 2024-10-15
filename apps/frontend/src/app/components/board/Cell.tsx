@@ -5,7 +5,7 @@ export const isCell = (cell: string): cell is "0" | "1" | "2" | "3" => ["0", "1"
 
 type Props = {
   cell: "0" | "1" | "2" | "3";
-  size: string;
+  size?: string;
   borderColor?: string;
   style?: CSSProperties;
 };

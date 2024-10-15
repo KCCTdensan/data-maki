@@ -54,9 +54,8 @@ export const Board = ({ board, width, height, zoomLevel, marks, scrollGroup }: P
         <Fragment key={virtualRow.key}>
           {columnVirtualizer.getVirtualItems().map((virtualColumn) => {
             const cell = board[virtualRow.index][virtualColumn.index] as "0" | "1" | "2" | "3";
-            const borderColor = shouldMark(marks, virtualColumn.index, virtualRow.index)
-              ? "var(--orange-8)"
-              : "var(--mauve-2)";
+            const borderColor =
+              marks && shouldMark(marks, virtualColumn.index, virtualRow.index) ? "var(--orange-8)" : "var(--mauve-2)";
 
             return (
               <BoardCell

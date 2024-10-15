@@ -7,7 +7,6 @@ import {
   Checkbox,
   HStack,
   Heading,
-  Input,
   InputGroup,
   InputLeftElement,
   InputRightElement,
@@ -43,7 +42,7 @@ export const TimelineCard = ({
 
   const turns = actualTurns - 1; // turn starts from 0
 
-  if (currentTurn === turns - 1) pause();
+  if (currentTurn === turns && isPlaying) pause();
 
   useEffect(() => {
     if (isPlaying && interval !== null) {
