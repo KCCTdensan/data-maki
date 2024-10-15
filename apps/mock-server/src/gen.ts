@@ -41,6 +41,7 @@ export type GenerationSettings = {
   height: number;
   genKindStart: GenerationKindStart;
   genKindGoal: GenerationKindGoal;
+  waitDuration?: number;
 };
 
 export const getBoardArrayFromNumbers = (numbers: number[], width: number): string[] => {

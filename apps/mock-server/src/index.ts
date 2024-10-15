@@ -26,6 +26,7 @@ const generationSettings: GenerationSettings = {
   height: 0,
   genKindStart: "all-random",
   genKindGoal: "all-random",
+  waitDuration: 5,
 };
 
 const app = new Hono();
@@ -55,7 +56,11 @@ app.use(async (c, next) => {
   await next();
 });
 
+let lockedDown = true;
+
 app.get("/problem", (c) => {
+  if (lockedDown) return new Response('"AccessTimeError"', { status: 403 });
+
   const [id, problem] = generateProblem(generationSettings);
 
   c.header("X-Data-Maki-Problem-ID", id.toString());
@@ -69,6 +74,14 @@ app.post("/answer", async (c) => {
 
   if (!validation.success) {
     return c.json({ error: "Invalid answer format", details: validation.errors }, 400);
+  }
+
+  if (generationSettings.waitDuration && generationSettings.waitDuration > 0) {
+    lockedDown = true;
+
+    setTimeout(() => {
+      lockedDown = false;
+    }, generationSettings.waitDuration * 1000);
   }
 
   const revision = microtime.now();
@@ -85,9 +98,18 @@ app.post("/settings", async (c) => {
   generationSettings.height = settings.height;
   generationSettings.genKindStart = settings.genKindStart;
   generationSettings.genKindGoal = settings.genKindGoal;
+  generationSettings.waitDuration = settings.waitDuration;
 
   return new Response(null, { status: 204 });
 });
+
+if (generationSettings.waitDuration && generationSettings.waitDuration > 0) {
+  lockedDown = true;
+
+  setTimeout(() => {
+    lockedDown = false;
+  }, generationSettings.waitDuration * 1000);
+}
 
 export default {
   port: PORT,

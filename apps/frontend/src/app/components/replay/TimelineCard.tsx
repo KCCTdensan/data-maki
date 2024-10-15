@@ -17,7 +17,7 @@ import {
   VStack,
   useBoolean,
 } from "@yamada-ui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
 
@@ -27,6 +27,7 @@ type Props = Readonly<{
   onChangeTurn: (turn: number) => void;
   showDebugOverlay: boolean;
   onChangeDebugOverlay: (showDebugOverlay: boolean) => void;
+  onChangeInterval: (interval: number) => void;
 }>;
 
 export const TimelineCard = ({
@@ -35,10 +36,20 @@ export const TimelineCard = ({
   onChangeTurn,
   showDebugOverlay,
   onChangeDebugOverlay,
+  onChangeInterval,
 }: Props) => {
   const [isPlaying, { off: pause, toggle: togglePlaying }] = useBoolean(false);
   const [rawInterval, setRawInterval] = useState<string>("");
   const interval = rawInterval === "" ? null : Number(rawInterval);
+  const oldInterval = useRef(interval);
+
+  useEffect(() => {
+    if (interval !== oldInterval.current) {
+      oldInterval.current = interval;
+
+      onChangeInterval(interval ?? 0);
+    }
+  }, [interval, onChangeInterval]);
 
   const turns = actualTurns - 1; // turn starts from 0
 
@@ -91,8 +102,14 @@ export const TimelineCard = ({
               </InputRightElement>
             </InputGroup>
             <ButtonGroup isAttached isDisabled={turns <= 0} variant="outline" gap="sm">
+              <Button onClick={() => onChangeTurn(clamp(currentTurn - 1, 0, turns))} isDisabled={currentTurn === 0}>
+                -1
+              </Button>
               <Button onClick={() => onChangeTurn(clamp(currentTurn - 10, 0, turns))}>-10</Button>
               <Button onClick={() => onChangeTurn(clamp(currentTurn + 10, 0, turns))}>+10</Button>
+              <Button onClick={() => onChangeTurn(clamp(currentTurn + 1, 0, turns))} isDisabled={currentTurn === turns}>
+                +1
+              </Button>
             </ButtonGroup>
             <Checkbox isChecked={showDebugOverlay} onChange={() => onChangeDebugOverlay(!showDebugOverlay)}>
               Debug overlay

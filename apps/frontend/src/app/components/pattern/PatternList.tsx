@@ -2,6 +2,7 @@ import { type Pattern as PatternSchema, fixedPatterns } from "@data-maki/schemas
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Box, Card, CardBody, FormControl, HStack, Option, ScrollArea, Select } from "@yamada-ui/react";
 import { Fragment, useRef, useState } from "react";
+import { Pattern } from "./Pattern";
 
 type PatternType = "general" | "fixed";
 
@@ -12,47 +13,39 @@ type Props = Readonly<{
 export const PatternListInner = ({ patterns }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useVirtualizer({
+  const virtualizer = useVirtualizer({
     horizontal: true,
+    gap: 12,
     count: patterns.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 32,
+    estimateSize: (i) => patterns[i].width * 32,
     paddingEnd: 12,
-    overscan: 2,
-  });
-
-  const columnVirtualizer = useVirtualizer({
-    count: patterns.length,
-    getScrollElement: () => scrollRef.current,
-    estimateSize: () => 32,
     overscan: 2,
   });
 
   return (
     <ScrollArea ref={scrollRef} innerProps={{ as: CardBody }} minH="200px">
-      <Box width={`${rowVirtualizer.getTotalSize()}px`} h="100%" position="relative">
-        {rowVirtualizer.getVirtualItems().map((virtualRow) =>
-          columnVirtualizer.getVirtualItems().map((virtualItem) => {
-            const pattern = patterns[virtualItem.index];
-            const size = virtualItem.size;
+      <Box width={`${virtualizer.getTotalSize()}px`} h="100%" position="relative">
+        {virtualizer.getVirtualItems().map((virtualItem) => {
+          const pattern = patterns[virtualItem.index];
+          const size = pattern.width * 32;
 
-            return (
-              <Fragment key={virtualItem.key}>
-                <BoardCell
-                  pattern={pattern}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: `${size}px`,
-                    height: `${size}px`,
-                    transform: `translateX(${virtualItem.start}px)`,
-                  }}
-                />
-              </Fragment>
-            );
-          }),
-        )}
+          return (
+            <Fragment key={virtualItem.key}>
+              <Pattern
+                pattern={pattern}
+                style={{
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  width: `${size}px`,
+                  height: `${size}px`,
+                  transform: `translateX(${virtualItem.start}px)`,
+                }}
+              />
+            </Fragment>
+          );
+        })}
       </Box>
     </ScrollArea>
   );
