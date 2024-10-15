@@ -31,12 +31,22 @@ export default function Page() {
 
     const boards: string[][] = [structuredClone(replayInfo.problem.board.start)];
 
-    for (const op of replayInfo.answer.ops) {
-      const afterBoard = easyKatanuki(replayInfo.problem, op);
+    for (const [i, op] of replayInfo.answer.ops.entries()) {
+      try {
+        const afterBoard = easyKatanuki(replayInfo.problem, op);
 
-      replayInfo.problem.board.start = afterBoard;
+        replayInfo.problem.board.start = afterBoard;
 
-      boards.push(afterBoard);
+        boards.push(afterBoard);
+      } catch (e) {
+        if (e instanceof Error) {
+          throw new Error(`Failed to apply operation ${i + 1}`, { cause: e });
+        }
+
+        console.error(e);
+
+        throw new Error(`Failed to apply operation ${i + 1}`);
+      }
     }
 
     replayInfo.problem.board.start = boards[0];
