@@ -42,9 +42,7 @@ class InternalPattern:
 
         return InternalPattern(
             p=pattern["p"],
-            cells=TwoDimensionalIntArray(
-                inner=cells, width=pattern["width"], height=pattern["height"]
-            ),
+            cells=TwoDimensionalIntArray(inner=cells, width=pattern["width"], height=pattern["height"]),
         )
 
     @property
@@ -55,6 +53,12 @@ class InternalPattern:
     def height(self) -> int:
         return self.cells.height
 
+    def copy(self) -> "InternalPattern":
+        return InternalPattern(
+            p=self.p,
+            cells=self.cells.copy(),
+        )
+
 
 @dataclass
 class InternalProblem:
@@ -63,9 +67,7 @@ class InternalProblem:
 
     @staticmethod
     def from_problem(problem: Problem) -> "InternalProblem":
-        current = np.array(
-            [int(cell) for row in problem["board"]["start"] for cell in row]
-        )
+        current = np.array([int(cell) for row in problem["board"]["start"] for cell in row])
         goal = np.array([int(cell) for row in problem["board"]["goal"] for cell in row])
 
         width = problem["board"]["width"]
@@ -74,4 +76,10 @@ class InternalProblem:
         return InternalProblem(
             current=TwoDimensionalIntArray(inner=current, width=width, height=height),
             goal=TwoDimensionalIntArray(inner=goal, width=width, height=height),
+        )
+
+    def copy(self) -> "InternalProblem":
+        return InternalProblem(
+            current=self.current.copy(),
+            goal=self.goal.copy(),
         )

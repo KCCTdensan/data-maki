@@ -1,9 +1,9 @@
 from . import utils
 from .context import Context
 from .models.answer import Direction, Op
+from .models.replay import CellsMark, ExtraOpInfo, MarkType
 from .patterns import get_pattern
 from .utils import ReverseOperation
-from .models.replay import MarkType, CellsMark, ExtraOpInfo, ReplayInfo
 
 
 def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
@@ -12,8 +12,14 @@ def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
     # this function can't correct x&y confused by ud or lr
     if c.rv_op.has_reverse90:
         x, y = y, x
+        if p > 0 and p < 25:
+            if p % 3 == 2:
+                p += 1
+            elif p % 3 == 0:
+                p -= 1
 
         if c.rv_op.has_reverse_up_down:
+            y = c.width - y - 1
             y -= pattern.height - 1
 
             if s == Direction.LEFT:
@@ -22,6 +28,7 @@ def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
                 s = Direction.LEFT
 
         if c.rv_op.has_reverse_left_right:
+            x = c.height - x - 1
             x -= pattern.width - 1
 
             if s == Direction.UP:
@@ -40,6 +47,7 @@ def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
 
     else:
         if c.rv_op.has_reverse_up_down:
+            y = c.height - y - 1
             y -= pattern.height - 1
 
             if s == Direction.UP:
@@ -48,6 +56,7 @@ def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
                 s = Direction.UP
 
         if c.rv_op.has_reverse_left_right:
+            x = c.width - x - 1
             x -= pattern.width - 1
 
             if s == Direction.LEFT:
@@ -74,17 +83,32 @@ def add_info(c: Context):
 
         cr_x, cr_y = cr_y, cr_x
 
-    if c.rv_op.has_reverse_up_down:
-        if gl_type == MarkType.ROW:
-            gl_idx = c.height - gl_idx - 1
+        if c.rv_op.has_reverse_up_down:
+            if gl_type == MarkType.ROW:
+                gl_idx = c.width - gl_idx - 1
 
-        cr_y = c.height - cr_y - 1
+            cr_y = c.width - cr_y - 1
 
-    if c.rv_op.has_reverse_left_right:
-        if gl_type == MarkType.COLUMN:
-            gl_idx = c.width - gl_idx - 1
+        if c.rv_op.has_reverse_left_right:
+            if gl_type == MarkType.COLUMN:
+                gl_idx = c.height - gl_idx - 1
 
-        cr_x = c.width - cr_x - 1
+            cr_x = c.height - cr_x - 1
+
+    else:
+        if c.rv_op.has_reverse_up_down:
+            if gl_type == MarkType.ROW:
+                gl_idx = c.height - gl_idx - 1
+
+            cr_y = c.height - cr_y - 1
+
+        if c.rv_op.has_reverse_left_right:
+            if gl_type == MarkType.COLUMN:
+                gl_idx = c.width - gl_idx - 1
+
+            cr_x = c.width - cr_x - 1
+
+    print(f"add x:{cr_x}, y:{cr_y}, idx:{gl_idx}")
 
     if c.info_now.goalMark.type == MarkType.ROW:
         c.info.append(
@@ -95,23 +119,14 @@ def add_info(c: Context):
             )
         )
     else:
-        c.info.append(
-            ExtraOpInfo(
-                CellsMark(cr_type, cr_y, cr_x), CellsMark(gl_type, gl_idx, None), None
-            )
-        )
+        c.info.append(ExtraOpInfo(CellsMark(cr_type, cr_y, cr_x), CellsMark(gl_type, gl_idx, None), None))
 
 
 def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
     pattern_ = get_pattern(p, c.patterns)
     pattern = utils.reverse(pattern_.cells, c.rv_op)
 
-    if (
-        x + pattern_.width <= 0
-        or x >= c.width
-        or y + pattern_.height <= 0
-        or y >= c.height
-    ):
+    if x + pattern_.width <= 0 or x >= c.width or y + pattern_.height <= 0 or y >= c.height:
         raise Exception("Nukigata can't pick any cells :(")
 
     # stripe -> reverse / border -> normal
@@ -136,9 +151,7 @@ def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
     else:
         raise Exception("the direction is not exist! :(")
 
-    """
-    pattern = utils.list_rv(pattern, c.rv_uldr, c.rv_ud, c.rv_lr)
-    """
+    # print(pattern)
 
     """
     before

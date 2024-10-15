@@ -1,9 +1,9 @@
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Optional
 
-from enum import StrEnum
-from .problem import Problem
 from .answer import Answer
+from .problem import Problem
 
 
 class MarkType(StrEnum):

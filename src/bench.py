@@ -4,6 +4,7 @@ import os
 from contextlib import redirect_stdout
 
 from data_maki.models.problem import Problem
+from data_maki.models.result import Result
 from data_maki.solver import solve
 
 data_jsons = [
@@ -88,19 +89,21 @@ data_jsons = [
 
 
 def main():
-    datas: list[tuple[str, Problem]] = [
-        (name, json.loads(data_json)) for (name, data_json) in data_jsons
-    ]
+    datas: list[tuple[str, Problem]] = [(name, json.loads(data_json)) for (name, data_json) in data_jsons]
     ns = []
 
     for name, data in datas:
         print(f"{name}...", end=" ")
 
         with redirect_stdout(open(os.devnull, "w")):
-            answer, board, replay = solve(data)
+            results: list[Result] = solve(data)
 
-        print(f"{answer.n} turns")
-        ns.append(answer.n)
+        nmin = 320000
+        for result in results:
+            nmin = min(nmin, result.answer.n)
+
+        print(f"{nmin} turns")
+        ns.append(nmin)
 
     print(f"Avg: {int(sum(ns) / len(ns))}")
     print(f"Max: {max(ns)}")

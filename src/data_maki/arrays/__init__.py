@@ -1,4 +1,5 @@
-from dataclasses import dataclass, field
+from dataclasses import dataclass
+
 import numpy as np
 import numpy.typing as npt
 
@@ -15,9 +16,7 @@ class TwoDimensionalIntArray:
 
     def __post_init__(self):
         if len(self.inner) != self.width * self.height:
-            raise ValueError(
-                f"Invalid size: {len(self.inner)} != {self.width} * {self.height}"
-            )
+            raise ValueError(f"Invalid size: {len(self.inner)} != {self.width} * {self.height}")
 
     def __iter__(self):
         return iter(self.inner)
@@ -26,27 +25,16 @@ class TwoDimensionalIntArray:
         if not isinstance(value, TwoDimensionalIntArray):
             return False
 
-        return (
-            np.array_equal(self.inner, value.inner)
-            and self.width == value.width
-            and self.height == value.height
-        )
+        return np.array_equal(self.inner, value.inner) and self.width == value.width and self.height == value.height
 
     def size(self):
         return self.width * self.height
 
     def copy(self) -> "TwoDimensionalIntArray":
-        return TwoDimensionalIntArray(
-            inner=self.inner.copy(), width=self.width, height=self.height
-        )
+        return TwoDimensionalIntArray(inner=self.inner.copy(), width=self.width, height=self.height)
 
     def get(self, idx_row: int, idx_column: int) -> int:
-        if (
-            idx_row < 0
-            or idx_row >= self.height
-            or idx_column < 0
-            or idx_column >= self.width
-        ):
+        if idx_row < 0 or idx_row >= self.height or idx_column < 0 or idx_column >= self.width:
             raise IndexError(f"Out of range in get({idx_row}, {idx_column})")
 
         return self.inner[self.width * idx_row + idx_column].item()
@@ -94,12 +82,7 @@ class TwoDimensionalIntArray:
             yield self.get_column(i)
 
     def set(self, idx_row: int, idx_column: int, value: int):
-        if (
-            idx_row < 0
-            or idx_row >= self.height
-            or idx_column < 0
-            or idx_column >= self.width
-        ):
+        if idx_row < 0 or idx_row >= self.height or idx_column < 0 or idx_column >= self.width:
             raise IndexError(f"Out of range in set({idx_row}, {idx_column})")
 
         self.inner[self.width * idx_row + idx_column] = value
@@ -130,7 +113,7 @@ class TwoDimensionalIntArray:
         return inner
 
     def reverse_row_wise_inplace(self):
-        self.inner = flatten([self.get_row(x) for x in range(self.height - 1, -1, -1)])
+        self.inner = np.array(flatten([self.get_row(x) for x in range(self.height - 1, -1, -1)]))
 
     def reverse_row_wise(self) -> "TwoDimensionalIntArray":
         inner = self.copy()
@@ -140,7 +123,7 @@ class TwoDimensionalIntArray:
         return inner
 
     def reverse_column_wise_inplace(self):
-        self.inner = flatten([self.get_row(x)[::-1] for x in range(self.height)])
+        self.inner = np.array(flatten([self.get_row(x)[::-1] for x in range(self.height)]))
 
     def reverse_column_wise(self) -> "TwoDimensionalIntArray":
         inner = self.copy()

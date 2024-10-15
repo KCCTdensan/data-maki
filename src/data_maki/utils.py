@@ -7,9 +7,7 @@ from .arrays import TwoDimensionalIntArray
 class ReturnableThread[T](Thread):
     _result: T | None = None
 
-    def __init__(
-        self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None
-    ):
+    def __init__(self, group=None, target=None, name=None, args=(), kwargs={}, Verbose=None):
         Thread.__init__(self, group, target, name, args, kwargs)
 
     def run(self):
@@ -20,6 +18,9 @@ class ReturnableThread[T](Thread):
         Thread.join(self, *args)
 
         return self._return
+
+    def _is_alive(self) -> bool:
+        return self.is_alive()
 
 
 def print_board(board: TwoDimensionalIntArray):
@@ -38,9 +39,14 @@ class ReverseOperation(StrEnum):
 
 
 class ReverseOperationPatterns:
-    has_reverse90 = False
-    has_reverse_up_down = False
-    has_reverse_left_right = False
+    has_reverse90: bool
+    has_reverse_up_down: bool
+    has_reverse_left_right: bool
+
+    def __init__(self):
+        self.has_reverse90 = False
+        self.has_reverse_up_down = False
+        self.has_reverse_left_right = False
 
 
 def list_rv(arr: TwoDimensionalIntArray, strategy: ReverseOperation):
@@ -96,7 +102,7 @@ def count_elements(b: TwoDimensionalIntArray):
 
     for i, rows in enumerate(b.loop_row_views()):
         for cell in rows:
-            elems[i][cell.item()] += 1
+            elems[i][cell] += 1
 
     return elems
 

@@ -1,7 +1,7 @@
 from . import utils
 from .context import Context
-from .models.answer import Direction
 from .katanuki import katanuki_board
+from .models.answer import Direction
 
 
 def evaluate_row_elem(c: Context, p: int, x: int, y: int, elem_goal: list[int]):
