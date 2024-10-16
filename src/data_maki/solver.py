@@ -10,54 +10,58 @@ from .models.problem import InternalProblem, Problem
 from .models.replay import CellsMark, ExtraOpInfo, MarkType, ReplayInfo
 from .models.result import Result
 
-TOTAL_WORKERS = 1
+TOTAL_WORKERS = 8
 
 worker_barrier = Barrier(TOTAL_WORKERS, timeout=10)
 
 
-def solve(problem: Problem, N: int):
+def solve(problem: Problem):
     worker_barrier.reset()
 
-    flgs: list[list[bool]] = [
-        [False, False, False],
-    ]
+    flgs: list[list[bool]] = []
 
-    for j in range(N):
-        if (N >> j) & 1:
-            flgs[0][2 - j] = True
+    for i in range(TOTAL_WORKERS):
+        flgs.append([False, False, False])
+        for j in range(3):
+            if (i >> j) & 1:
+                flgs[i][2 - j] = True
 
-    workers: list[utils.ReturnableThread] = []
+    workers: list[(int, utils.ReturnableThread)] = []
     c = list(Context() for _ in range(TOTAL_WORKERS))
     for i, flg in enumerate(flgs):
         workers.append(
-            utils.ReturnableThread(target=solve_worker, args=(deepcopy(problem), c[i], flg[0], flg[1], flg[2]))
+            (
+                i,
+                utils.ReturnableThread(
+                    target=solve_worker,
+                    args=(deepcopy(problem), c[i], flg[0], flg[1], flg[2]),
+                ),
+            ),
         )
         print(flg[0], flg[1], flg[2])
 
         print(f"start worker {i}")
-        workers[i].start()
+        workers[i][1].start()
 
     # datas: list[list[Answer, InternalProblem, ReplayInfo]] = []
-    datas: list[Result] = []
+    datas: list[Result] = [None] * TOTAL_WORKERS
 
     cnt = TOTAL_WORKERS
 
     while cnt > 0:
         del_idx = []
-        for i, worker in enumerate(workers):
+        for j, (i, worker) in enumerate(workers):
             if not worker._is_alive():
-                datas.append(worker.join())
+                datas[i] = worker.join()
                 # print(json.dumps(datas[TOTAL_WORKERS-cnt], indent=2, cls=EnhancedJSONEncoder))
-                print(datas[TOTAL_WORKERS - cnt].answer.n)
+                print(datas[i].answer.n)
                 cnt -= 1
-                del_idx.append(i)
+                del_idx.append(j)
         del_idx.sort(reverse=True)
         for idx in del_idx:
             workers.pop(idx)
 
-    datas.sort(key=lambda x: x.answer.n)
-
-    return datas[0]
+    return datas
 
 
 def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: bool):
@@ -78,7 +82,9 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
         c.width = problem["board"]["width"]
         c.height = problem["board"]["height"]
 
-    c.info_now = ExtraOpInfo(CellsMark(MarkType.POINT, 0, 0), CellsMark(MarkType.ROW, 0, None), [0, 0, 0, 0])
+    c.info_now = ExtraOpInfo(
+        CellsMark(MarkType.POINT, 0, 0), CellsMark(MarkType.ROW, 0, None), [0, 0, 0, 0]
+    )
 
     c.board = InternalProblem.from_problem(problem)
 
@@ -89,7 +95,9 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
     elems_goal = utils.count_elements(c.board.goal)
     c.elems_now = utils.count_elements(c.board.current)
 
-    print(f"My rv_op: {c.rv_op.has_reverse90}, {c.rv_op.has_reverse_up_down}, {c.rv_op.has_reverse_left_right}")
+    print(
+        f"My rv_op: {c.rv_op.has_reverse90}, {c.rv_op.has_reverse_up_down}, {c.rv_op.has_reverse_left_right}"
+    )
 
     utils.print_board(c.board.current)
 
@@ -100,7 +108,9 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
     for i in range(c.height - 1, -1, -1):
         c.info_now.goalMark.index = i
         cmped = c.height - i - 1 - cnt_unmoved  # counts of columns completed yet
-        c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1 - cnt_unmoved], elems_goal[i])
+        c.info_now.delta = utils.get_delta(
+            c.elems_now[c.height - 1 - cnt_unmoved], elems_goal[i]
+        )
 
         print(f"delta = {c.info_now.delta}")
 
@@ -174,7 +184,9 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
                     katanuki(c, value[0], value[1], value[2], Direction.UP)
                     is_filled = True
 
-                    c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                    c.info_now.delta = utils.get_delta(
+                        c.elems_now[c.height - 1], elems_goal[i]
+                    )
 
                     break
 
@@ -218,11 +230,15 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
                                 katanuki(
                                     c,
                                     2 if rv_ul else 3,
-                                    x if not rv_ul and not rv_lr or rv_ul and not rv_ud else x - 1,
+                                    x
+                                    if not rv_ul and not rv_lr or rv_ul and not rv_ud
+                                    else x - 1,
                                     y,
                                     Direction.UP,
                                 )
-                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                                c.info_now.delta = utils.get_delta(
+                                    c.elems_now[c.height - 1], elems_goal[i]
+                                )
                                 irregular = True
                                 y = c.height - 2
 
@@ -235,9 +251,19 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
                                     c.info_now.currentMark.index2 = x
                                     katanuki(
                                         c,
-                                        0 if cnt == 0 else 3 * cnt if rv_ul else 3 * cnt - 1,
+                                        0
+                                        if cnt == 0
+                                        else 3 * cnt
+                                        if rv_ul
+                                        else 3 * cnt - 1,
                                         x - (1 << cnt),
-                                        y if not rv_ud and not rv_ul or not rv_lr and rv_ul or cnt == 0 else y - 1,
+                                        y
+                                        if not rv_ud
+                                        and not rv_ul
+                                        or not rv_lr
+                                        and rv_ul
+                                        or cnt == 0
+                                        else y - 1,
                                         Direction.LEFT,
                                     )
                                     x -= 1 << cnt
@@ -250,12 +276,16 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
                             katanuki(c, 0, x, y, Direction.UP)
 
                             if irregular:
-                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                                c.info_now.delta = utils.get_delta(
+                                    c.elems_now[c.height - 1], elems_goal[i]
+                                )
                                 c.info_now.currentMark.index = c.height - 3
                                 c.info_now.currentMark.index2 = j + k
                                 katanuki(c, 0, j + k, c.height - 3, Direction.UP)
 
-                            c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                            c.info_now.delta = utils.get_delta(
+                                c.elems_now[c.height - 1], elems_goal[i]
+                            )
 
                             is_filled = True
 
@@ -289,11 +319,15 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
                                 katanuki(
                                     c,
                                     2 if rv_ul else 3,
-                                    x if not rv_ul and not rv_lr or rv_ul and not rv_ud else x - 1,
+                                    x
+                                    if not rv_ul and not rv_lr or rv_ul and not rv_ud
+                                    else x - 1,
                                     y,
                                     Direction.UP,
                                 )
-                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                                c.info_now.delta = utils.get_delta(
+                                    c.elems_now[c.height - 1], elems_goal[i]
+                                )
                                 irregular = True
                                 y = c.height - 2
 
@@ -306,9 +340,19 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
                                     c.info_now.currentMark.index2 = x
                                     katanuki(
                                         c,
-                                        0 if cnt == 0 else 3 * cnt if rv_ul else 3 * cnt - 1,
+                                        0
+                                        if cnt == 0
+                                        else 3 * cnt
+                                        if rv_ul
+                                        else 3 * cnt - 1,
                                         x + 1,
-                                        y if not rv_ud and not rv_ul or not rv_lr and rv_ul or cnt == 0 else y - 1,
+                                        y
+                                        if not rv_ud
+                                        and not rv_ul
+                                        or not rv_lr
+                                        and rv_ul
+                                        or cnt == 0
+                                        else y - 1,
                                         Direction.RIGHT,
                                     )
 
@@ -322,12 +366,16 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
                             katanuki(c, 0, x, y, Direction.UP)
 
                             if irregular:
-                                c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                                c.info_now.delta = utils.get_delta(
+                                    c.elems_now[c.height - 1], elems_goal[i]
+                                )
                                 c.info_now.currentMark.index = c.height - 3
                                 c.info_now.currentMark.index2 = j - k
                                 katanuki(c, 0, j - k, c.height - 3, Direction.UP)
 
-                            c.info_now.delta = utils.get_delta(c.elems_now[c.height - 1], elems_goal[i])
+                            c.info_now.delta = utils.get_delta(
+                                c.elems_now[c.height - 1], elems_goal[i]
+                            )
 
                             is_filled = True
 

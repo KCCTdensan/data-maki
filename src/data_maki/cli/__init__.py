@@ -23,9 +23,8 @@ def main():
             problem = json.load(f)
 
     # answer, _, replay = solve(problem)
-    for i in range(7, -1, -1):
-        data = solve(problem, i)
-
+    datas = solve(problem)
+    for i, data in enumerate(datas):
         sys.stderr.write(f"worker{i} {data.replay.answer.ops}\n\n\n")
         # print(f"in worker{i}...  turns: {data.answer.n}")
         with open(f"replay_{i}.json", "w") as f:

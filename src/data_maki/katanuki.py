@@ -113,14 +113,23 @@ def add_info(c: Context):
             )
         )
     else:
-        c.info.append(ExtraOpInfo(CellsMark(cr_type, cr_y, cr_x), CellsMark(gl_type, gl_idx, None), None))
+        c.info.append(
+            ExtraOpInfo(
+                CellsMark(cr_type, cr_y, cr_x), CellsMark(gl_type, gl_idx, None), None
+            )
+        )
 
 
 def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
     pattern_ = get_pattern(p, c.patterns)
     pattern = utils.reverse(pattern_.cells, c.rv_op)
 
-    if x + pattern_.width <= 0 or x >= c.width or y + pattern_.height <= 0 or y >= c.height:
+    if (
+        x + pattern_.width <= 0
+        or x >= c.width
+        or y + pattern_.height <= 0
+        or y >= c.height
+    ):
         raise Exception("Nukigata can't pick any cells :(")
 
     # stripe -> reverse / border -> normal
