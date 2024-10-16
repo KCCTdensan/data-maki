@@ -1,5 +1,6 @@
 import type { TypedArray } from "type-fest";
 import { isUint8Array } from "uint8array-extras";
+import type { ReverseOperationPatterns } from "../types";
 import { dbg } from "../workers/log";
 
 const sliceJump = <T extends TypedArray>(arr: T, start: number, jump: number) => {
@@ -223,13 +224,54 @@ export const reverseCells = (cells: TwoDimensionalCells, op: ReverseOperation): 
   }
 };
 
-export const reverseCellsInPlace = (cells: TwoDimensionalCells, op: ReverseOperation) => {
-  switch (op) {
-    case "reverse-90":
-      return cells.transposeInPlace();
-    case "reverse-up-down":
-      return cells.reverseRowWiseInPlace();
-    case "reverse-left-right":
-      return cells.reverseColumnWiseInPlace();
+export const multiReverse = (cells_: TwoDimensionalCells, rvOp: ReverseOperationPatterns) => {
+  let cells = cells_;
+
+  if (rvOp.hasReverse90) {
+    cells = cells.transpose();
+
+    if (rvOp.hasReverseLeftRight) {
+      cells = cells.reverseRowWise();
+    }
+
+    if (rvOp.hasReverseUpDown) {
+      cells = cells.reverseColumnWise();
+    }
+  } else {
+    if (rvOp.hasReverseLeftRight) {
+      cells = cells.reverseColumnWise();
+    }
+
+    if (rvOp.hasReverseUpDown) {
+      cells = cells.reverseRowWise();
+    }
   }
+
+  return cells;
+};
+
+export const multiDereverse = (cells_: TwoDimensionalCells, rvOp: ReverseOperationPatterns) => {
+  let cells = cells_;
+
+  if (rvOp.hasReverse90) {
+    if (rvOp.hasReverseLeftRight) {
+      cells = cells.reverseRowWise();
+    }
+
+    if (rvOp.hasReverseUpDown) {
+      cells = cells.reverseColumnWise();
+    }
+
+    cells = cells.transpose();
+  } else {
+    if (rvOp.hasReverseLeftRight) {
+      cells = cells.reverseColumnWise();
+    }
+
+    if (rvOp.hasReverseUpDown) {
+      cells = cells.reverseRowWise();
+    }
+  }
+
+  return cells;
 };

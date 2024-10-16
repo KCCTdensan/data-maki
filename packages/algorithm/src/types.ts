@@ -13,15 +13,22 @@ export type Direction = typeof UP | typeof DOWN | typeof LEFT | typeof RIGHT;
 
 export type CellCounts = FixedLengthArray<number, 4>;
 
+export interface ReverseOperationPatterns {
+  hasReverse90: boolean;
+  hasReverseUpDown: boolean;
+  hasReverseLeftRight: boolean;
+}
+
 export interface Context {
   worker?: Worker;
   board: TwoDimensionalCells;
   goalBoard: TwoDimensionalCells;
   // Element counts per column
-  currentElementCounts: Array<FixedLengthArray<number, 4>>;
+  currentElementCounts: CellCounts[];
   patterns: InternalPattern[];
   width: number;
   height: number;
+  rvOp: ReverseOperationPatterns;
 
   // Answer
   n: number;

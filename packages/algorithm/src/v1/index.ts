@@ -22,6 +22,11 @@ export const createContext = (problem: Problem, self?: Worker): Context => {
     patterns: problem.general.patterns.map(patternToInternal),
     width: problem.board.width,
     height: problem.board.height,
+    rvOp: {
+      hasReverse90: false,
+      hasReverseUpDown: false,
+      hasReverseLeftRight: false,
+    },
     n: 0,
     ops: [],
   };
