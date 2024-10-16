@@ -80,6 +80,8 @@ export class AlgorithmFeature extends FeatureBase {
             board: solvingState.problem.board,
             general: solvingState.problem.general,
           } satisfies SolveStartEvent);
+
+          solvingState.workers = workers;
         },
         (workerId, turns) => {
           this.sendEvent({

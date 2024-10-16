@@ -11,7 +11,7 @@ Follow the root monorepo README.md for setup instructions.
 ## v2 (2024-10-16)
 
 - Evaluation-based selection
-- 
+- Threaded parallelism
 
 ## v1 (2024-10-06)
 
