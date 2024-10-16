@@ -108,31 +108,39 @@ export default function Page() {
         </Heading>
         {(board && extraOpInfo) || turn === turns - 1 ? (
           <>
-            <Box as="section" my={4}>
-              <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
-                Delta
-              </Heading>
-              {delta ? (
-                <Flex gap="md">
-                  <HStack gap="md">
-                    <BoardCell cell={"0"} size="32px" />
-                    <Text>{delta[0]}</Text>
-                  </HStack>
-                  <HStack gap="md">
-                    <BoardCell cell={"1"} size="32px" />
-                    <Text>{delta[1]}</Text>
-                  </HStack>
-                  <HStack gap="md">
-                    <BoardCell cell={"2"} size="32px" />
-                    <Text>{delta[2]}</Text>
-                  </HStack>
-                  <HStack gap="md">
-                    <BoardCell cell={"3"} size="32px" />
-                    <Text>{delta[3]}</Text>
-                  </HStack>
-                </Flex>
-              ) : null}
-            </Box>
+            <HStack>
+              <Box as="section" my={4}>
+                <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
+                  Delta
+                </Heading>
+                {delta && (
+                  <Flex gap="md">
+                    <HStack gap="md">
+                      <BoardCell cell={"0"} size="32px" />
+                      <Text>{delta[0]}</Text>
+                    </HStack>
+                    <HStack gap="md">
+                      <BoardCell cell={"1"} size="32px" />
+                      <Text>{delta[1]}</Text>
+                    </HStack>
+                    <HStack gap="md">
+                      <BoardCell cell={"2"} size="32px" />
+                      <Text>{delta[2]}</Text>
+                    </HStack>
+                    <HStack gap="md">
+                      <BoardCell cell={"3"} size="32px" />
+                      <Text>{delta[3]}</Text>
+                    </HStack>
+                  </Flex>
+                )}
+              </Box>
+              <Box as="section" my={4}>
+                <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
+                  Pattern
+                </Heading>
+                <p>{replayInfo.answer.ops[turn] ? replayInfo.answer.ops[turn].p : "None"}</p>
+              </Box>
+            </HStack>
             <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
               <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
                 Start
