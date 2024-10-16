@@ -9,14 +9,8 @@ from .utils import ReverseOperation
 def add_ops(c: Context, p: int, x: int, y: int, s: Direction):
     pattern = get_pattern(p, c.patterns)
 
-    # this function can't correct x&y confused by ud or lr
     if c.rv_op.has_reverse90:
         x, y = y, x
-        if p > 0 and p < 25:
-            if p % 3 == 2:
-                p += 1
-            elif p % 3 == 0:
-                p -= 1
 
         if c.rv_op.has_reverse_up_down:
             y = c.width - y - 1

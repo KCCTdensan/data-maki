@@ -21,4 +21,5 @@ class Context:
         self.ops = []
         self.info = []
         self.elems_now = []
+        self.rv_op = ReverseOperationPatterns()
         self.patterns = []
