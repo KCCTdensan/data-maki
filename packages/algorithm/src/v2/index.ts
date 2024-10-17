@@ -84,7 +84,7 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
 
               p = 3 * cnt;
               pp.x = !rvUl && rvLr ? x - 1 : x;
-              pp.y = rvUl && rvLr ? y + 1 : y;
+              pp.y = rvUl && !rvLr ? y + 1 : y;
 
               evaluation = evaluateRow(c, p, pp, goalElementCounts[i]);
 
