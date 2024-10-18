@@ -26,9 +26,8 @@ const copyFiles = async (from: string[], to: string) => {
 
 console.time("Finished building solver");
 
-await Bun.build({
+const results = await Bun.build({
   entrypoints: ["./src/index.ts"],
-  splitting: true,
   sourcemap: "linked",
   plugins: [
     typia({
@@ -45,6 +44,13 @@ await Bun.build({
     "process.env.NODE_ENV": '"production"',
   },
 });
+
+if (!results.success) {
+  console.error("Failed to build solver");
+  console.error(results.logs);
+
+  process.exit(1);
+}
 
 console.log("Copying files...");
 

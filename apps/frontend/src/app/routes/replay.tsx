@@ -31,12 +31,22 @@ export default function Page() {
 
     const boards: string[][] = [structuredClone(replayInfo.problem.board.start)];
 
-    for (const op of replayInfo.answer.ops) {
-      const afterBoard = easyKatanuki(replayInfo.problem, op);
+    for (const [i, op] of replayInfo.answer.ops.entries()) {
+      try {
+        const afterBoard = easyKatanuki(replayInfo.problem, op);
 
-      replayInfo.problem.board.start = afterBoard;
+        replayInfo.problem.board.start = afterBoard;
 
-      boards.push(afterBoard);
+        boards.push(afterBoard);
+      } catch (e) {
+        if (e instanceof Error) {
+          throw new Error(`Failed to apply operation ${i + 1}`, { cause: e });
+        }
+
+        console.error(e);
+
+        throw new Error(`Failed to apply operation ${i + 1}`);
+      }
     }
 
     replayInfo.problem.board.start = boards[0];
@@ -98,31 +108,39 @@ export default function Page() {
         </Heading>
         {(board && extraOpInfo) || turn === turns - 1 ? (
           <>
-            <Box as="section" my={4}>
-              <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
-                Delta
-              </Heading>
-              {delta ? (
-                <Flex gap="md">
-                  <HStack gap="md">
-                    <BoardCell cell={"0"} size="32px" />
-                    <Text>{delta[0]}</Text>
-                  </HStack>
-                  <HStack gap="md">
-                    <BoardCell cell={"1"} size="32px" />
-                    <Text>{delta[1]}</Text>
-                  </HStack>
-                  <HStack gap="md">
-                    <BoardCell cell={"2"} size="32px" />
-                    <Text>{delta[2]}</Text>
-                  </HStack>
-                  <HStack gap="md">
-                    <BoardCell cell={"3"} size="32px" />
-                    <Text>{delta[3]}</Text>
-                  </HStack>
-                </Flex>
-              ) : null}
-            </Box>
+            <HStack>
+              <Box as="section" my={4}>
+                <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
+                  Delta
+                </Heading>
+                {delta && (
+                  <Flex gap="md">
+                    <HStack gap="md">
+                      <BoardCell cell={"0"} size="32px" />
+                      <Text>{delta[0]}</Text>
+                    </HStack>
+                    <HStack gap="md">
+                      <BoardCell cell={"1"} size="32px" />
+                      <Text>{delta[1]}</Text>
+                    </HStack>
+                    <HStack gap="md">
+                      <BoardCell cell={"2"} size="32px" />
+                      <Text>{delta[2]}</Text>
+                    </HStack>
+                    <HStack gap="md">
+                      <BoardCell cell={"3"} size="32px" />
+                      <Text>{delta[3]}</Text>
+                    </HStack>
+                  </Flex>
+                )}
+              </Box>
+              <Box as="section" my={4}>
+                <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
+                  Pattern
+                </Heading>
+                <p>{replayInfo.answer.ops[turn] ? replayInfo.answer.ops[turn].p : "None"}</p>
+              </Box>
+            </HStack>
             <Grid templateColumns="1fr 1fr" w="100%" placeItems="start" gap={4}>
               <Heading as="h3" size="md" fontWeight="regular" lineHeight={1}>
                 Start

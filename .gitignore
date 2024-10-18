@@ -280,3 +280,6 @@ poetry.toml
 
 # LSP config files
 pyrightconfig.json
+
+# Profiling data
+*.prof

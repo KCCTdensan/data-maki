@@ -1,6 +1,6 @@
 import { ALGO_VERSION } from "@/constants/env";
 import { LATEST_VERSION, type SolveFunc, getSolveFunc, isSolveFuncVersion } from "@data-maki/algorithm";
-import type { UIMessageEventBase } from "@data-maki/schemas";
+import type { Answer, Problem, UIMessageEventBase } from "@data-maki/schemas";
 import type { SolveStartEvent } from "@data-maki/schemas";
 import type { SolveProgressEvent } from "@data-maki/schemas";
 import type { SolveFinishedEvent } from "@data-maki/schemas";
@@ -9,6 +9,7 @@ import type { LogLayer } from "loglayer";
 import type { ChannelTx, ReadonlyStore } from "reactive-channel";
 import { span } from "../../logging";
 import { DoneState } from "../../state/done.ts";
+import { IdleState } from "../../state/idle.ts";
 import { StateManager } from "../../state/manager.ts";
 import { SolvingState } from "../../state/solving.ts";
 import { FeatureBase } from "../base";
@@ -53,6 +54,36 @@ export class AlgorithmFeature extends FeatureBase {
     }
   }
 
+  private async submitAnswer(id: string, problem: Problem, answer: Answer, finalBoard?: string[]) {
+    let correct = true;
+
+    if (finalBoard) {
+      correct = deepEqual(finalBoard, problem.board.goal);
+
+      if (correct) {
+        this.log
+          .withMetadata({
+            id,
+            turns: answer.ops.length,
+          })
+          .info("Answer is correct");
+      } else {
+        this.log
+          .withMetadata({
+            id,
+            turns: answer.ops.length,
+            expected: problem.board.goal,
+            actual: finalBoard,
+          })
+          .error("Answer is incorrect");
+      }
+    }
+
+    const revision = await this.serverComm.submitAnswer(id, answer);
+
+    return [correct, revision] as const;
+  }
+
   init() {}
 
   async start() {
@@ -80,40 +111,36 @@ export class AlgorithmFeature extends FeatureBase {
             board: solvingState.problem.board,
             general: solvingState.problem.general,
           } satisfies SolveStartEvent);
+
+          solvingState.workers = workers;
         },
-        (workerId, turns) => {
+        async (workerId, answer) => {
           this.sendEvent({
             eventName: "solve.progress",
             solveId: solvingState.id,
             workerId,
-            turns,
+            turns: answer.n,
           } satisfies SolveProgressEvent);
+
+          if (solvingState.currentShortestAnswer === null || answer.n < solvingState.currentShortestAnswer.n) {
+            solvingState.currentShortestAnswer = answer;
+
+            const [, revision] = await this.submitAnswer(solvingState.id, solvingState.problem, answer);
+
+            this.log
+              .withMetadata({
+                id: solvingState.id,
+                turns: answer.ops.length,
+                revision,
+              })
+              .info("Answer updated");
+          }
         },
       );
 
-      const correct = deepEqual(finalBoard, solvingState.problem.board.goal);
-
-      if (correct) {
-        this.log
-          .withMetadata({
-            id: solvingState.id,
-            turns: answer.ops.length,
-          })
-          .info("Answer is correct");
-      } else {
-        this.log
-          .withMetadata({
-            id: solvingState.id,
-            turns: answer.ops.length,
-            expected: solvingState.problem.board.goal,
-            actual: finalBoard,
-          })
-          .error("Answer is incorrect");
-      }
-
       scope.end();
 
-      const revision = await this.serverComm.submitAnswer(solvingState.id, solvingState.problem, answer);
+      const [correct, revision] = await this.submitAnswer(solvingState.id, solvingState.problem, answer, finalBoard);
 
       this.sendEvent({
         eventName: "solve.finished",
@@ -124,6 +151,12 @@ export class AlgorithmFeature extends FeatureBase {
       } satisfies SolveFinishedEvent);
 
       StateManager.instance.setState(new DoneState(solvingState.id, answer));
+
+      setTimeout(() => {
+        StateManager.instance.setState(IdleState.instance);
+
+        IdleState.instance.oldProblem = solvingState.problem;
+      }, 1000);
     });
   }
 }

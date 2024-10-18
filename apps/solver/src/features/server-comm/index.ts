@@ -90,7 +90,7 @@ export class ServerCommunicatorFeature extends FeatureBase {
     }
   }
 
-  async submitAnswer(id: string, problem: Problem, answer: Answer): Promise<number> {
+  async submitAnswer(id: string, answer: Answer): Promise<number> {
     const scope = span(
       this.log.withMetadata({
         answerId: id,
@@ -107,12 +107,6 @@ export class ServerCommunicatorFeature extends FeatureBase {
     const { revision } = typia.assert<AnswerResponse>(data);
 
     scope.end();
-
-    setTimeout(() => {
-      StateManager.instance.setState(IdleState.instance);
-
-      IdleState.instance.oldProblem = problem;
-    }, 1000);
 
     return revision;
   }

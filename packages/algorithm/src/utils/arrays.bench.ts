@@ -1,5 +1,5 @@
 import { bench, describe } from "vitest";
-import { TwoDimensionalCells, reverseCells, reverseCellsInPlace } from "./arrays";
+import { TwoDimensionalCells, reverseCells } from "./arrays";
 
 const createRandomTwoDimensionalCells = (x: number, y: number) =>
   new TwoDimensionalCells(
@@ -68,17 +68,5 @@ describe("benchmark reverseCells", () => {
 
   bench("reverse-left-right", () => {
     reverseCells(list, "reverse-left-right");
-  });
-
-  bench("in-place reverse-90", () => {
-    reverseCellsInPlace(list, "reverse-90");
-  });
-
-  bench("in-place reverse-up-down", () => {
-    reverseCellsInPlace(list, "reverse-up-down");
-  });
-
-  bench("in-place reverse-left-right", () => {
-    reverseCellsInPlace(list, "reverse-left-right");
   });
 });

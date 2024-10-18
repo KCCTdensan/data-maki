@@ -1,5 +1,4 @@
 import type { CellCounts } from "../types";
-import { dbg } from "../workers/log";
 import type { TwoDimensionalCells } from "./arrays";
 
 export const zip = <T, U>(a: T[], b: U[]): Array<[T, U]> => a.map((e, i) => [e, b[i]]);

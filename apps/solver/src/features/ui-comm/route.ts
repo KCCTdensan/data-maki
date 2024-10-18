@@ -39,7 +39,7 @@ export const createRouteDefinition = <T extends Env>(app: Hono<T>) =>
           eventToSSE({
             eventName: "solve.start",
             solveId: solvingState.id,
-            workers: 1, // TODO: Implement multi-worker solving
+            workers: solvingState.workers,
             startedAt: solvingState.startedAt,
             board: solvingState.problem.board,
             general: solvingState.problem.general,

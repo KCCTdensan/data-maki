@@ -1,22 +1,68 @@
-import type { Board, Op, Problem } from "@data-maki/schemas";
+import type { Op, Problem } from "@data-maki/schemas";
 import { cellsToBoard } from "./models/answer";
-import { type InternalPattern, getPattern } from "./models/pattern";
-import { boardToCells } from "./models/problem";
-import { type Context, DOWN, type Direction, LEFT, type Point, UP } from "./types";
-import { type TwoDimensionalCells, dbgCells, reverseCells } from "./utils/arrays";
+import { getPattern } from "./models/pattern";
+import { type Context, DOWN, type Direction, LEFT, type Point, RIGHT, UP } from "./types";
+import { type TwoDimensionalCells, dbgCells, multiReverse, reverseCells } from "./utils/arrays";
 import { countElementsColumnWise } from "./utils/board";
 import { createContext } from "./v1";
 import { dbg } from "./workers/log";
 
-export const addOp = (c: Context, ops: Op) => {
+export const addOp = (c: Context, op: Op) => {
+  let { p, x, y, s } = op;
+
+  const pattern = getPattern(op.p, c.patterns);
+
+  if (c.rvOp.hasReverse90) {
+    const tmp = x;
+    x = y;
+    y = tmp;
+
+    if (c.rvOp.hasReverseUpDown) {
+      y = c.width - y - 1;
+      y -= pattern.height - 1;
+
+      if (s === LEFT) s = RIGHT;
+      else if (s === RIGHT) s = LEFT;
+    }
+
+    if (c.rvOp.hasReverseLeftRight) {
+      x = c.height - x - 1;
+      x -= pattern.width - 1;
+
+      if (s === UP) s = DOWN;
+      else if (s === DOWN) s = UP;
+    }
+
+    if (s === UP) s = LEFT;
+    else if (s === DOWN) s = RIGHT;
+    else if (s === LEFT) s = UP;
+    else if (s === RIGHT) s = DOWN;
+  } else {
+    if (c.rvOp.hasReverseUpDown) {
+      y = c.height - y - 1;
+      y -= pattern.height - 1;
+
+      if (s === UP) s = DOWN;
+      else if (s === DOWN) s = UP;
+    }
+
+    if (c.rvOp.hasReverseLeftRight) {
+      x = c.width - x - 1;
+      x -= pattern.width - 1;
+
+      if (s === LEFT) s = RIGHT;
+      else if (s === RIGHT) s = LEFT;
+    }
+  }
+
   c.n += 1;
-  c.ops.push(ops);
+  c.ops.push({ p, x, y, s });
 };
 
 const generatePatternData = (
   dir: Direction,
   b: TwoDimensionalCells,
-  pattern: InternalPattern,
+  pattern: TwoDimensionalCells,
   w: number,
   h: number,
   x: number,
@@ -33,7 +79,7 @@ const generatePatternData = (
           x: y,
           y: x,
         },
-        pattern: reverseCells(pattern.cells, "reverse-90"),
+        pattern: reverseCells(pattern, "reverse-90"),
       }
     : /* dir === LEFT || dir === RIGHT */ {
         b: b.clone(),
@@ -45,23 +91,33 @@ const generatePatternData = (
           x,
           y,
         },
-        pattern: pattern.cells,
+        pattern,
       };
 
-export const katanuki = (c: Context, p: number, x: number, y: number, dir: Direction) => {
+export const katanukiBoard = (c: Context, p: number, x: number, y: number, s: Direction) => {
   const pattern_ = getPattern(p, c.patterns);
 
-  dbg(c.worker, "katanuki", { p: pattern_.p, x, y, dir });
+  dbg(c.worker, "katanuki", { p: pattern_.p, x, y, s });
 
   if (x + pattern_.width <= 0 || x >= c.width || y + pattern_.height <= 0 || y >= c.height) {
-    throw new Error("Cannot pick any cells: out of range");
+    throw new Error(
+      `Cannot pick any cells: out of range (x: ${c.width} > [${x}, ${x + pattern_.width}), y: ${c.height} > [${y}, ${y + pattern_.height})`,
+    );
   }
 
   // Looking point on the board
   const l: Point = { x: 0, y: 0 };
 
   // Stripe -> Reverse / Border -> Normal
-  let { b, bx, by, pw, ph, pp, pattern } = generatePatternData(dir, c.board, pattern_, c.width, c.height, x, y);
+  let { b, bx, by, pw, ph, pp, pattern } = generatePatternData(
+    s,
+    c.board,
+    multiReverse(pattern_.cells, c.rvOp),
+    c.width,
+    c.height,
+    x,
+    y,
+  );
 
   for (const i of Array(ph).keys()) {
     l.y = pp.y + i;
@@ -84,7 +140,7 @@ export const katanuki = (c: Context, p: number, x: number, y: number, dir: Direc
       picked.unshift(currentRow.splice(l.x, 1)[0]);
     }
 
-    if (dir === UP || dir === LEFT) {
+    if (s === UP || s === LEFT) {
       currentRow.push(...picked);
     } else {
       currentRow.unshift(...picked);
@@ -93,32 +149,29 @@ export const katanuki = (c: Context, p: number, x: number, y: number, dir: Direc
     b.setRow(l.y, currentRow);
   }
 
-  if (dir === UP || dir === DOWN) {
+  if (s === UP || s === DOWN) {
     b = reverseCells(b, "reverse-90");
   }
 
-  if (!c.board.equals(b)) {
-    c.board = b;
-    c.currentElementCounts = countElementsColumnWise(c.board, c.worker);
-
-    const op: Op = {
-      p: pattern_.p,
-      x,
-      y,
-      s: dir,
-    };
-
-    addOp(c, op);
-    dbgCells(c.board, c.worker);
-  } else {
-    dbg(c.worker, c.board, b);
-  }
+  return b;
 };
 
 export const easyKatanuki = (problem: Problem, op: Op): string[] => {
   const c = createContext(problem);
 
-  katanuki(c, op.p, op.x, op.y, op.s as Direction);
+  return cellsToBoard(katanukiBoard(c, op.p, op.x, op.y, op.s as Direction));
+};
 
-  return cellsToBoard(c.board);
+export const katanuki = (c: Context, p: number, x: number, y: number, s: Direction) => {
+  const b = katanukiBoard(c, p, x, y, s);
+
+  if (!c.board.equals(b)) {
+    c.board = b;
+    c.currentElementCounts = countElementsColumnWise(c.board, c.worker);
+
+    addOp(c, { p, x, y, s });
+    dbgCells(c.board, c.worker);
+  } else {
+    dbg(c.worker, c.board, b);
+  }
 };

@@ -11,7 +11,7 @@ export const solve: SolveFunc = async (problem, onStartWorker, onWorkerFinish) =
 
   const result = await worker.solve(problem, barrier);
 
-  onWorkerFinish?.(0, result[0].n);
+  onWorkerFinish?.(0, result[0]);
 
   return result;
 };
