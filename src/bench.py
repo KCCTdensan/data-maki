@@ -1,7 +1,10 @@
 # Same as data_maki/cli/data.py
+import cProfile
 import json
 import os
+import sys
 from contextlib import redirect_stdout
+from pstats import SortKey
 
 from data_maki.models.problem import Problem
 from data_maki.models.result import Result
@@ -92,8 +95,9 @@ def main():
     datas: list[tuple[str, Problem]] = [(name, json.loads(data_json)) for (name, data_json) in data_jsons]
     ns = []
 
-    for name, data in datas:
+    for name, data in [datas[0]]:
         print(f"{name}...", end=" ")
+        sys.stdout.flush()
 
         with redirect_stdout(open(os.devnull, "w")):
             results: list[Result] = solve(data)
@@ -109,3 +113,17 @@ def main():
     print(f"Max: {max(ns)}")
     print(f"Min: {min(ns)}")
     print(f"MED: {sorted(ns)[len(ns) // 2]}")
+
+    print("Profile...")
+
+    pr = cProfile.Profile()
+
+    data = datas[0][1]
+
+    with redirect_stdout(open(os.devnull, "w")):
+        pr.runcall(solve, data)
+
+    pr.print_stats(sort=SortKey.CUMULATIVE)
+
+if __name__ == "__main__":
+    main()
