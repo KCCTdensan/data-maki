@@ -19,6 +19,6 @@ export const LATEST_VERSION = VERSIONS[VERSIONS.length - 1];
 
 export type SolveFunc = (
   problem: Problem,
-  onStartWorker?: ((totalWorkers: number) => void) | undefined,
-  onWorkerFinish?: ((workerId: number, turns: number) => void) | undefined,
+  onStartWorker?: ((totalWorkers: number) => void | Promise<void>) | undefined,
+  onWorkerFinish?: ((workerId: number, answer: Answer) => void | Promise<void>) | undefined,
 ) => Promise<[answer: Answer, board: string[]]>;

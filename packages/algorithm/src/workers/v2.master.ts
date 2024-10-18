@@ -36,7 +36,7 @@ export const solve: SolveFunc = async (problem, onStartWorker, onWorkerFinish) =
           hasReverseLeftRight: flags[i][2],
         })
         .then((result) => {
-          onWorkerFinish?.(i, result[0].n);
+          onWorkerFinish?.(i, result[0]);
 
           return result;
         }),
