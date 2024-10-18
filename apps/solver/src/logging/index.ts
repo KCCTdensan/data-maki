@@ -1,4 +1,3 @@
-import { resolve } from "node:path";
 import { type ILogBuilder, LogLayer, LoggerType } from "loglayer";
 import pino, { type P } from "pino";
 import type PinoPretty from "pino-pretty";
@@ -26,7 +25,7 @@ export const internalPinoLogger = pino({
       {
         target: "pino-roll",
         options: {
-          file: resolve("logs", "solver"),
+          file: `${process.cwd()}/logs/solver`,
           extension: ".log",
           frequency: "daily",
           dateFormat: "yyyy-MM-dd",

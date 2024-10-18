@@ -26,7 +26,7 @@ const copyFiles = async (from: string[], to: string) => {
 
 console.time("Finished building solver");
 
-await Bun.build({
+const results = await Bun.build({
   entrypoints: ["./src/index.ts"],
   sourcemap: "linked",
   plugins: [
@@ -38,13 +38,19 @@ await Bun.build({
     }),
   ],
   minify: true,
-  bytecode: true,
   outdir: "./dist",
   target: "bun",
   define: {
     "process.env.NODE_ENV": '"production"',
   },
 });
+
+if (!results.success) {
+  console.error("Failed to build solver");
+  console.error(results.logs);
+
+  process.exit(1);
+}
 
 console.log("Copying files...");
 

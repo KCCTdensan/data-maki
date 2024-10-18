@@ -71,7 +71,7 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
 
             let evaluation = 0;
 
-            if (cnt != 0) {
+            if (cnt !== 0) {
               p = 3 * cnt - 1;
               pp.x = rvUl && rvUd ? x - 1 : x;
               pp.y = !rvUl && !rvUd ? y + 1 : y;
@@ -154,8 +154,6 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
                 // Move lookingCell to the place which is confused and move the deepest cell to the place which is not confused
                 katanuki(c, rvUl ? 2 : 3, (!rvUl && !rvLr) || (rvUl && !rvUd) ? rx : rx - 1, y, UP);
 
-                delta = getDelta(c.currentElementCounts[c.height - 1], goalElementCounts[i]);
-
                 irregular = true;
                 y = c.height - 2;
               }
@@ -183,8 +181,6 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
               katanuki(c, 0, rx, y, UP);
 
               if (irregular) {
-                delta = getDelta(c.currentElementCounts[c.height - 1], goalElementCounts[i]);
-
                 katanuki(c, 0, j + k, c.height - 3, UP);
               }
 
@@ -222,8 +218,6 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
                 // Move lookingCell to the place which is confused and move the deepest cell to the place which is not confused
                 katanuki(c, rvUl ? 2 : 3, (!rvUl && !rvLr) || (rvUl && !rvUd) ? lx : lx - 1, y, UP);
 
-                delta = getDelta(c.currentElementCounts[c.height - 1], goalElementCounts[i]);
-
                 irregular = true;
                 y = c.height - 2;
               }
@@ -251,8 +245,6 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
               katanuki(c, 0, lx, y, UP);
 
               if (irregular) {
-                delta = getDelta(c.currentElementCounts[c.height - 1], goalElementCounts[i]);
-
                 katanuki(c, 0, j - k, c.height - 3, UP);
               }
 
@@ -311,7 +303,7 @@ export const solve = (c: Context): [answer: Answer, board: string[]] => {
 
             let evaluation = 0;
 
-            if (cnt != 0) {
+            if (cnt !== 0) {
               p = 3 * cnt - 1;
               pp.x = rvUl && !rvUd ? x + 1 : x;
               pp.y = !rvUl && rvUd ? y - 1 : y;
