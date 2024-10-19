@@ -4,7 +4,7 @@ from threading import Barrier
 
 from . import utils
 from .context import Context
-from .evaluation import evaluate_col_piece, evaluate_row_elem
+from .evaluation import evaluate_row_elem
 from .katanuki import katanuki
 from .models.answer import Answer, Direction
 from .models.problem import InternalProblem, Problem
@@ -392,38 +392,45 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
             c.info_now.currentMark.index2 = 0
             katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
 
-    c.info_now.goalMark.type = MarkType.COLUMN
     c.info_now.delta = None
 
     cnt_unmoved = 0
-    for i in range(c.width - 1, -1, -1):
+    for i in range(c.height - 1, -1, -1):
         c.info_now.goalMark.index = i
         cmped = c.width - i - 1 - cnt_unmoved  # counts of columns completed yet
-        column_goal = c.board.goal.get_column(i)
+        row_goal = c.board.goal.get_row(i)
+
+        if c.board.current.get_row(c.height - 1 - cnt_unmoved) == row_goal:
+            cnt_unmoved += 1
+
+            if i == 0:
+                c.info_now.currentMark.index = c.height - cnt_unmoved
+                c.info_now.currentMark.index2 = 0
+                katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
+
+            continue
+
+        if cnt_unmoved > 0:
+            c.info_now.currentMark.index = c.height - cnt_unmoved
+            c.info_now.currentMark.index2 = 0
+            katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
+            cmped += cnt_unmoved
+            cnt_unmoved = 0
 
         # only border
-        for j in range(c.height):
-            cell_cr = column_goal[j]
+        for j in range(c.width - 1, -1, -1):
+            cell_cr = row_goal[j]
 
-            if c.board.current.get(j, c.width - 1 - cnt_unmoved) == cell_cr:
-                continue
-
-            if cnt_unmoved > 0:
-                c.info_now.currentMark.index = 0
-                c.info_now.currentMark.index2 = c.width - cnt_unmoved
-                katanuki(c, 22, c.width - cnt_unmoved, 0, Direction.RIGHT)
-                cmped += cnt_unmoved
-                cnt_unmoved = 0
-
-            for k in range(c.width - 2, cmped - 1, -1):
-                cell_lk = c.board.current.get(j, k)
+            for k in range(c.width - 1, cmped - 1, -1):
+                cell_lk = c.board.current.get(c.height - 1, k)
 
                 if cell_cr == cell_lk:
+                    """
                     cnt = 0
                     value = (0, 0, 0, 256)
                     while k - (1 << cnt) + 1 >= cmped:
-                        x = k - (1 << cnt) + 1
-                        y = j
+                        x = j
+                        y = k - (1 << cnt) + 1
                         p = 0
                         px = 0
                         py = 0
@@ -431,17 +438,17 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
 
                         if cnt != 0:
                             p = cnt * 3 - 1
-                            px = x + 1 if rv_ul and not rv_ud else x
-                            py = y - 1 if not rv_ul and rv_ud else y
-                            evaluation = evaluate_col_piece(c, p, px, py, column_goal)
+                            px = x - 1 if rv_ul and rv_ud else x
+                            py = y + 1 if not rv_ul and not rv_ud else y
+                            evaluation = evaluate_row_piece(c, p, px, py, row_goal)
 
                             if value[3] > evaluation:
                                 value = (p, px, py, evaluation)
 
                             p = cnt * 3
-                            px = x + 1 if not rv_ul and not rv_lr else x
-                            py = y - 1 if rv_ul and rv_lr else y
-                            evaluation = evaluate_col_piece(c, p, px, py, column_goal)
+                            px = x - 1 if not rv_ul and rv_lr else x
+                            py = y + 1 if rv_ul and not rv_lr else y
+                            evaluation = evaluate_row_piece(c, p, px, py, row_goal)
 
                             if value[3] > evaluation:
                                 value = (p, px, py, evaluation)
@@ -450,24 +457,26 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
                             p = 0
                             px = x
                             py = y
-                            evaluation = evaluate_col_piece(c, p, px, py, column_goal)
+                            evaluation = evaluate_row_piece(c, p, px, py, row_goal)
 
                             if value[3] > evaluation:
                                 value = (p, px, py, evaluation)
 
                         cnt += 1
 
-                    c.info_now.currentMark.index = j
+                    """
+
+                    c.info_now.currentMark.index = c.height - 1
                     c.info_now.currentMark.index2 = k
-                    katanuki(c, value[0], value[1], value[2], Direction.LEFT)
+                    katanuki(c, 0, k, c.height - 1, Direction.RIGHT)
                     break
 
         cnt_unmoved += 1
 
         if i == 0:
-            c.info_now.currentMark.index = 0
-            c.info_now.currentMark.index2 = c.width - cnt_unmoved
-            katanuki(c, 22, c.width - cnt_unmoved, 0, Direction.RIGHT)
+            c.info_now.currentMark.index = c.height - cnt_unmoved
+            c.info_now.currentMark.index2 = 0
+            katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
 
     c.board.current = utils.dereverse(c.board.current, c.rv_op)
     c.board.goal = utils.dereverse(c.board.goal, c.rv_op)
