@@ -1,21 +1,45 @@
 import type { Pattern as PatternSchema } from "@data-maki/schemas";
-import { Grid } from "@yamada-ui/react";
-import type { CSSProperties } from "react";
-import { BoardCell, isCell } from "../board/Cell";
+import { type CSSProperties, useEffect, useRef } from "react";
+import { isCell } from "../board/Cell";
 
 type Props = Readonly<{
   pattern: PatternSchema;
+  size?: number;
   style?: CSSProperties;
 }>;
 
-export const Pattern = ({ pattern, style }: Props) => (
-  <Grid templateColumns={`repeat(${pattern.width}, 1fr)`} style={style}>
-    {pattern.cells.map((row, rowIndex) =>
-      row.split("").map((cell, colIndex) => {
-        if (!isCell(cell)) throw new Error(`Invalid cell: ${cell}`);
+export const Pattern = ({ pattern, size = 192, style }: Props) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
-        return <BoardCell key={`${rowIndex}-${colIndex}-${cell}`} cell={cell} size="2rem" />;
-      }),
-    )}
-  </Grid>
-);
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext("2d");
+
+    if (!ctx) return;
+
+    const { width, height, cells } = pattern;
+
+    const cellHeight = size / height;
+    const cellWidth = size / width;
+
+    for (let i = 0; i < height; i++) {
+      for (let j = 0; j < width; j++) {
+        const cell = cells[i][j];
+
+        if (isCell(cell)) {
+          if (cell === "1") {
+            ctx.fillStyle = "#000";
+          } else {
+            ctx.fillStyle = "#fff";
+          }
+
+          ctx.fillRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+        }
+      }
+    }
+  }, [pattern, size]);
+
+  return <canvas ref={canvasRef} width={size} height={size} style={style} />;
+};
