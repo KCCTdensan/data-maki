@@ -76,6 +76,7 @@ export default function Page() {
             headers: {
               "Content-Type": "application/json",
             },
+            mode: "no-cors",
             body: JSON.stringify({
               widthRandom: randomWidth,
               heightRandom: randomHeight,
