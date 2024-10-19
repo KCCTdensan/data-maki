@@ -20,7 +20,14 @@ import { useState } from "react";
 import { MockServerConnectionCard } from "../components/mock-server/MockServerConnectionCard";
 
 // Code from apps/frontend/src/app/routes/mock.tsx
-type GenerationKindStart = "all-random" | "gen-random" | "column-seq" | "column-seq-reverse" | "column-group-shuffle";
+type GenerationKindStart =
+  | "all-random"
+  | "gen-random"
+  | "column-seq"
+  | "column-seq-reverse"
+  | "column-group-shuffle"
+  | "random-area-reverse"
+  | "block-swap";
 
 const generationKindStarts: GenerationKindStart[] = [
   "all-random",
@@ -28,6 +35,8 @@ const generationKindStarts: GenerationKindStart[] = [
   "column-seq",
   "column-seq-reverse",
   "column-group-shuffle",
+  "random-area-reverse",
+  "block-swap",
 ] as const;
 
 type GenerationKindGoal =
@@ -38,7 +47,9 @@ type GenerationKindGoal =
   | "column-seq"
   | "column-seq-reverse"
   | "partial-single-swap"
-  | "partial-block-swap";
+  | "partial-block-swap"
+  | "random-area-reverse"
+  | "block-swap";
 
 const generationKindGoals: GenerationKindGoal[] = [
   "all-random",
@@ -49,6 +60,8 @@ const generationKindGoals: GenerationKindGoal[] = [
   "column-seq-reverse",
   "partial-single-swap",
   "partial-block-swap",
+  "random-area-reverse",
+  "block-swap",
 ] as const;
 
 export default function Page() {
