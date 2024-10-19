@@ -1,4 +1,5 @@
 import type { Answer } from "@data-maki/schemas";
+import type { Problem } from "@data-maki/schemas";
 import type { Serve } from "bun";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
@@ -17,6 +18,8 @@ const config = typia.assert<Config>(await Bun.file(filename).json());
 const validateAnswer = typia.createValidate<Answer>();
 
 const validTokens = new Set(config.teams);
+
+let customProblem: Problem;
 
 const generationSettings: GenerationSettings = {
   widthRandom: true,
@@ -57,6 +60,14 @@ app.use(async (c, next) => {
 
 let lockedDown = true;
 
+let customProblemFlg: boolean = false;
+
+app.post("/customProblem", async (c) => {
+  customProblem = await c.req.json();
+
+  return new Response(null, { status: 204 });
+});
+
 app.get("/problem", (c) => {
   if (lockedDown) return new Response('"AccessTimeError"', { status: 403 });
 
@@ -64,7 +75,7 @@ app.get("/problem", (c) => {
 
   c.header("X-Data-Maki-Problem-ID", id.toString());
 
-  return c.json(problem);
+  return c.json(customProblemFlg ? customProblem : problem);
 });
 
 app.post("/answer", async (c) => {
