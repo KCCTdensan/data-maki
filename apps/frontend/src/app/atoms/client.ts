@@ -84,6 +84,7 @@ export const eventStreamAtom = atom(
           Accept: "text/event-stream",
         },
         signal: newController.signal,
+        mode: "no-cors",
       });
 
       if (!response.ok) {

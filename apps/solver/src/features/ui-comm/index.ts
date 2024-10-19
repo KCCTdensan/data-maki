@@ -26,13 +26,7 @@ app.use(
 
 app.use(
   cors({
-    origin: (origin) => {
-      if (isDevelopment) {
-        return origin;
-      }
-
-      return origin.endsWith("data-maki.pages.dev") ? origin : "";
-    },
+    origin: (origin) => origin,
   }),
 );
 
