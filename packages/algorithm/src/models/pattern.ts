@@ -1,4 +1,4 @@
-import { type General, type Pattern, fixedPatterns as fixedPatterns_ } from "@data-maki/schemas";
+import { type Pattern, fixedPatterns as fixedPatterns_ } from "@data-maki/schemas";
 import { TwoDimensionalCells } from "../utils/arrays";
 
 export interface InternalPattern {

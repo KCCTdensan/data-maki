@@ -32,10 +32,6 @@ export class TwoDimensionalCells {
     return this.#inner.length;
   }
 
-  [Symbol.iterator]() {
-    return this.#inner[Symbol.iterator]();
-  }
-
   equals(other: TwoDimensionalCells) {
     for (let i = 0; i < this.#inner.length; i++) {
       if (this.#inner[i] !== other.#inner[i]) {
@@ -159,7 +155,7 @@ export class TwoDimensionalCells {
   transposeInPlace() {
     this.#inner = this.#transposeInner();
 
-    const tmp = this.width;
+    const tmp = this.height;
     this.height = this.width;
     this.width = tmp;
 

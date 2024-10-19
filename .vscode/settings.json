@@ -1,5 +1,7 @@
 {
   "editor.rulers": [120],
   "npm.packageManager": "bun",
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "rust-analyzer.linkedProjects": ["${workspaceFolder}/packages/algorithm/src/v3/Cargo.toml"],
+  "rust-analyzer.cargo.target": "wasm32-unknown-unknown"
 }

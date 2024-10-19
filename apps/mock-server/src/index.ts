@@ -19,7 +19,7 @@ const validateAnswer = typia.createValidate<Answer>();
 
 const validTokens = new Set(config.teams);
 
-let customProblem: Problem;
+let customProblem: Problem | null = null;
 
 const generationSettings: GenerationSettings = {
   widthRandom: true,
@@ -60,8 +60,6 @@ app.use(async (c, next) => {
 
 let lockedDown = true;
 
-const customProblemFlg: boolean = false;
-
 app.post("/customProblem", async (c) => {
   customProblem = await c.req.json();
 
@@ -75,7 +73,7 @@ app.get("/problem", (c) => {
 
   c.header("X-Data-Maki-Problem-ID", id.toString());
 
-  return c.json(customProblemFlg ? customProblem : problem);
+  return c.json(customProblem ?? problem);
 });
 
 app.post("/answer", async (c) => {

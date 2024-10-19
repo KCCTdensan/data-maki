@@ -1,4 +1,5 @@
 import { Glob } from "bun";
+import { wasmLoader } from "esbuild-plugin-wasm";
 import { defineConfig } from "tsup";
 
 const entry: string[] = [];
@@ -17,4 +18,5 @@ export default defineConfig({
   define: {
     "process.env.NODE_ENV": '"production"',
   },
+  esbuildPlugins: [wasmLoader()],
 });

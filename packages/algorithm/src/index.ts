@@ -1,14 +1,16 @@
 import type { Answer, Problem } from "@data-maki/schemas";
 import { solve as solveV1 } from "./workers/v1.master";
 import { solve as solveV2 } from "./workers/v2.master";
+import { solve as solveV3 } from "./workers/v3.master";
 
 export { easyKatanuki } from "./katanuki";
 
-export const VERSIONS = ["v1", "v2"] as const;
+export const VERSIONS = ["v1", "v2", "v3"] as const;
 
 const solveFuncs: { [key in (typeof VERSIONS)[number]]: SolveFunc } = {
   v1: solveV1,
   v2: solveV2,
+  v3: solveV3,
 };
 
 export const isSolveFuncVersion = (version: string): version is (typeof VERSIONS)[number] =>
