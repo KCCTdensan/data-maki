@@ -60,7 +60,7 @@ app.use(async (c, next) => {
 
 let lockedDown = true;
 
-let customProblemFlg: boolean = false;
+const customProblemFlg: boolean = false;
 
 app.post("/customProblem", async (c) => {
   customProblem = await c.req.json();
