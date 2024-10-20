@@ -26,8 +26,8 @@ type GenerationKindStart =
   | "column-seq"
   | "column-seq-reverse"
   | "column-group-shuffle"
-  | "random-area-reverse"
-  | "block-swap";
+  | "random-rectangle-area"
+  | "random-eclipse-area";
 
 const generationKindStarts: GenerationKindStart[] = [
   "all-random",
@@ -35,8 +35,8 @@ const generationKindStarts: GenerationKindStart[] = [
   "column-seq",
   "column-seq-reverse",
   "column-group-shuffle",
-  "random-area-reverse",
-  "block-swap",
+  "random-rectangle-area",
+  "random-eclipse-area",
 ] as const;
 
 type GenerationKindGoal =

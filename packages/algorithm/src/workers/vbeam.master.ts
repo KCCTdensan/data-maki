@@ -25,7 +25,7 @@ export const solve: SolveFunc = async (problem, onStartWorker, onWorkerFinish) =
 
   const workers = Array(TOTAL_WORKERS)
     .fill(null)
-    .map(() => Comlink.wrap<typeof import("./v2.worker")>(spawnWorker("v2.worker.ts")));
+    .map(() => Comlink.wrap<typeof import("./vbeam.worker.ts")>(spawnWorker("vbeam.worker.ts")));
 
   const results = await Promise.all(
     workers.map((worker, i) =>

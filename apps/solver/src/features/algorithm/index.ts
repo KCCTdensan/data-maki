@@ -20,6 +20,7 @@ export class AlgorithmFeature extends FeatureBase {
   #tx: ChannelTx<UIMessageEventBase>;
   #subscriberCount$: ReadonlyStore<number>;
   readonly #solve: SolveFunc;
+  readonly #solveBeam: SolveFunc = getSolveFunc("vbeam");
 
   constructor(
     log: LogLayer,
@@ -100,19 +101,19 @@ export class AlgorithmFeature extends FeatureBase {
 
       const scope = span(this.log, "Solve finished");
 
-      const [answer, finalBoard] = await this.#solve(
+      const solvePromise = this.#solve(
         solvingState.problem,
         (workers) => {
           this.sendEvent({
             eventName: "solve.start",
             solveId: solvingState.id,
-            workers,
+            workers: workers * 2,
             startedAt: solvingState.startedAt,
             board: solvingState.problem.board,
             general: solvingState.problem.general,
           } satisfies SolveStartEvent);
 
-          solvingState.workers = workers;
+          solvingState.workers = workers * 2;
         },
         async (workerId, answer) => {
           this.sendEvent({
@@ -138,7 +139,38 @@ export class AlgorithmFeature extends FeatureBase {
         },
       );
 
+      const solveBeamPromise = this.#solveBeam(
+        solvingState.problem,
+        (workers) => {},
+        async (workerId, answer) => {
+          this.sendEvent({
+            eventName: "solve.progress",
+            solveId: solvingState.id,
+            workerId: workerId + 8,
+            turns: answer.n,
+          } satisfies SolveProgressEvent);
+
+          if (solvingState.currentShortestAnswer === null || answer.n < solvingState.currentShortestAnswer.n) {
+            solvingState.currentShortestAnswer = answer;
+
+            const [, revision] = await this.submitAnswer(solvingState.id, solvingState.problem, answer);
+
+            this.log
+              .withMetadata({
+                id: solvingState.id,
+                turns: answer.ops.length,
+                revision,
+              })
+              .info("Answer updated");
+          }
+        },
+      );
+
       scope.end();
+
+      const [answer, finalBoard] = (await Promise.all([solvePromise, solveBeamPromise])).toSorted(
+        (a: [Answer, string[]], b: [Answer, string[]]) => a[0].n - b[0].n,
+      )[0];
 
       const [correct, revision] = await this.submitAnswer(solvingState.id, solvingState.problem, answer, finalBoard);
 

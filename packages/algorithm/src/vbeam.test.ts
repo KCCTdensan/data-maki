@@ -2,9 +2,9 @@ import { describe, expect, test } from "bun:test";
 import type { Answer, Problem } from "@data-maki/schemas";
 import typia from "typia";
 import dataExample from "../examples/input.json";
-import { solve } from "./workers/v3.master";
+import { solve } from "./workers/vbeam.master";
 
-describe("algorithm v3 tests", () => {
+describe("algorithm vbeam tests", () => {
   let problem: Problem;
   let answer: Answer;
 

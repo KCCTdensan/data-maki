@@ -1,9 +1,0 @@
-{
-  "name": "algorithm-v3-wasm",
-  "type": "module",
-  "version": "0.1.0",
-  "files": ["algorithm_v3_wasm_bg.wasm", "algorithm_v3_wasm.js", "algorithm_v3_wasm_bg.js", "algorithm_v3_wasm.d.ts"],
-  "main": "algorithm_v3_wasm.js",
-  "types": "algorithm_v3_wasm.d.ts",
-  "sideEffects": ["./algorithm_v3_wasm.js", "./snippets/*"]
-}
