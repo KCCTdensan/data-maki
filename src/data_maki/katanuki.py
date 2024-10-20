@@ -120,7 +120,9 @@ def add_info(c: Context):
         )
 
 
-def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
+def katanuki_board(
+    c: Context, p: int, x: int, y: int, s: Direction, b: utils.TwoDimensionalIntArray
+):
     pattern_ = get_pattern(p, c.patterns)
     pattern = utils.reverse(pattern_.cells, c.rv_op)
 
@@ -134,7 +136,7 @@ def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
 
     # stripe -> reverse / border -> normal
     if s == Direction.UP or s == Direction.DOWN:
-        b = utils.list_rv(c.board.current, ReverseOperation.Reverse90)
+        b = utils.list_rv(b, ReverseOperation.Reverse90)
         bx = c.height
         by = c.width
         pw = pattern.height
@@ -143,7 +145,7 @@ def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
         py = x
         pattern = utils.list_rv(pattern, ReverseOperation.Reverse90)
     elif s == Direction.LEFT or s == Direction.RIGHT:
-        b = c.board.current.copy()
+        # b = b
         bx = c.width
         by = c.height
         pw = pattern.width
@@ -211,7 +213,7 @@ def katanuki_board(c: Context, p: int, x: int, y: int, s: Direction):
 def katanuki(c: Context, p: int, x: int, y: int, s: Direction):
     print([p, x, y, s])
 
-    b = katanuki_board(c, p, x, y, s)
+    b = katanuki_board(c, p, x, y, s, c.board.current)
 
     if c.board.current != b:
         c.board.current = b

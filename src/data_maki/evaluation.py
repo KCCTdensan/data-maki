@@ -5,7 +5,7 @@ from .models.answer import Direction
 
 
 def evaluate_row_elem(c: Context, p: int, x: int, y: int, elem_goal: list[int]):
-    board = katanuki_board(c, p, x, y, Direction.UP)
+    board = katanuki_board(c, p, x, y, Direction.UP, c.board.current)
     elems = utils.count_elements(board)
     delta = utils.get_delta(elems[c.height - 1], elem_goal)
 

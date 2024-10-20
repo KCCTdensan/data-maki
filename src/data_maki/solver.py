@@ -5,7 +5,7 @@ from threading import Barrier
 from . import utils
 from .context import Context
 from .evaluation import evaluate_row_elem
-from .katanuki import katanuki
+from .katanuki import katanuki, katanuki_board
 from .models.answer import Answer, Direction
 from .models.problem import InternalProblem, Problem
 from .models.replay import CellsMark, ExtraOpInfo, MarkType, ReplayInfo
@@ -115,89 +115,122 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
 
         print(f"delta = {c.info_now.delta}")
 
-        unfilled = []
+        if cnt_unmoved > 0 and c.info_now.delta != [0, 0, 0, 0]:
+            c.info_now.currentMark.index = c.height - cnt_unmoved
+            c.info_now.currentMark.index2 = 0
+            katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
+            cmped += cnt_unmoved
+            cnt_unmoved = 0
+            c.info_now.currentMark.index = c.height - 1
+
+        paths = [([], c.board.current.copy(), 0, c.info_now.delta)]
+        beam_size = 3
 
         # only stripe
         for j in range(c.width):
-            if c.info_now.delta == [0, 0, 0, 0]:
-                break
-
-            if cnt_unmoved > 0:
-                c.info_now.currentMark.index = c.height - cnt_unmoved
-                c.info_now.currentMark.index2 = 0
-                katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
-                cmped += cnt_unmoved
-                cnt_unmoved = 0
-                c.info_now.index = c.height - 1
-
-            cell_lk = c.board.current.get(c.height - 1, j)
-
-            if c.info_now.delta[cell_lk] <= 0:
-                continue
-
-            is_filled = False
-
-            for k in range(c.height - 2, cmped - 1, -1):
-                cell_lk = c.board.current.get(k, j)
-
-                if c.info_now.delta[cell_lk] < 0:
-                    print(f"looking at {cell_lk} on x: {j} y: {k}")
-                    cnt = 0
-                    value = (0, 0, 0, 256)  # value = p, x, y, evaluation
-                    while k - (1 << cnt) + 1 >= cmped:
-                        x = j
-                        y = k - (1 << cnt) + 1
-                        p = 0
-                        px = 0
-                        py = 0
-                        evaluation = 0
-
-                        if cnt != 0:
-                            p = cnt * 3 - 1
-                            px = x - 1 if rv_ul and rv_ud else x
-                            py = y + 1 if not rv_ul and not rv_ud else y
-                            evaluation = evaluate_row_elem(c, p, px, py, elems_goal[i])
-
-                            if value[3] > evaluation:
-                                value = (p, px, py, evaluation)
-
-                            p = cnt * 3
-                            px = x - 1 if not rv_ul and rv_lr else x
-                            py = y + 1 if rv_ul and not rv_lr else y
-                            evaluation = evaluate_row_elem(c, p, px, py, elems_goal[i])
-
-                            if value[3] > evaluation:
-                                value = (p, px, py, evaluation)
-
-                        else:
-                            p = 0
-                            px = x
-                            py = y
-                            evaluation = evaluate_row_elem(c, p, px, py, elems_goal[i])
-
-                            if value[3] > evaluation:
-                                value = (p, px, py, evaluation)
-
-                        cnt += 1
-
-                    c.info_now.currentMark.index = k
-                    c.info_now.currentMark.index2 = j
-                    katanuki(c, value[0], value[1], value[2], Direction.UP)
-                    is_filled = True
-
-                    c.info_now.delta = utils.get_delta(
-                        c.elems_now[c.height - 1], elems_goal[i]
-                    )
-
+            temp = []
+            # print(f"j = {j}, num = {len(paths)}")
+            for path in paths:
+                # print(path[0])
+                # utils.print_board(path[1])
+                if path[3] == [0, 0, 0, 0]:
+                    temp.append(path)
                     break
 
-            if not is_filled:
-                unfilled.append(j)
+                cell_lk = path[1].get(c.height - 1, j)
 
-        print(f"unFilled = {unfilled}")
+                if path[3][cell_lk] <= 0:
+                    temp.append(path)
+                    print("added")
+                    continue
+
+                is_filled = False
+
+                for k in range(c.height - 2, cmped - 1, -1):
+                    cell_lk = path[1].get(k, j)
+
+                    if path[3][cell_lk] < 0:
+                        print(f"looking at {cell_lk} on x: {j} y: {k}")
+                        cnt = 0
+                        values = []
+                        while k - (1 << cnt) + 1 >= cmped:
+                            x = j
+                            y = k - (1 << cnt) + 1
+                            p = 0
+                            px = 0
+                            py = 0
+                            evaluation = 0
+
+                            if cnt != 0:
+                                p = cnt * 3 - 1
+                                px = x - 1 if rv_ul and rv_ud else x
+                                py = y + 1 if not rv_ul and not rv_ud else y
+                                evaluation = evaluate_row_elem(
+                                    c, p, px, py, elems_goal[i]
+                                )
+
+                                values.append((p, px, py, evaluation))
+
+                                p = cnt * 3
+                                px = x - 1 if not rv_ul and rv_lr else x
+                                py = y + 1 if rv_ul and not rv_lr else y
+                                evaluation = evaluate_row_elem(
+                                    c, p, px, py, elems_goal[i]
+                                )
+
+                                values.append((p, px, py, evaluation))
+
+                            else:
+                                p = 0
+                                px = x
+                                py = y
+                                evaluation = evaluate_row_elem(
+                                    c, p, px, py, elems_goal[i]
+                                )
+
+                                values.append((p, px, py, evaluation))
+
+                            cnt += 1
+
+                        for value in values:
+                            b = katanuki_board(
+                                c, value[0], value[1], value[2], Direction.UP, path[1]
+                            )
+                            temp.append(
+                                (
+                                    [*path[0], value],
+                                    b,
+                                    value[3],
+                                    utils.get_delta(
+                                        utils.count_elements(b)[c.height - 1],
+                                        elems_goal[i],
+                                    ),
+                                )
+                            )
+                        is_filled = True
+
+                        break
+
+                if not is_filled:
+                    print("added")
+                    temp.append(path)
+
+            temp.sort(key=lambda x: x[2])
+            paths = temp[:beam_size]
+
+        paths.sort(key=lambda x: x[2])
+
+        for value in paths[0][0]:
+            c.info_now.currentMark.index = value[2]
+            c.info_now.currentMark.index2 = value[1]
+            katanuki(c, value[0], value[1], value[2], Direction.UP)
+
+        c.info_now.delta = utils.get_delta(
+            c.elems_now[c.height - 1 - cnt_unmoved], elems_goal[i]
+        )
 
         # unFilled
-        for j in unfilled:
+        for j in range(c.width):
             is_filled = False
             cell_lk = c.board.current.get(c.height - 1, j)
             if c.info_now.delta[cell_lk] <= 0:
@@ -394,89 +427,26 @@ def solve_worker(problem: Problem, c: Context, rv_ul: bool, rv_ud: bool, rv_lr: 
 
     c.info_now.delta = None
 
-    cnt_unmoved = 0
     for i in range(c.height - 1, -1, -1):
         c.info_now.goalMark.index = i
-        cmped = c.width - i - 1 - cnt_unmoved  # counts of columns completed yet
         row_goal = c.board.goal.get_row(i)
 
-        if c.board.current.get_row(c.height - 1 - cnt_unmoved) == row_goal:
-            cnt_unmoved += 1
-
-            if i == 0:
-                c.info_now.currentMark.index = c.height - cnt_unmoved
-                c.info_now.currentMark.index2 = 0
-                katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
-
+        if c.board.current.get_row(i) == row_goal:
             continue
-
-        if cnt_unmoved > 0:
-            c.info_now.currentMark.index = c.height - cnt_unmoved
-            c.info_now.currentMark.index2 = 0
-            katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
-            cmped += cnt_unmoved
-            cnt_unmoved = 0
 
         # only border
         for j in range(c.width - 1, -1, -1):
+            cmped = c.width - j - 1
             cell_cr = row_goal[j]
 
             for k in range(c.width - 1, cmped - 1, -1):
-                cell_lk = c.board.current.get(c.height - 1, k)
+                cell_lk = c.board.current.get(i, k)
 
                 if cell_cr == cell_lk:
-                    """
-                    cnt = 0
-                    value = (0, 0, 0, 256)
-                    while k - (1 << cnt) + 1 >= cmped:
-                        x = j
-                        y = k - (1 << cnt) + 1
-                        p = 0
-                        px = 0
-                        py = 0
-                        evaluation = 0
-
-                        if cnt != 0:
-                            p = cnt * 3 - 1
-                            px = x - 1 if rv_ul and rv_ud else x
-                            py = y + 1 if not rv_ul and not rv_ud else y
-                            evaluation = evaluate_row_piece(c, p, px, py, row_goal)
-
-                            if value[3] > evaluation:
-                                value = (p, px, py, evaluation)
-
-                            p = cnt * 3
-                            px = x - 1 if not rv_ul and rv_lr else x
-                            py = y + 1 if rv_ul and not rv_lr else y
-                            evaluation = evaluate_row_piece(c, p, px, py, row_goal)
-
-                            if value[3] > evaluation:
-                                value = (p, px, py, evaluation)
-
-                        else:
-                            p = 0
-                            px = x
-                            py = y
-                            evaluation = evaluate_row_piece(c, p, px, py, row_goal)
-
-                            if value[3] > evaluation:
-                                value = (p, px, py, evaluation)
-
-                        cnt += 1
-
-                    """
-
-                    c.info_now.currentMark.index = c.height - 1
+                    c.info_now.currentMark.index = i
                     c.info_now.currentMark.index2 = k
-                    katanuki(c, 0, k, c.height - 1, Direction.RIGHT)
+                    katanuki(c, 0, k, i, Direction.RIGHT)
                     break
-
-        cnt_unmoved += 1
-
-        if i == 0:
-            c.info_now.currentMark.index = c.height - cnt_unmoved
-            c.info_now.currentMark.index2 = 0
-            katanuki(c, 22, 0, c.height - cnt_unmoved, Direction.DOWN)
 
     c.board.current = utils.dereverse(c.board.current, c.rv_op)
     c.board.goal = utils.dereverse(c.board.goal, c.rv_op)
