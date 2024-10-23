@@ -3,7 +3,14 @@ import type { FixedLengthArray } from "type-fest";
 import { shuffle } from "./utils/array";
 import { getRandomInt } from "./utils/number";
 
-type GenerationKindStart = "all-random" | "gen-random" | "column-seq" | "column-seq-reverse" | "column-group-shuffle";
+type GenerationKindStart =
+  | "all-random"
+  | "gen-random"
+  | "column-seq"
+  | "column-seq-reverse"
+  | "column-group-shuffle"
+  | "random-rectangle-area"
+  | "random-eclipse-area";
 
 const generationKindStarts: GenerationKindStart[] = [
   "all-random",
@@ -11,6 +18,8 @@ const generationKindStarts: GenerationKindStart[] = [
   "column-seq",
   "column-seq-reverse",
   "column-group-shuffle",
+  "random-rectangle-area",
+  "random-eclipse-area",
 ] as const;
 
 type GenerationKindGoal =
@@ -21,7 +30,9 @@ type GenerationKindGoal =
   | "column-seq"
   | "column-seq-reverse"
   | "partial-single-swap"
-  | "partial-block-swap";
+  | "partial-block-swap"
+  | "random-area-reverse"
+  | "block-swap";
 
 const generationKindGoals: GenerationKindGoal[] = [
   "all-random",
@@ -32,6 +43,8 @@ const generationKindGoals: GenerationKindGoal[] = [
   "column-seq-reverse",
   "partial-single-swap",
   "partial-block-swap",
+  "random-area-reverse",
+  "block-swap",
 ] as const;
 
 export type GenerationSettings = {
@@ -63,11 +76,11 @@ export const generateProblem = (generationSettings: GenerationSettings): [id: nu
 
   const genKindStart =
     generationSettings.genKindStart === "all-random"
-      ? generationKindStarts[getRandomInt(1, 4)]
+      ? generationKindStarts[getRandomInt(1, 9)]
       : generationSettings.genKindStart;
   const genKindGoal =
     generationSettings.genKindGoal === "all-random"
-      ? generationKindGoals[getRandomInt(1, 7)]
+      ? generationKindGoals[getRandomInt(1, 8)]
       : generationSettings.genKindGoal;
 
   const numbers: number[] = Array(width * height).fill(0);
@@ -118,6 +131,51 @@ export const generateProblem = (generationSettings: GenerationSettings): [id: nu
         [numbers[idx1], numbers[idx2]] = [numbers[idx2] as number, numbers[idx1] as number];
       }
       break;
+    case "random-rectangle-area": {
+      const areaCnt: number = getRandomInt(30, 40);
+      for (let i = 0; i < areaCnt; i++) {
+        let x1: number = getRandomInt(-width / (i + 1), width);
+        x1 = x1 < 0 ? 0 : x1;
+        let x2: number = getRandomInt(x1, width + width / (i + 1));
+        x2 = width < x2 ? width - 1 : x2;
+        let y1: number = getRandomInt(-height / (i + 1), height);
+        y1 = y1 < 0 ? 0 : y1;
+        let y2: number = getRandomInt(y1, height + height / (i + 1));
+        y2 = height < y2 ? height - 1 : y2;
+        const num: number = getRandomInt(0, 4);
+        for (let y = y1; y < y2; ++y) {
+          for (let x = x1; x < x2; ++x) {
+            numbers[y * width + x] = num;
+          }
+        }
+      }
+      break;
+    }
+    case "random-eclipse-area": {
+      const areaCnt: number = getRandomInt(30, 50);
+      for (let i = 0; i < areaCnt; i++) {
+        let x1: number = getRandomInt(-width / (i + 1), width);
+        x1 = x1 < 0 ? 0 : x1;
+        let x2: number = getRandomInt(x1, width + width / (i + 1));
+        x2 = width < x2 ? width - 1 : x2;
+        let y1: number = getRandomInt(-height / (i + 1), height);
+        y1 = y1 < 0 ? 0 : y1;
+        let y2: number = getRandomInt(y1, height + height / (i + 1));
+        y2 = height < y2 ? height - 1 : y2;
+        const num: number = getRandomInt(0, 4);
+        for (let y = y1; y < y2; ++y) {
+          for (let x = x1; x < x2; ++x) {
+            if (
+              (x - (x1 + x2) / 2) ** 2 / ((x1 - x2) / 2) ** 2 + (y - (y1 + y2) / 2) ** 2 / ((y1 - y2) / 2) ** 2 <=
+              1
+            ) {
+              numbers[y * width + x] = num;
+            }
+          }
+        }
+      }
+      break;
+    }
     default:
       throw new Error("Invalid generation kind");
   }
@@ -198,6 +256,110 @@ export const generateProblem = (generationSettings: GenerationSettings): [id: nu
       }
       goal = getBoardArrayFromNumbers(goalNumbers, width);
       break;
+    case "random-area-reverse": {
+      // random area reverse(30-50)
+      goalNumbers = numbers;
+      const areaCnt: number = getRandomInt(30, 50);
+      for (let i = 0; i < areaCnt; ++i) {
+        let x1: number = getRandomInt(-width / (i + 1), width);
+        x1 = x1 < 0 ? 0 : x1;
+        let x2: number = getRandomInt(x1, width + width / (i + 1));
+        x2 = width < x2 ? width - 1 : x2;
+        let y1: number = getRandomInt(-height / (i + 1), height);
+        y1 = y1 < 0 ? 0 : y1;
+        let y2: number = getRandomInt(y1, height + height / (i + 1));
+        y2 = height < y2 ? height - 1 : y2;
+
+        if (getRandomInt(0, 2)) {
+          /*
+          0 1 2 3
+          4 5 6 7
+             |
+             V
+          3 2 1 0
+          7 6 5 4
+          */
+          for (let y = y1; y < y2; ++y) {
+            for (let j = 0; j < (x2 - x1 + 1) / 2; ++j) {
+              const leftIndex = y * width + x1 + j;
+              const rightIndex = y * width + x2 - j;
+
+              if (
+                leftIndex >= 0 &&
+                leftIndex < goalNumbers.length &&
+                rightIndex >= 0 &&
+                rightIndex < goalNumbers.length
+              ) {
+                [goalNumbers[leftIndex], goalNumbers[rightIndex]] = [
+                  goalNumbers[rightIndex] as number,
+                  goalNumbers[leftIndex] as number,
+                ];
+              }
+            }
+          }
+        }
+        if (getRandomInt(0, 2)) {
+          /*
+          0 1 2 3
+          4 5 6 7
+             |
+             V
+          4 5 6 7
+          0 1 2 3
+          */
+          for (let x = x1; x < x2; ++x) {
+            for (let j = 0; j < (y2 - y1 + 1) / 2; ++j) {
+              const topIndex = (y1 + j) * width + x;
+              const bottomIndex = (y2 - j) * width + x;
+
+              if (
+                topIndex >= 0 &&
+                topIndex < goalNumbers.length &&
+                bottomIndex >= 0 &&
+                bottomIndex < goalNumbers.length
+              ) {
+                [goalNumbers[topIndex], goalNumbers[bottomIndex]] = [
+                  goalNumbers[bottomIndex] as number,
+                  goalNumbers[topIndex] as number,
+                ];
+              }
+            }
+          }
+        }
+      }
+      goal = getBoardArrayFromNumbers(goalNumbers, width);
+      break;
+    }
+    case "block-swap": {
+      goalNumbers = numbers;
+      const blockCnt: number = getRandomInt(30, 50);
+      for (let i = 0; i < blockCnt; ++i) {
+        let x1: number = getRandomInt(-width / (i + 1), width - 8);
+        x1 = x1 < 0 ? 0 : x1;
+        let x2: number = getRandomInt(x1, x1 + 8);
+        x2 = width < x2 ? width - 1 : x2;
+        let y1: number = getRandomInt(-height / (i + 1), height - 8);
+        y1 = y1 < 0 ? 0 : y1;
+        let y2: number = getRandomInt(y1, y1 + 8);
+        y2 = height < y2 ? height - 1 : y2;
+
+        let x3: number = getRandomInt(-width / (i + 1), width - (x2 - x1));
+        x3 = x3 < 0 ? 0 : x3;
+        let y3: number = getRandomInt(-height / (i + 1), height - (y2 - y1));
+        y3 = y3 < 0 ? 0 : y3;
+
+        for (let j = 0; j < x2 - x1; ++j) {
+          for (let k = 0; k < y2 - y1; ++k) {
+            [goalNumbers[(y1 + k) * width + x1 + j], goalNumbers[(y3 + k) * width + x3 + j]] = [
+              goalNumbers[(y3 + k) * width + x3 + j] as number,
+              goalNumbers[(y1 + k) * width + x1 + j] as number,
+            ];
+          }
+        }
+      }
+      goal = getBoardArrayFromNumbers(goalNumbers, width);
+      break;
+    }
     default:
       throw new Error("Invalid generation kind");
   }

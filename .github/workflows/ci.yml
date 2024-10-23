@@ -54,7 +54,7 @@ jobs:
 
       - name: Build solver (standalone)
         working-directory: apps/solver
-        run: bun build --minify --sourcemap --compile --bytecode --target=bun-${{ matrix.target }} --outfile=dist/solver-${{ matrix.outfile }} dist/index.js $(find dist -name '*.js' -not -name 'index.js')
+        run: bun build --minify --sourcemap --compile --bytecode --target=bun-${{ matrix.target }} --outfile=dist/solver-${{ matrix.outfile }} dist/index.js $(find dist -name '*.js' -not -name 'index.js') $(find dist -name '*.wasm')
 
       - name: Build mock server
         working-directory: apps/mock-server

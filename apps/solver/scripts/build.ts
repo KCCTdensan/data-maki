@@ -54,8 +54,10 @@ if (!results.success) {
 
 console.log("Copying files...");
 
-const files = await Array.fromAsync(new Glob("../../packages/algorithm/dist/workers/*.worker.js").scan());
+const files = await Array.fromAsync(new Glob("../../packages/algorithm/dist/workers/*.worker.js*").scan());
+const wasmFiles = await Array.fromAsync(new Glob("../../packages/algorithm/dist/workers/*.wasm").scan());
 await mkdirp("./dist/workers");
 await copyFiles(files, "./dist/workers");
+await copyFiles(wasmFiles, "./dist");
 
 console.timeEnd("Finished building solver");

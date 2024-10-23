@@ -28,6 +28,7 @@
     "@data-maki/biome-config": "workspace:*",
     "@data-maki/typescript-config": "workspace:*",
     "@vitest/web-worker": "^2.1.2",
+    "esbuild-plugin-wasm": "^1.1.0",
     "tsup": "^8.3.0",
     "vitest": "^2.1.2"
   }
